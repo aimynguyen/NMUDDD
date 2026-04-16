@@ -8,6 +8,7 @@ public class User {
     private String uid;
     private String userName;
     private String email;
+    private String birthday;
     private String avatarUrl;
     private String theme;
     private List<String> friendIds;
@@ -15,10 +16,11 @@ public class User {
 
     public User(){}
 
-    public User(String uid, String displayName, String email, String avatarUrl, String theme, List<String> friendIds, Timestamp createAt){
+    public User(String uid, String displayName, String email,String birthday, String avatarUrl, String theme, List<String> friendIds, Timestamp createAt){
         this.uid = uid;
         this.userName = displayName;
         this.email = email;
+        this.birthday = birthday;
         this.avatarUrl = avatarUrl;
         this.theme = theme;
         this.friendIds = friendIds;
@@ -33,6 +35,13 @@ public class User {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public String getBirthday() {
+        return birthday;
+    }
+    public void setBirthday(String birthday) {
+        this.birthday = birthday;
+    }
 
     public String getAvatarUrl() { return avatarUrl; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }

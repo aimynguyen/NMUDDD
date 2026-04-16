@@ -3,6 +3,7 @@ package com.example.diary_app.data.model;
 import com.google.firebase.Timestamp;
 
 import java.util.List;
+import java.util.Map;
 
 public class Post {
     private String postId;
@@ -16,10 +17,11 @@ public class Post {
     private String privacy;
     private Timestamp createAt;
     private Location location;
+    private Map<String, String> reactions;
 
     public Post() {}
 
-    public Post(String postId, String userId, String userName, String userAvatar, String imageUrl, String caption, List<String> tags, String emotion, String privacy, Timestamp createdAt, Location location) {
+    public Post(String postId, String userId, String userName, String userAvatar, String imageUrl, String caption, List<String> tags, String emotion, String privacy, Timestamp createdAt, Location location, Map<String, String> reactions) {
         this.postId = postId;
         this.userId = userId;
         this.userName = userName;
@@ -31,6 +33,7 @@ public class Post {
         this.privacy = privacy;
         this.createAt = createdAt;
         this.location = location;
+        this.reactions = reactions;
     }
 
     public String getPostId() {
@@ -119,6 +122,14 @@ public class Post {
 
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    public Map<String, String> getReactions() {
+        return reactions;
+    }
+
+    public void setReactions(Map<String, String> reactions) {
+        this.reactions = reactions;
     }
 }
 
