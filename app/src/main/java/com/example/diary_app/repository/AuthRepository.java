@@ -58,4 +58,9 @@ public class AuthRepository {
     public void logout(){
         mAuth.signOut();
     }
+
+    // 7. Quên mật khẩu (Gửi email reset password)
+    public Task<Void> resetPassword(String email){
+       return mAuth.sendPasswordResetEmail(email);
+    }
 }

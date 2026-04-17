@@ -4,6 +4,7 @@ import android.net.Uri;
 
 import com.example.diary_app.data.model.Post;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -13,7 +14,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class PostRepository {
@@ -106,4 +109,41 @@ public class PostRepository {
                 .document(postId)
                 .update("reactions." + myUid, reactionType);
     }
+
+    // 9. Lấy toàn bộ bài viết trong một khoảng thời gian (vd 1 thang)
+    // Hàm này cung cấp data cho: Calendar, Biểu đồ Cảm xúc, và Danh sách Tag
+    public Task<QuerySnapshot> getPostByTimeRange(String myUid, Date startDate, Date endDate){
+        Timestamp start = new Timestamp(startDate);
+        Timestamp end = new Timestamp(endDate);
+
+        return db.collection("posts")
+                .whereEqualTo("userId", myUid)
+                .whereGreaterThanOrEqualTo("createAt", start)
+                .whereLessThanOrEqualTo("createAt", end)
+                .orderBy("createAt", Query.Direction.DESCENDING)
+                .get();
+
+        // ViewModel DÙNG HÀM NÀY ĐỂ XỬ LÝ MÀN HÌNH THỐNG KÊ
+    }
+
+    // 10. Xóa bài viết
+    public Task<Void> deletePost(String postId, String imageUrl){
+        if(imageUrl != null && !imageUrl.isEmpty()){
+            StorageReference imageRef = storage.getReferenceFromUrl(imageUrl);
+
+            return imageRef.delete().continueWithTask(task -> {
+                return db.collection("posts").document(postId).delete();
+            });
+        }
+        else {
+            return db.collection("posts").document(postId).delete();
+        }
+    }
+
+    // 11. Cập nhật nội dung bài viết (Sửa Caption, đổi Privacy, thêm Tag...)
+    // KHÔNG SỬA ẢNH
+    public Task<Void> updatePost(String postId, Map<String, Object> updates){
+        return db.collection("posts").document(postId).update(updates);
+    }
+
 }

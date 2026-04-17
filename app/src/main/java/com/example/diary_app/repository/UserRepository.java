@@ -35,6 +35,5 @@ public class UserRepository {
     // 4. Cập nhật thông tin cá nhân
     public Task<Void> updateUserField(String uid, String field, Object value){
         return db.collection("users").document(uid).update(field, value);
-
     }
 }
