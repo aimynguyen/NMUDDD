@@ -1,10 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AndroidLayouts">
+    <shared>
+      <config />
+    </shared>
+    <layouts>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/comp_button.xml">
+        <config>
+          <theme>@style/Theme.Diary_App</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/comp_card.xml">
+        <config>
+          <theme>@style/Theme.Diary_App</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_searchbar.xml">
+        <config>
+          <theme>@style/Theme.Diary_App</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/layout_header.xml">
+        <config>
+          <theme>@style/Theme.Diary_App</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/layout_navbar.xml">
+        <config>
+          <theme>@style/Theme.Diary_App</theme>
+        </config>
+      </layout>
+    </layouts>
+  </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
+<<<<<<< HEAD
     <list default="true" id="b1f39e30-eb6d-4d12-b2fa-afa2f613ffc1" name="Changes" comment="" />
+=======
+    <list default="true" id="b1f39e30-eb6d-4d12-b2fa-afa2f613ffc1" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/landing/LandingActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/pages/landing/LandingActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/landing/LandingAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/pages/landing/LandingAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/landing/LandingViewModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/pages/landing/LandingViewModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/profile/ProfileActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/pages/profile/ProfileActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/profile/ProfileViewModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/pages/profile/ProfileViewModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/search/SearchActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/pages/search/SearchActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/search/SearchAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/pages/search/SearchAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/search/SearchViewModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/pages/search/SearchViewModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/statistics/StaticticsActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/pages/statistics/StaticticsActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/statistics/StaticticsAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/pages/statistics/StaticticsAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/statistics/StaticticsViewModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/diary_app/ui/pages/statistics/StaticticsViewModel.java" afterDir="false" />
+    </list>
+>>>>>>> 9fa629f3a7fae20294ddd3d574e11e0c10eae6ff
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -35,6 +84,14 @@
         </projects_view>
       </state>
     </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="layoutResourceFile" />
+        <option value="valueResourceFile" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -160,5 +217,21 @@
       <updated>1775732513251</updated>
     </task>
     <servers />
+  </component>
+  <component name="play_dynamic_filters_status">
+    <option name="appIdToCheckInfo">
+      <map>
+        <entry key="com.example.diary_app">
+          <value>
+            <CheckInfo lastCheckTimestamp="1776350506073" />
+          </value>
+        </entry>
+        <entry key="com.example.diary_app.test">
+          <value>
+            <CheckInfo lastCheckTimestamp="1776350506074" />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
