@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="md_theme_light_primary">#C29A9A</color>
+    <color name="md_theme_light_surfaceVariant">#EEEEEE</color>
+    <color name="my_yellow_button">#FEFACA</color>
         <!--core palette-->
         <color name="blue_primary">#CDEBF3</color>
         <color name="blue_secondary">#002C77</color>
