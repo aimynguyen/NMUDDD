@@ -41,6 +41,9 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
+<<<<<<< HEAD
+    <list default="true" id="b1f39e30-eb6d-4d12-b2fa-afa2f613ffc1" name="Changes" comment="" />
+=======
     <list default="true" id="b1f39e30-eb6d-4d12-b2fa-afa2f613ffc1" name="Changes" comment="">
       <change afterPath="$PROJECT_DIR$/app/src/main/res/font/inter.xml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/app/src/main/res/font/inter_bold.ttf" afterDir="false" />
@@ -51,6 +54,7 @@
       <change afterPath="$PROJECT_DIR$/app/src/main/res/font/oleo_script_swash_caps_regular.ttf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
+>>>>>>> 9fa629f3a7fae20294ddd3d574e11e0c10eae6ff
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
