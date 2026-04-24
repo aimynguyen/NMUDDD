@@ -5,6 +5,26 @@
       <config />
     </shared>
     <layouts>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/drawable/avatar_circle.xml">
+        <config>
+          <theme>@style/Theme.Diary_App</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/drawable/bg_circle_white.xml">
+        <config>
+          <theme>@style/Theme.Diary_App</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/drawable/bg_rounded.xml">
+        <config>
+          <theme>@style/Theme.Diary_App</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/drawable/username_chip.xml">
+        <config>
+          <theme>@style/Theme.Diary_App</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/font/inter.xml">
         <config>
           <theme>@style/Theme.Diary_App</theme>
@@ -52,14 +72,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b1f39e30-eb6d-4d12-b2fa-afa2f613ffc1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/avatar_circle.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/bg_circle_white.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/bg_rounded.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/caption_background.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/username_chip.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/bg_searchbar.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_diary.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_diary.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_searchbar.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_searchbar.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -241,12 +257,12 @@
       <map>
         <entry key="com.example.diary_app">
           <value>
-            <CheckInfo lastCheckTimestamp="1776845302829" />
+            <CheckInfo lastCheckTimestamp="1777020508718" />
           </value>
         </entry>
         <entry key="com.example.diary_app.test">
           <value>
-            <CheckInfo lastCheckTimestamp="1776845302832" />
+            <CheckInfo lastCheckTimestamp="1777020508715" />
           </value>
         </entry>
       </map>
