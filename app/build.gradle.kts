@@ -46,6 +46,15 @@ dependencies {
 
     implementation(platform("com.google.firebase:firebase-bom:34.11.0"))
     implementation("com.google.firebase:firebase-analytics")
+
+
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+
+    implementation("com.google.guava:guava:33.0.0-android")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
+    implementation("com.google.android.material:material:1.11.0")
+
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.android.gms:play-services-location:21.1.0")
 }

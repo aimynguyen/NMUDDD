@@ -6,15 +6,16 @@
     android:layout_height="match_parent">
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/btn_post"
+        android:id="@+id/btn_sign"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="32dp"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
-        android:text="POST"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:text="sign in"
         android:textColor="#333333"
-        app:backgroundTint="#FEFACA"
+        app:backgroundTint="#ffffff"
+        app:cornerRadius="100dp"
         tools:ignore="MissingConstraints" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
