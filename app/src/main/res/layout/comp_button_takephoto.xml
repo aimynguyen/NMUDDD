@@ -21,6 +21,7 @@
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:src="@drawable/inner_shadow_circle"
+        android:backgroundTint="@color/blue_tertiary"
 
         android:elevation="11dp"
 
