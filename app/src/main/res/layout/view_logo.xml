@@ -1,0 +1,6 @@
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/imgLogo"
+    android:layout_width="200dp"
+    android:layout_height="200dp"
+    android:src="@drawable/auralog_logo"
+    android:scaleType="centerInside"/>

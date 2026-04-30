@@ -1,0 +1,8 @@
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/txtAppName"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Auralog"
+    android:textSize="48sp"
+    android:textColor="#FFFFFF"
+    android:fontFamily="@font/oleo_script_swash_caps_bold"/>
