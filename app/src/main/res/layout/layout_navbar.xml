@@ -1,22 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.bottomnavigation.BottomNavigationView
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/account"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="56dp"
     android:layout_width="match_parent"
-    android:layout_height="66dp"
-    android:layout_margin="16dp"
-    app:cardBackgroundColor="@android:color/white"
-    app:cardElevation="4dp"
-    app:cardCornerRadius="16dp"
-    app:strokeWidth="0dp">
+    android:id="@+id/bottom_nav"
+    android:background="@color/blue_secondary"
+    app:menu="@menu/navbar_menu"
+    app:itemIconTint="@color/narbar_item_color"
+    app:itemTextColor="@color/white"
+    app:shapeAppearanceOverlay="@style/ShapeAppearance.App.HalfRounded">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-</com.google.android.material.card.MaterialCardView>
+</com.google.android.material.bottomnavigation.BottomNavigationView>
