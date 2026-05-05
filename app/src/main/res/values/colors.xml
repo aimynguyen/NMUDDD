@@ -8,7 +8,6 @@
         <color name="blue_light">#A7D3DC</color>
         <color name="blue_pale">#D9EEF2</color>
 
-
         <!-- aura accent -->
         <color name="aura_pink">#F6B7C3</color>
         <color name="aura_purple">#C6B4E2</color>
@@ -33,5 +32,9 @@
         <color name="color_background">@color/background_light</color>
         <color name="color_accent">@color/aura_pink</color>
         <color name="color_text">@color/text_primary</color>
+
+    <color name="md_theme_light_primary">#6200EE</color>
+    <color name="md_theme_light_surfaceVariant">#E7E0EC</color>
+
 
 </resources>
