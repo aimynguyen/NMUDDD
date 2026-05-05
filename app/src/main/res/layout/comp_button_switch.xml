@@ -25,7 +25,7 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         tools:note="hinh tron ben trong"
-        android:id="@+id/switch"
+        android:id="@+id/switch_status"
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

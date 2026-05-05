@@ -53,8 +53,13 @@ dependencies {
     implementation("com.google.guava:guava:33.0.0-android")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
+    //material3 cho dep
     implementation("com.google.android.material:material:1.11.0")
 
+    //map
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.android.gms:play-services-location:21.1.0")
+
+    //anychart
+    implementation("com.github.AnyChart:AnyChart-Android:1.1.5")
 }
