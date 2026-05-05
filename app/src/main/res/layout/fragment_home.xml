@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <include layout="@layout/layout_header"/>
+
+    <FrameLayout
+        android:id="@+id/contentContainer">
+
+        <include layout="@layout/layout_camera"/>
+        <include layout="@layout/layout_feed"/>
+        <include layout="@layout/layout_preview"/>
+
+    </FrameLayout>
+
+    <include layout="@layout/layout_navbar"/>
+
+</ConstraintLayout>
