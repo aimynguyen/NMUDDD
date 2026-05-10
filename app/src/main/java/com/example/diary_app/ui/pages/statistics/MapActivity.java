@@ -111,15 +111,34 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Người dùng VỪA BẤM "Cho phép" xong -> Bật map và zoom luôn
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    mMap.setMyLocationEnabled(true);
+                    mMap.getUiSettings().setMyLocationButtonEnabled(true);
+                    zoomToUserLocation();
+                }
+            } else {
+                Toast.makeText(this, "Chưa cấp quyền thì không xem được vị trí đâu nhé!", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     private void zoomToUserLocation() {
         // 1. Khởi tạo trình lấy vị trí
         FusedLocationProviderClient fusedLocationClient =
                 LocationServices.getFusedLocationProviderClient(this);
 
         // 2. Kiểm tra lại quyền
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // Đã có quyền (Dù là chính xác hay tương đối) -> Bật vị trí
+            mMap.setMyLocationEnabled(true);
             // 3. Lấy vị trí cuối cùng được ghi nhận
             fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
                 if (location != null) {
