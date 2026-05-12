@@ -52,11 +52,11 @@ dependencies {
 
 
     //AI
-    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+    implementation("com.google.ai.client.generativeai:generativeai:0.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+    implementation("com.google.guava:guava:31.1-android")
 
-    implementation("com.google.guava:guava:33.0.0-android")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
 
     //material3 cho dep
     implementation("com.google.android.material:material:1.11.0")

@@ -24,8 +24,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyC1yRzYt27Q7qSLrNHUd3BsTLLnbBFH4sA" />
         <activity
-
-            android:name=".ui.pages.statistics.StaticticsActivity"
+            android:name=".ui.pages.chat.ChatAIActivity"
 
             android:exported="true">
             <intent-filter>

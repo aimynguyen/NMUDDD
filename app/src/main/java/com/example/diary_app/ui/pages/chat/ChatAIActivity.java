@@ -1,44 +1,49 @@
 package com.example.diary_app.ui.pages.chat;
 
 import android.os.Bundle;
-import android.os.Message;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.diary_app.R;
-import com.google.ai.client.generativeai.GenerativeModel;
-import com.google.ai.client.generativeai.java.ChatFutures;
-import com.google.ai.client.generativeai.java.GenerativeModelFutures;
-import com.google.ai.client.generativeai.type.Content;
-import com.google.ai.client.generativeai.type.GenerateContentResponse;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
+import com.example.diary_app.data.model.ChatMessage;
+import com.google.firebase.Timestamp;
 
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 public class ChatAIActivity extends AppCompatActivity {
+
     private RecyclerView recyclerView;
     private EditText editText;
     private ImageButton sendButton;
-
     private ChatAIAdapter chatAdapter;
-    private List<Message> messageList;
+    private List<ChatMessage> messageList;
 
-    private GenerativeModelFutures modelFutures;
-    private ChatFutures chatContext;
+    private final String API_KEY = "AIzaSyAZY9S6LbYej8YFL9TYOZt4ZAqSJr-3kyg"; // Thay bằng Key thật của bạn
+    private OkHttpClient client;
 
-    @Override public void onCreate(Bundle savedInstanceState) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_chatAI);
+        setContentView(R.layout.fragment_chat_ai);
 
+        client = new OkHttpClient();
         recyclerView = findViewById(R.id.recyclerView);
         editText = findViewById(R.id.edtMessage);
         sendButton = findViewById(R.id.btnSend);
@@ -49,47 +54,94 @@ public class ChatAIActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(chatAdapter);
 
-        GenerativeModel model = new GenerativeModel("gemini-1.5-flash", "AIzaSyASW_qgTgbCWqboIFOD8RZ7l6juzLG0zo8");
-        model = GenerativeModelFutures.from(model).getGenerativeModel();
-
-        chatContext= model.startChat(this);
-
         sendButton.setOnClickListener(v -> {
             String message = editText.getText().toString().trim();
             if (!message.isEmpty()) {
                 sendChatToGemini(message);
             }
         });
-
     }
+
     private void sendChatToGemini(String userMessage) {
-        // Thêm tin nhắn của người dùng vào giao diện
-        messageList.add(new MessageModel(userMessage, MessageModel.SENT_BY_USER));
-        chatAdapter.notifyItemInserted(messageList.size() - 1);
-        recyclerView.scrollToPosition(messageList.size() - 1);
+        // 1. Thêm tin nhắn User vào list
+        ChatMessage userChat = new ChatMessage(
+                String.valueOf(System.currentTimeMillis()),
+                "user_123", // senderId của người dùng
+                userMessage,
+                Timestamp.now()
+        );
+        updateUI(userChat);
         editText.setText("");
 
-        // Gửi đến Gemini
-        Content content = new Content.Builder().addText(userMessage).build();
-        ListenableFuture<GenerateContentResponse> response = chatContext.sendMessage(content);
+        // 2. Chuẩn bị Request gửi lên Google API v1 (Stable)
+        // Dùng đường dẫn này để tránh lỗi v1beta 404
+        // Đảm bảo dùng v1 (hoặc v1beta nếu v1 lỗi) và CÓ dấu hai chấm trước generateContent
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + API_KEY;
 
-        Futures.addCallback(response, new FutureCallback<GenerateContentResponse>() {
+        String jsonBody = "{\"contents\":[{\"parts\":[{\"text\":\"" + userMessage.replace("\"", "\\\"") + "\"}]}]}";
+        RequestBody body = RequestBody.create(jsonBody, MediaType.get("application/json; charset=utf-8"));
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        System.out.println("DEBUG_URL: " + url);
+
+        // 3. Gọi API
+        client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onSuccess(GenerateContentResponse result) {
-                String botResponse = result.getText();
-                runOnUiThread(() -> {
-                    // Thêm phản hồi của Bot vào giao diện
-                    messageList.add(new MessageModel(botResponse, MessageModel.SENT_BY_BOT));
-                    chatAdapter.notifyItemInserted(messageList.size() - 1);
-                    recyclerView.scrollToPosition(messageList.size() - 1);
-                });
+            public void onFailure(Call call, IOException e) {
+                showToast("Lỗi mạng: " + e.getMessage());
             }
 
             @Override
-            public void onFailure(Throwable t) {
-                runOnUiThread(() -> Toast.makeText(ChatAIActivity.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show());
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response.body().string());
+                        String botReply = jsonObject.getJSONArray("candidates")
+                                .getJSONObject(0)
+                                .getJSONObject("content")
+                                .getJSONArray("parts")
+                                .getJSONObject(0)
+                                .getString("text");
+
+                        runOnUiThread(() -> {
+                            ChatMessage botChat = new ChatMessage(
+                                    String.valueOf(System.currentTimeMillis()),
+                                    "gemini_bot", // senderId của Bot
+                                    botReply,
+                                    Timestamp.now()
+                            );
+                            updateUI(botChat);
+                        });
+                    } catch (Exception e) {
+                        showToast("Lỗi xử lý JSON");
+                    }
+                } else {
+                    String errorBody = response.body() != null ? response.body().string() : "null";
+                    android.util.Log.e("GEMINI_ERROR_DETAIL", errorBody);
+
+                    runOnUiThread(() -> Toast.makeText(ChatAIActivity.this, "Lỗi: " + response.code(), Toast.LENGTH_SHORT).show());
+                }
+                if (response.code() == 429) {
+                    showToast("Bạn đã nhắn quá nhanh! Hãy đợi một chút rồi thử lại nha bạn yêu ơi.");
+                    return;
+                }
             }
-        }, ContextCompat.getMainExecutor(this));
+        });
     }
 
+    private void updateUI(ChatMessage message) {
+        runOnUiThread(() -> {
+            messageList.add(message);
+            chatAdapter.notifyItemInserted(messageList.size() - 1);
+            recyclerView.scrollToPosition(messageList.size() - 1);
+        });
+    }
+
+    private void showToast(String msg) {
+        runOnUiThread(() -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show());
+    }
 }
