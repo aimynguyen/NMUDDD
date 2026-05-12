@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:id="@+id/layoutCamera"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/blue_primary">
+
+    <!-- frame 1:1 -->
+    <View
+        android:id="@+id/cameraFrame"
+        android:layout_width="260dp"
+        android:layout_height="260dp"
+        android:elevation="8dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_camera_frame"/>
+
+    <!-- capture button -->
+
+        <!-- btn -->
+        <FrameLayout
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="200dp"
+            android:elevation="20dp">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:background="@drawable/bg_capture_outer"
+                android:elevation="6dp"/>
+
+            <View
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_capture_inner"
+                android:elevation="6dp"/>
+
+        </FrameLayout>
+
+    <!-- upload button -->
+    <FrameLayout
+        android:layout_width="56dp"
+        android:layout_height="55dp"
+        android:background="@drawable/bg_upload"
+        android:layout_gravity="center|left"
+        android:layout_marginTop="200dp"
+        android:layout_marginLeft="60dp"
+        android:elevation="8dp">
+
+        <ImageView
+            android:id="@+id/btnUpload"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_gravity="center"
+            android:src="@drawable/upload"
+            android:scaleType="centerInside"/>
+
+    </FrameLayout>
+
+</FrameLayout>
