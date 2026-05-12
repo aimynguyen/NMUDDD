@@ -16,7 +16,7 @@
         android:background="@drawable/bg_top_circle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:translationY="-353dp"
+        android:translationY="-333dp"
         android:translationX="-43sp"/>
 
     <!-- Logo + App name -->
@@ -28,7 +28,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:translationX="-50dp"
-        android:translationY="-110dp"
+        android:translationY="-90dp"
         />
 
     <!-- Username -->
@@ -38,7 +38,7 @@
         android:layout_height="56dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginTop="300dp"
+        android:layout_marginTop="330dp"
         android:background="@drawable/bg_input_rounded"
         android:elevation="8dp"
         android:hint="Username"
@@ -52,7 +52,7 @@
         android:id="@+id/edtPassword"
         android:layout_width="0dp"
         android:layout_height="56dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:background="@drawable/bg_input_rounded"
@@ -84,15 +84,15 @@
         android:background="@drawable/bg_bottom_circle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:translationY="460dp"
+        android:translationY="500dp"
         android:translationX="-160dp"/>
 
     <!-- Login -->
     <Button
         android:id="@+id/btnLogin"
-        android:layout_width="180dp"
+        android:layout_width="140dp"
         android:layout_height="52dp"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="90dp"
         android:background="@drawable/bg_button_rounded"
         app:backgroundTint="@android:color/white"
         android:text="Login"
@@ -104,7 +104,7 @@
     <!-- Register -->
     <Button
         android:id="@+id/btnRegister"
-        android:layout_width="220dp"
+        android:layout_width="180dp"
         android:layout_height="52dp"
         android:layout_marginTop="16dp"
         android:background="@drawable/bg_button_rounded"
