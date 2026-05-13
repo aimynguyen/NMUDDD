@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fillViewport="true"
+    android:background="@drawable/bg_gradient_01">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="24dp">
+
+        <!-- Logo -->
+        <ImageView
+            android:layout_width="306dp"
+            android:layout_height="189dp"
+            android:src="@drawable/appname_logo_w_dropshadow"
+            android:scaleType="fitCenter"/>
+
+        <!-- Form Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/bg_form_card"
+            android:elevation="8dp">
+
+            <!-- Title -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Create your account"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Username -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Username"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_input_pink"
+                android:padding="10dp"
+                android:hint="Username"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- Email -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Email"/>
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_input_pink"
+                android:padding="10dp"
+                android:hint="Email"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- DOB -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date of birth"/>
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_input_pink"
+                android:padding="10dp"
+                android:hint="Date of birth"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- Password -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Password"/>
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_input_pink"
+                android:layout_marginBottom="20dp"
+                android:padding="10dp"
+                android:hint="Password"
+                android:inputType="textPassword"/>
+
+            <!-- Button -->
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_button_rounded"
+                android:elevation="8dp"
+                android:text="Sign up"
+                android:textColor="@color/text_primary"
+                app:backgroundTint="@color/white"
+                app:strokeColor="#F5B6C2"
+                app:strokeWidth="6dp" />
+
+            <!-- Terms -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="By signing up, you agree to our terms of service and recognize our privacy policy."
+                android:textSize="12sp"
+                android:textColor="@color/gray_medium"
+                android:layout_marginTop="12dp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
