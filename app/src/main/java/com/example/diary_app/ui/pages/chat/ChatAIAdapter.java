@@ -50,13 +50,13 @@ public class ChatAIAdapter extends RecyclerView.Adapter<ChatAIAdapter.ChatViewHo
             holder.txtMessageLeft.setVisibility(View.GONE);
             holder.txtMessageRight.setText(message.getContent());
             holder.txtMessageRight.setBackgroundResource(R.drawable.bg_message_sent);
-            holder.txtMessageRight.setPadding(24, 24, 24, 24);
+            holder.txtMessageRight.setPadding(32, 24, 32, 24);
         } else {
             holder.txtMessageLeft.setVisibility(View.VISIBLE);
             holder.txtMessageRight.setVisibility(View.GONE);
             holder.txtMessageLeft.setText(message.getContent());
             holder.txtMessageLeft.setBackgroundResource(R.drawable.bg_message_recieved);
-            holder.txtMessageLeft.setPadding(24, 24, 24, 24);
+            holder.txtMessageLeft.setPadding(32, 24, 32, 24);
         }
     }
 

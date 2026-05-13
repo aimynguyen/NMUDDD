@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.diary_app.BuildConfig;
 import com.example.diary_app.R;
 import com.example.diary_app.data.model.ChatMessage;
 import com.google.firebase.Timestamp;
@@ -35,7 +36,7 @@ public class ChatAIActivity extends AppCompatActivity {
     private ChatAIAdapter chatAdapter;
     private List<ChatMessage> messageList;
 
-    private final String API_KEY = "AIzaSyAZY9S6LbYej8YFL9TYOZt4ZAqSJr-3kyg"; // Thay bằng Key thật của bạn
+    private final String API_KEY = BuildConfig.GEMINI_API_KEY; // Thay bằng Key thật của bạn
     private OkHttpClient client;
 
     @Override
@@ -76,7 +77,7 @@ public class ChatAIActivity extends AppCompatActivity {
         // 2. Chuẩn bị Request gửi lên Google API v1 (Stable)
         // Dùng đường dẫn này để tránh lỗi v1beta 404
         // Đảm bảo dùng v1 (hoặc v1beta nếu v1 lỗi) và CÓ dấu hai chấm trước generateContent
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + API_KEY;
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=" + API_KEY;
 
         String jsonBody = "{\"contents\":[{\"parts\":[{\"text\":\"" + userMessage.replace("\"", "\\\"") + "\"}]}]}";
         RequestBody body = RequestBody.create(jsonBody, MediaType.get("application/json; charset=utf-8"));
@@ -97,9 +98,12 @@ public class ChatAIActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful() && response.body() != null) {
+                // Lưu body vào biến string ngay lập tức
+                String rawResponse = response.body() != null ? response.body().string() : "";
+
+                if (response.isSuccessful()) {
                     try {
-                        JSONObject jsonObject = new JSONObject(response.body().string());
+                        JSONObject jsonObject = new JSONObject(rawResponse);
                         String botReply = jsonObject.getJSONArray("candidates")
                                 .getJSONObject(0)
                                 .getJSONObject("content")
@@ -110,24 +114,24 @@ public class ChatAIActivity extends AppCompatActivity {
                         runOnUiThread(() -> {
                             ChatMessage botChat = new ChatMessage(
                                     String.valueOf(System.currentTimeMillis()),
-                                    "gemini_bot", // senderId của Bot
+                                    "gemini_bot",
                                     botReply,
                                     Timestamp.now()
                             );
                             updateUI(botChat);
                         });
                     } catch (Exception e) {
-                        showToast("Lỗi xử lý JSON");
+                        showToast("Lỗi xử lý dữ liệu AI");
                     }
                 } else {
-                    String errorBody = response.body() != null ? response.body().string() : "null";
-                    android.util.Log.e("GEMINI_ERROR_DETAIL", errorBody);
+                    // Log chi tiết lỗi thật sự từ Google để debug
+                    android.util.Log.e("GEMINI_ERROR", "Code: " + response.code() + " | Body: " + rawResponse);
 
-                    runOnUiThread(() -> Toast.makeText(ChatAIActivity.this, "Lỗi: " + response.code(), Toast.LENGTH_SHORT).show());
-                }
-                if (response.code() == 429) {
-                    showToast("Bạn đã nhắn quá nhanh! Hãy đợi một chút rồi thử lại nha bạn yêu ơi.");
-                    return;
+                    if (response.code() == 429) {
+                        showToast("Hệ thống đang quá tải hoặc sai Model ID. Thử lại sau nhé!");
+                    } else {
+                        showToast("Lỗi từ máy chủ: " + response.code());
+                    }
                 }
             }
         });
