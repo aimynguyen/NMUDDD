@@ -1,6 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="307dp"
+    android:layout_height="307dp"
+    android:layout_margin="8dp"
+    android:layout_gravity="center"
+    card_view:cardCornerRadius="24dp"
+    card_view:cardElevation="6dp"
+    >
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        >
+        <!--Image-->
+        <ImageView
+            android:id="@+id/imgDiary"
+            android:layout_width="263dp"
+            android:layout_height="263dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_rounded"
+            android:scaleType="centerCrop"
+            android:src="@android:drawable/ic_menu_gallery" />
+
+        <!--Mood display circle-->
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="10dp"
+            android:padding="8dp"
+            android:elevation="4dp"
+            android:background="@drawable/bg_circle_white"/>
+
+        <!-- Top: avatar + username -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="12dp"
+            android:gravity="center_vertical">
+
+            <View
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/avatar_circle"/>
+
+            <TextView
+                android:id="@+id/tvUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Morii_bunny"
+                android:textSize="12sp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/username_chip"
+                android:padding="4dp"/>
+        </LinearLayout>
+
+        <!-- Bottom: caption -->
+        <TextView
+            android:id="@+id/tvCaption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Caption caption caption"
+            android:textSize="12sp"
+            android:background="@drawable/caption_background"
+            android:padding="6dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="12dp"/>
+
+    </FrameLayout>
+
+
+</androidx.cardview.widget.CardView>

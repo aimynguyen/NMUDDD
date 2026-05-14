@@ -1,0 +1,51 @@
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <com.google.android.material.card.MaterialCardView
+        tools:note="khung dai ben ngoai cuc tron"
+        android:id="@+id/switch_track"
+
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        app:cardBackgroundColor="#F0F0F0"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="2dp"
+        app:strokeWidth="0dp"
+        android:padding="8dp"
+        android:layout_margin="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        tools:note="hinh tron ben trong"
+        android:id="@+id/switch_status"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="private"
+
+        app:layout_constraintTop_toTopOf="@id/switch_track"
+        app:layout_constraintBottom_toBottomOf="@id/switch_track"
+        app:layout_constraintStart_toStartOf="@id/switch_track"
+
+        app:fabCustomSize="30dp"
+        tools:note_1="kich thuoc hinh tron ben trong"
+
+        app:maxImageSize="16dp"
+        app:backgroundTint="#FFFFFF"
+        app:tint="#FFD700"
+        app:borderWidth="0dp"
+
+        app:elevation="4dp"
+        tools:note_2="do bong cua hinh tron"
+        tools:ignore="MissingConstraints">
+
+    </com.google.android.material.floatingactionbutton.FloatingActionButton>
+</androidx.constraintlayout.widget.ConstraintLayout>
