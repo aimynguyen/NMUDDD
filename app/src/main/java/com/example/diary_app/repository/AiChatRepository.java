@@ -55,7 +55,7 @@ public class AiChatRepository {
      * 2. Lắng nghe lịch sử chat để hiển thị lên màn hình (Realtime)
      */
     public ListenerRegistration listenToAiChatHistory(String myUid, EventListener<QuerySnapshot> listener) {
-        db.collection("ai_chats")
+        return db.collection("ai_chats")
                 .document(myUid)
                 .collection("messages")
                 .orderBy("createdAt", Query.Direction.ASCENDING)
