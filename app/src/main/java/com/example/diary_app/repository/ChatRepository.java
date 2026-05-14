@@ -5,6 +5,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
@@ -51,16 +52,16 @@ public class ChatRepository {
      * 2. Lắng nghe TẤT CẢ các phòng chat của mình (Màn hình Danh sách tin nhắn ngoài cùng)
      * Lưu ý: Trả về ListenerRegistration (bên ViewModel) để HỦY lắng nghe khi thoát app, tránh tốn RAM
      */
-    public void listenToMyChatRoom(String myUid, EventListener<QuerySnapshot> listener){
-        db.collection("chats")
+    public ListenerRegistration listenToMyChatRoom(String myUid, EventListener<QuerySnapshot> listener){
+        return db.collection("chats")
                 .whereArrayContains("participants", myUid)
                 .orderBy("lastUpdated", Query.Direction.DESCENDING)
                 .addSnapshotListener(listener);
     }
 
     // 3. Lắng nghe tin nhắn TRONG 1 PHÒNG CHAT CỤ THỂ
-    public void listenToMessageInRoom(String chatId, EventListener<QuerySnapshot> listener){
-        db.collection("chats")
+    public ListenerRegistration listenToMessageInRoom(String chatId, EventListener<QuerySnapshot> listener){
+        return db.collection("chats")
                 .document(chatId)
                 .collection("messages")
                 .orderBy("createdAt", Query.Direction.ASCENDING)
