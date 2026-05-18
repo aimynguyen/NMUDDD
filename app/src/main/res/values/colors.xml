@@ -1,37 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-        <!--core palette-->
-        <color name="blue_primary">#CDEBF3</color>
-        <color name="blue_secondary">#002C77</color>
-        <color name="blue_tertiary">#0081A4</color>
-        <color name="blue_medium">#2F80ED</color>
-        <color name="blue_light">#A7D3DC</color>
-        <color name="blue_pale">#D9EEF2</color>
+    <!--core palette-->
+    <color name="blue_primary">#CDEBF3</color>
+    <color name="blue_secondary">#002C77</color>
+    <color name="blue_tertiary">#0081A4</color>
+    <color name="blue_medium">#2F80ED</color>
+    <color name="blue_light">#A7D3DC</color>
+    <color name="blue_pale">#D9EEF2</color>
 
+    <!-- aura accent -->
+    <color name="aura_pink">#F6B7C3</color>
+    <color name="aura_purple">#C6B4E2</color>
+    <color name="aura_glow">#EDE7FF</color>
 
-        <!-- aura accent -->
-        <color name="aura_pink">#F6B7C3</color>
-        <color name="aura_purple">#C6B4E2</color>
-        <color name="aura_glow">#EDE7FF</color>
+    <!-- neutral -->
+    <color name="white">#FFFFFF</color>
+    <color name="background_light">#F5F7FA</color>
+    <color name="gray_light">#D1D5DB</color>
+    <color name="gray_medium">#6B7280</color>
+    <color name="text_primary">#1F2937</color>
 
-        <!-- neutral -->
-        <color name="white">#FFFFFF</color>
-        <color name="background_light">#F5F7FA</color>
-        <color name="gray_light">#D1D5DB</color>
-        <color name="gray_medium">#6B7280</color>
-        <color name="text_primary">#1F2937</color>
+    <!-- mood -->
+    <color name="mood_happy">#FEFACA</color>
+    <color name="mood_calm">#CBE5C2</color>
+    <color name="mood_neutral">#FBD1DD</color>
+    <color name="mood_sad">#CDEBF3</color>
+    <color name="mood_angry">#F7BDB1</color>
 
-        <!-- mood -->
-        <color name="mood_happy">#FEFACA</color>
-        <color name="mood_calm">#CBE5C2</color>
-        <color name="mood_neutral">#D6C7DE</color>
-        <color name="mood_sad">#CDEBF3</color>
-        <color name="mood_angry">#F7BDB1</color>
+    <!-- semantic -->
+    <color name="color_primary">@color/blue_primary</color>
+    <color name="color_background">@color/background_light</color>
+    <color name="color_accent">@color/aura_pink</color>
+    <color name="color_text">@color/text_primary</color>
 
-        <!-- semantic -->
-        <color name="color_primary">@color/blue_primary</color>
-        <color name="color_background">@color/background_light</color>
-        <color name="color_accent">@color/aura_pink</color>
-        <color name="color_text">@color/text_primary</color>
+    <color name="md_theme_light_primary">#6200EE</color>
+    <color name="md_theme_light_surfaceVariant">#E7E0EC</color>
 
 </resources>
