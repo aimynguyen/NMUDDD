@@ -1,9 +1,12 @@
 package com.example.diary_app.viewmodel;
 
+import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -19,7 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class PostViewModel extends ViewModel {
+public class PostViewModel extends AndroidViewModel {
     private PostRepository postRepository;
 
     // Các LiveData để UI lắng nghe
@@ -31,8 +34,18 @@ public class PostViewModel extends ViewModel {
     private MutableLiveData<Boolean> postSuccess = new MutableLiveData<>();
     private MutableLiveData<Integer> uploadProgress = new MutableLiveData<>(); // Để FE làm thanh tiến trình (Progress Bar)
 
+    public PostViewModel(@NonNull Application application) {
+        super(application);
+        postRepository = new PostRepository();
+    }
+
+    public LiveData<List<Post>> getNewsFeedList() { return newsFeedList; }
+    public LiveData<List<Post>> getMyAlbumList() { return myAlbumList; }
     public LiveData<Boolean> getPostSuccess() { return postSuccess; }
     public LiveData<Integer> getUploadProgress() { return uploadProgress; }
+    public LiveData<String> getErrorMessage() { return errorMessage; }
+    public LiveData<Boolean> getIsLoading() { return isLoading; }
+
     /**
      * 1. Tải danh sách Newsfeed (Trang chủ)
      * Lấy bài của mình và bạn bè, đồng thời xử lý logic ẩn bài Private của người khác.
@@ -57,7 +70,11 @@ public class PostViewModel extends ViewModel {
                         posts.add(post);
                     }
                     newsFeedList.setValue(posts);
-                });
+                })
+                .addOnFailureListener(e -> {
+            isLoading.setValue(false);
+            errorMessage.setValue("Lỗi tải bảng tin: " + e.getMessage());
+            });
     }
 
     /**
@@ -87,7 +104,7 @@ public class PostViewModel extends ViewModel {
     /**
      * 3. Chức năng ĐĂNG BÀI MỚI
      */
-    public void createNewPost(Context context, String userId, String userName, String userAvatar,
+    public void createNewPost(String userId, String userName, String userAvatar,
                               Uri imageUri, String caption, List<String> tags,
                               String emotion, String privacy, Location location) {
         isLoading.setValue(true);
@@ -97,7 +114,7 @@ public class PostViewModel extends ViewModel {
         // --- XỬ LÝ ẢNH TRƯỚC KHI UPLOAD ---
         try {
             // Biến Uri thành Bitmap
-            Bitmap originalBitmap = imageHelper.uriToBitmap(context, imageUri);
+            Bitmap originalBitmap = imageHelper.uriToBitmap(getApplication(), imageUri);
             if (originalBitmap == null)
                 throw new Exception("Không thể đọc ảnh");
 
@@ -155,23 +172,5 @@ public class PostViewModel extends ViewModel {
             errorMessage.setValue("Lỗi xử lý ảnh: " + e.getMessage());
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }

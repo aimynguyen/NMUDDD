@@ -9,6 +9,12 @@ public class Location {
 
     public Location() {}
 
+    public Location(GeoPoint coordinates, String address, String city) {
+        this.coordinates = coordinates;
+        this.address = address;
+        this.city = city;
+    }
+
     public GeoPoint getCoordinates() {return coordinates;}
     public void setCoordinates(GeoPoint coordinates) { this.coordinates = coordinates; }
 
