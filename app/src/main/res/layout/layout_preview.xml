@@ -1,37 +1,235 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/layoutPreview"
-    android:visibility="gone"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_gravity="left"
+    android:background="@color/blue_primary">
+
+    <!-- preview -->
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:id="@+id/fixedPreviewLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingTop="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <!-- image preview -->
+        <!--delete-->
+
+        <ImageButton
+            android:id="@+id/btnRemoveImage"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_gravity="top|left"
+            android:layout_marginLeft="20dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/bg_circle_white"
+            android:padding="10dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:elevation="5dp"/>
+
+        <!--preview -->
+
         <ImageView
             android:id="@+id/imgPreview"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_width="230dp"
+            android:layout_height="230dp"
+            android:background="@drawable/bg_camera_frame"
+            android:clipToOutline="true"
+            android:scaleType="centerCrop"
+            android:src="@android:drawable/ic_menu_gallery"
+            android:elevation="6dp"/>
 
-        <!-- caption -->
-        <EditText
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:id="@+id/edtCaption"
-            android:hint="Write caption..."/>
+        <!-- slider -->
 
-        <!-- Mood -->
+        <FrameLayout
+            android:layout_width="80dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:background="@drawable/bg_slider_container"
+            android:elevation="6dp">
 
-        <!-- location -->
+            <!--slide -->
 
-        <!-- post button & cancel button -->
+            <LinearLayout
+                android:id="@+id/btnPrivate"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="start|center_vertical"
+                android:layout_margin="5dp"
+                android:background="@drawable/bg_slider_circle_light"
+                android:gravity="center"
+                android:elevation="8dp">
 
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/img_private"/>
 
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/btnPublic"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="end|center_vertical"
+                android:layout_margin="5dp"
+                android:background="@drawable/bg_slider_circle_dark"
+                android:gravity="center"
+                android:elevation="8dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/img_public"/>
+
+            </LinearLayout>
+
+        </FrameLayout>
 
     </LinearLayout>
-</ScrollView>
+
+
+    <!--scrollable -->
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/fixedPreviewLayout">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:paddingBottom="120dp">
+
+            <!-- date auto -->
+
+            <TextView
+                android:id="@+id/txtDate"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:background="@drawable/bg_input_rounded"
+                android:gravity="center"
+                android:text="01/01/2026"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:elevation="6dp"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:fontFamily="@font/inter_regular"
+                android:textStyle="normal" />
+
+            <!-- caption -->
+
+            <EditText
+                android:id="@+id/edtCaption"
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/bg_input_rounded"
+                android:gravity="top"
+                android:hint="Write caption..."
+                android:padding="18dp"
+                android:elevation="6dp"/>
+
+            <!-- mood -->
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:scrollbars="none"
+                android:fillViewport="true">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:background="@drawable/bg_input_rounded"
+                    android:layout_margin="10dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="20dp"
+                    android:elevation="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="💗" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="30dp"
+                        android:text="😊" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="30dp"
+                        android:text="😳" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="30dp"
+                        android:text="😭" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="30dp"
+                        android:text="😌" />
+
+                </LinearLayout>
+
+            </HorizontalScrollView>
+
+
+            <!-- location -->
+
+            <AutoCompleteTextView
+                android:id="@+id/autoLocation"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/bg_input_rounded"
+                android:completionThreshold="1"
+                android:hint="Choose location"
+                android:paddingHorizontal="18dp"
+                android:elevation="6dp"/>
+
+            <!-- post -->
+
+            <Button
+                android:id="@+id/btnPost"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"
+                android:layout_margin ="10dp"
+                android:background="@drawable/bg_button_rounded"
+                android:text="Post"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:layout_gravity="center"
+                android:elevation="6dp"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
