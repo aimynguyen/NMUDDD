@@ -1,4 +1,4 @@
-package com.example.diary_app.ui.pages.chat;
+package com.example.diary_app.ui.pages.login;
 
 import android.os.Bundle;
 
@@ -6,11 +6,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.diary_app.R;
 
-public class ChatActivity extends AppCompatActivity {
+public class LoginFragment extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_chat);
+        setContentView(R.layout.fragment_login);
     }
-
 }
