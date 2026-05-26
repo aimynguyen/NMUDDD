@@ -1,7 +1,6 @@
-package com.example.diary_app.ui.pages.statistics;
+package com.example.diary_app.viewmodel;
 
 import android.app.Application;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;

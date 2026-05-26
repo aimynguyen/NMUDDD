@@ -31,14 +31,19 @@ public class MainActivity extends AppCompatActivity {
             navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
                 int id = destination.getId();
 
-                // Tập hợp các ID fragment cần HIỆN cả Header và Navbar
-                if (id == R.id.nav_home || id == R.id.nav_statistics || id == R.id.nav_profile) {
+                // Cả Header cả Navbar
+                if (id == R.id.nav_home || id == R.id.nav_dashboard || id == R.id.nav_profile ) {
                     headerView.setVisibility(View.VISIBLE);
                     bottomNavigationView.setVisibility(View.VISIBLE);
                 }
-                // Nếu đi vào các trang khác (ví dụ: Đăng nhập, Chi tiết...) -> ẨN ĐI
-                else {
+                //Chỉ Nav
+                else if (id == R.id.nav_search) {
                     headerView.setVisibility(View.GONE); // GONE là ẩn hoàn toàn và co kích thước lại
+                    bottomNavigationView.setVisibility(View.GONE);
+                }
+                //chỉ Header
+                else{
+                    headerView.setVisibility(View.VISIBLE);
                     bottomNavigationView.setVisibility(View.GONE);
                 }
             });
