@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.diary_app.R;
 import com.example.diary_app.viewmodel.SignupViewModel;
 
-public class SignupActivity extends AppCompatActivity {
+public class SignupFragment extends AppCompatActivity {
 
     EditText edtUsername, edtEmail,
             edtDob, edtPassword;

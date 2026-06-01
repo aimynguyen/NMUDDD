@@ -32,10 +32,11 @@ public class PostRepository {
      * 1. Đẩy ảnh lên Firebase Storage
      * Trả về UploadTask để ViewModel biết khi nào upload xong và lấy URL
      */
-    public UploadTask uploadImageToStorage(Uri imageUrl){
-        String fileName = "post_image/" + UUID.randomUUID().toString() + ".jpg";
+    public UploadTask uploadImageToStorage(byte[] imageBytes) {
+        String fileName = "post_images/" + UUID.randomUUID().toString() + ".jpg";
         StorageReference ref = storage.getReference().child(fileName);
-        return ref.putFile(imageUrl);
+
+        return ref.putBytes(imageBytes);
     }
 
     /**
