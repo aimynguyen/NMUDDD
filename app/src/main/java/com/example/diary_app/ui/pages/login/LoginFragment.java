@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.diary_app.R;
 import com.example.diary_app.ui.pages.homepage.HomeActivity;
+import com.example.diary_app.ui.pages.signup.SignupFragment;
 import com.example.diary_app.viewmodel.LoginViewModel;
 
 public class LoginFragment extends AppCompatActivity {
@@ -36,6 +37,11 @@ public class LoginFragment extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
 
         btnRegister = findViewById(R.id.btnRegister);
+
+        btnRegister.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginFragment.this, SignupFragment.class);
+            startActivity(intent);
+        });
 
         // ViewModel
         loginViewModel =
