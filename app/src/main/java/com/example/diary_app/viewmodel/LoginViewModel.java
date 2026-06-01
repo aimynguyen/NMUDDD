@@ -4,43 +4,62 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.google.firebase.auth.FirebaseAuth;
-
+import com.example.diary_app.data.model.User;
+import com.example.diary_app.repository.AuthRepository;
+import com.example.diary_app.repository.UserRepository;
 public class LoginViewModel extends ViewModel {
+    private AuthRepository authRepository;
+    private UserRepository userRepository;
 
-    private FirebaseAuth mAuth;
-
-    private MutableLiveData<Boolean> loginSuccess =
-            new MutableLiveData<>();
-
-    private MutableLiveData<String> errorMessage =
-            new MutableLiveData<>();
+    private MutableLiveData<String> loginSuccess = new MutableLiveData<>();
+    private MutableLiveData<String> errorMessage = new MutableLiveData<>();
+    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
 
     public LoginViewModel() {
-        mAuth = FirebaseAuth.getInstance();
+        authRepository = new AuthRepository();
+        userRepository = new UserRepository();
     }
 
-    public LiveData<Boolean> getLoginSuccess() {
+    public LiveData<String> getLoginSuccess() {
         return loginSuccess;
     }
 
     public LiveData<String> getErrorMessage() {
         return errorMessage;
     }
+    public LiveData<Boolean> getIsLoading() { return isLoading; }
 
     public void login(String email, String password) {
+        isLoading.setValue(true);
 
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(task -> {
+        authRepository.login(email, password)
+                .addOnSuccessListener(authResult -> {
+                    String uid = authResult.getUser().getUid();
 
-                    if (task.isSuccessful()) {
-                        loginSuccess.setValue(true);
-                    } else {
-                        errorMessage.setValue(
-                                task.getException().getMessage()
-                        );
-                    }
+                    userRepository.getUserProfile(uid)
+                            .addOnSuccessListener(documentSnapshot -> {
+                                isLoading.setValue(false);
 
+                                if(documentSnapshot.exists()){
+                                    User user = documentSnapshot.toObject(User.class);
+                                    // Kiểm tra xem có phải Admin không
+                                    if (user != null && "admin".equals(user.getRole())) {
+                                        loginSuccess.setValue("admin");
+                                    } else {
+                                        loginSuccess.setValue("user");
+                                    }
+                                } else{
+                                    loginSuccess.setValue("user");
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                isLoading.setValue(false);
+                                errorMessage.setValue("Lỗi tải thông tin người dùng: " + e.getMessage());
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    isLoading.setValue(false);
+                    errorMessage.setValue("Sai email hoặc mật khẩu!");
                 });
     }
 }

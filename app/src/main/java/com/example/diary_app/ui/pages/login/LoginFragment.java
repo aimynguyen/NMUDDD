@@ -15,7 +15,7 @@ import com.example.diary_app.R;
 import com.example.diary_app.ui.pages.homepage.HomeActivity;
 import com.example.diary_app.viewmodel.LoginViewModel;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginFragment extends AppCompatActivity {
 
     EditText edtEmail, edtPassword;
 
@@ -51,31 +51,33 @@ public class LoginActivity extends AppCompatActivity {
             String password =
                     edtPassword.getText().toString().trim();
 
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập email và mật khẩu!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             loginViewModel.login(email, password);
 
         });
 
         // Observe success
-        loginViewModel.getLoginSuccess()
-                .observe(this, success -> {
+        loginViewModel.getLoginSuccess().observe(this, role -> {
 
-                    if (success) {
+            if(role.equals("admin")){
+                Toast.makeText(this, "Xin chào Quản trị viên!", Toast.LENGTH_SHORT).show();
+                ///// TODO: intent sang màn hình admin
+            }
+            else {
+                Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                Intent intent =
+                        new Intent(LoginFragment.this,
+                                ProfileActivity.class);
 
-                        Toast.makeText(this,
-                                "Login success",
-                                Toast.LENGTH_SHORT).show();
+                startActivity(intent);
+            }
+            finish();
 
-                        Intent intent =
-                                new Intent(LoginActivity.this,
-                                        ProfileActivity.class);
-
-                        startActivity(intent);
-
-                        finish();
-
-                    }
-
-                });
+        });
 
         // Observe error
         loginViewModel.getErrorMessage()
@@ -86,5 +88,15 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
 
                 });
+
+        // Observe loading
+        loginViewModel.getIsLoading().observe(this, isLoading -> {
+            btnLogin.setEnabled(!isLoading); // Khóa nút khi đang load
+            if (isLoading) {
+                btnLogin.setText("Đang đăng nhập...");
+            } else {
+                btnLogin.setText("Đăng nhập");
+            }
+        });
     }
 }

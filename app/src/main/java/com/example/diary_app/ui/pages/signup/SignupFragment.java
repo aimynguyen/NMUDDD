@@ -43,8 +43,15 @@ public class SignupFragment extends AppCompatActivity {
 
             String password =
                     edtPassword.getText().toString().trim();
+            String dob = edtDob.getText().toString().trim();
+            String username = edtUsername.getText().toString().trim();
 
-            signupViewModel.signup(email, password);
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            signupViewModel.signup(email, password, username, dob);
 
         });
 
@@ -58,6 +65,8 @@ public class SignupFragment extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show();
                     }
 
+                    //// TODO: intent sang màn hình chính
+                    finish();
                 });
 
         signupViewModel.getErrorMessage()
@@ -68,5 +77,15 @@ public class SignupFragment extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
 
                 });
+
+        // Lắng nghe trạng thái loading để vô hiệu hóa nút bấm tránh spam
+        signupViewModel.getIsLoading().observe(this, isLoading -> {
+            btnSignup.setEnabled(!isLoading);
+            if(isLoading) {
+                btnSignup.setText("Đang đăng ký...");
+            } else {
+                btnSignup.setText("Đăng ký");
+            }
+        });
     }
 }
