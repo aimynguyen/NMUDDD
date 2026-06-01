@@ -6,14 +6,13 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_gradient_01">
 
-    <ImageButton
+    <ImageView
         android:id="@+id/btnSetting"
         android:layout_width="42dp"
         android:layout_height="42dp"
         android:layout_marginTop="18dp"
         android:layout_marginEnd="18dp"
         android:background="@drawable/bg_circle_white"
-        android:padding="9dp"
         android:src="@drawable/setting_icon"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -36,9 +35,10 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center_horizontal"
-                android:layout_marginTop="20dp">
+                android:layout_marginTop="10dp">
 
                 <ImageView
+                    android:id="@+id/imgAvatar"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:src="@drawable/human_human"
@@ -46,14 +46,17 @@
                     android:padding="15dp"/>
 
                 <TextView
+                    android:id="@+id/txtName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Your name"
+                    android:textColor="@color/text_primary"
                     android:textStyle="bold"
                     android:textSize="18sp"
                     android:layout_marginTop="10dp"/>
 
                 <TextView
+                    android:id="@+id/txtEditProfile"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Edit profile ✎"
@@ -68,10 +71,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Friend requests"
+                android:textColor="@color/text_primary"
                 android:textStyle="bold"
                 android:textSize="16sp"
-                android:layout_marginTop="26dp"
-                android:layout_marginBottom="12dp"/>
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp"/>
+
+            <!-- empty state -->
+            <TextView
+                android:id="@+id/txtEmptyRequest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No friend requests yet"
+                android:textColor="#777777"
+                android:layout_marginBottom="5dp"/>
+
 
             <!-- REQUEST RECYCLERVIEW -->
 
@@ -79,6 +93,7 @@
                 android:id="@+id/rvRequests"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:minHeight="200dp"
                 android:nestedScrollingEnabled="false"/>
 
             <!-- FRIEND TITLE -->
@@ -87,10 +102,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Friends"
+                android:textColor="@color/text_primary"
                 android:textStyle="bold"
                 android:textSize="16sp"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="12dp"/>
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"/>
+
+            <!-- empty state -->
+            <TextView
+                android:id="@+id/txtEmptyFriends"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No friends yet"
+                android:textColor="#777777"/>
 
             <!-- FRIEND RECYCLERVIEW -->
 
@@ -98,7 +122,9 @@
                 android:id="@+id/rvFriends"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:minHeight="200dp"
                 android:nestedScrollingEnabled="false"/>
+
 
         </LinearLayout>
 
