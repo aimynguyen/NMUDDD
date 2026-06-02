@@ -23,8 +23,16 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyC1yRzYt27Q7qSLrNHUd3BsTLLnbBFH4sA" />
+
         <activity
-            android:name=".ui.pages.chat.ChatAIActivity"
+            android:name=".ui.pages.profile.ProfileActivity"
+            android:exported="true"/>
+
+        <activity
+            android:name=".ui.pages.profile.EditProfileActivity"/>
+
+        <activity
+            android:name=".ui.pages.login.LoginActivity"
 
             android:exported="true">
             <intent-filter>
