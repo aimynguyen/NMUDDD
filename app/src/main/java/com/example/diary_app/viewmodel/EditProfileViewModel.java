@@ -40,8 +40,7 @@ public class EditProfileViewModel extends ViewModel {
     // load profile
     public void loadProfile() {
 
-        String uid =
-                auth.getCurrentUser().getUid();
+        String uid = auth.getCurrentUser().getUid();
 
         db.collection("users")
                 .document(uid)

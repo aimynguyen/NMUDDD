@@ -10,44 +10,34 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ProfileViewModel extends ViewModel {
 
-    // username
+    private FirebaseAuth auth;
+    private FirebaseFirestore db;
+
     private MutableLiveData<String> userName =
             new MutableLiveData<>();
-
-    // avatar url
     private MutableLiveData<String> avatarUrl =
             new MutableLiveData<>();
 
-    private FirebaseAuth mAuth;
-
-    private FirebaseFirestore db;
-
     public ProfileViewModel() {
 
-        mAuth = FirebaseAuth.getInstance();
-
+        auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
     }
 
     // getter username
     public LiveData<String> getUserName() {
-
         return userName;
-
     }
 
     // getter avatar
     public LiveData<String> getAvatarUrl() {
-
         return avatarUrl;
-
     }
 
     public void loadProfile() {
 
-        FirebaseUser currentUser =
-                mAuth.getCurrentUser();
+        FirebaseUser currentUser = auth.getCurrentUser();
 
         if (currentUser != null) {
 
