@@ -31,8 +31,9 @@
         <activity
             android:name=".ui.pages.profile.EditProfileActivity"/>
 
+        <activity android:name=".ui.pages.signup.SignupFragment" />
         <activity
-            android:name=".ui.pages.login.LoginActivity"
+            android:name=".ui.pages.login.LoginFragment"
 
             android:exported="true">
             <intent-filter>
