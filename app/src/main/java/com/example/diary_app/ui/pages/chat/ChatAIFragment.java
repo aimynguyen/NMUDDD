@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.diary_app.BuildConfig;
 import com.example.diary_app.R;
+import com.example.diary_app.adapter.ChatAIAdapter;
 import com.example.diary_app.data.model.ChatMessage;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
