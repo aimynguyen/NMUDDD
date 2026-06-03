@@ -1,102 +1,101 @@
 package com.example.diary_app.ui.pages.login;
-import android.content.Intent;
-
-import com.example.diary_app.ui.pages.profile.ProfileFragment;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.diary_app.R;
+import com.example.diary_app.ui.pages.profile.ProfileFragment;
 import com.example.diary_app.ui.pages.signup.SignupFragment;
 import com.example.diary_app.viewmodel.LoginViewModel;
 
-public class LoginFragment extends AppCompatActivity {
+public class LoginFragment extends Fragment {
 
-    EditText edtEmail, edtPassword;
+    private EditText edtEmail, edtPassword;
+    private Button btnLogin, btnRegister;
+    private LoginViewModel loginViewModel;
 
-    Button btnLogin, btnRegister;
+    public LoginFragment() {
+        // Required empty public constructor
+    }
 
-    LoginViewModel loginViewModel;
-
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_login);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // 1. Inflate layout cho Fragment này
+        View view = inflater.inflate(R.layout.fragment_login, container, false);
 
-        // findViewById
-        edtEmail = findViewById(R.id.edtEmail);
+        // 2. Ánh xạ các View từ đối tượng 'view' vừa inflate
+        edtEmail = view.findViewById(R.id.edtEmail);
+        edtPassword = view.findViewById(R.id.edtPassword);
+        btnLogin = view.findViewById(R.id.btnLogin);
+        btnRegister = view.findViewById(R.id.btnRegister);
 
-        edtPassword = findViewById(R.id.edtPassword);
+        // 3. Khởi tạo ViewModel gắn với Lifecycle của Fragment
+        loginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
 
-        btnLogin = findViewById(R.id.btnLogin);
-
-        btnRegister = findViewById(R.id.btnRegister);
-
+        // 4. Sự kiện khi ấn nút Đăng ký (Chuyển sang SignupFragment)
         btnRegister.setOnClickListener(v -> {
-            Intent intent = new Intent(LoginFragment.this, SignupFragment.class);
-            startActivity(intent);
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.main, new SignupFragment()) // Thay R.id.fragment_container bằng ID định danh nơi chứa fragment trong Activity của bạn
+                    .addToBackStack(null)
+                    .commit();
         });
 
-        // ViewModel
-        loginViewModel =
-                new ViewModelProvider(this)
-                        .get(LoginViewModel.class);
-
-        // Button login
+        // 5. Sự kiện khi ấn nút Đăng nhập
         btnLogin.setOnClickListener(v -> {
-
-            String email =
-                    edtEmail.getText().toString().trim();
-
-            String password =
-                    edtPassword.getText().toString().trim();
+            String email = edtEmail.getText().toString().trim();
+            String password = edtPassword.getText().toString().trim();
 
             if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Vui lòng nhập email và mật khẩu!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Vui lòng nhập email và mật khẩu!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             loginViewModel.login(email, password);
-
         });
 
-        // Observe success
-        loginViewModel.getLoginSuccess().observe(this, role -> {
+        // 6. Lắng nghe dữ liệu (Observe) từ ViewModel
+        observeViewModel();
 
-            if(role.equals("admin")){
-                Toast.makeText(this, "Xin chào Quản trị viên!", Toast.LENGTH_SHORT).show();
-                ///// TODO: intent sang màn hình admin
+        return view;
+    }
+
+    private void observeViewModel() {
+        // Sử dụng getViewLifecycleOwner() để đảm bảo an toàn cho vòng đời UI trong Fragment
+        loginViewModel.getLoginSuccess().observe(getViewLifecycleOwner(), role -> {
+            if (role.equals("admin")) {
+                Toast.makeText(requireContext(), "Xin chào Quản trị viên!", Toast.LENGTH_SHORT).show();
+                ///// TODO: Thực hiện chuyển sang màn hình admin Fragment/Activity ở đây
+            } else {
+                Toast.makeText(requireContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+
+                // Chuyển sang ProfileFragment thay vì sử dụng Intent
+                getParentFragmentManager().beginTransaction()
+                        .replace(R.id.main, new ProfileFragment()) // Thay R.id.fragment_container bằng ID container của bạn
+                        .commit(); // Thường đăng nhập xong sẽ không cho Back quay lại màn Login nên không dùng addToBackStack
             }
-            else {
-                Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                Intent intent =
-                        new Intent(LoginFragment.this,
-                                ProfileFragment.class);
-
-                startActivity(intent);
-            }
-            finish();
-
         });
 
-        // Observe error
-        loginViewModel.getErrorMessage()
-                .observe(this, error -> {
+        // Lắng nghe lỗi đăng nhập
+        loginViewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
+            if (error != null) {
+                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+            }
+        });
 
-                    Toast.makeText(this,
-                            error,
-                            Toast.LENGTH_SHORT).show();
-
-                });
-
-        // Observe loading
-        loginViewModel.getIsLoading().observe(this, isLoading -> {
-            btnLogin.setEnabled(!isLoading); // Khóa nút khi đang load
+        // Lắng nghe trạng thái loading để đóng/mở nút tránh spam click
+        loginViewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            btnLogin.setEnabled(!isLoading);
             if (isLoading) {
                 btnLogin.setText("Đang đăng nhập...");
             } else {
