@@ -1,7 +1,7 @@
 package com.example.diary_app.ui.pages.login;
 import android.content.Intent;
 
-import com.example.diary_app.ui.pages.profile.ProfileActivity;
+import com.example.diary_app.ui.pages.profile.ProfileFragment;
 
 import android.os.Bundle;
 import android.widget.Button;
@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.diary_app.R;
-import com.example.diary_app.ui.pages.homepage.HomeActivity;
 import com.example.diary_app.ui.pages.signup.SignupFragment;
 import com.example.diary_app.viewmodel.LoginViewModel;
 
@@ -77,7 +76,7 @@ public class LoginFragment extends AppCompatActivity {
                 Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                 Intent intent =
                         new Intent(LoginFragment.this,
-                                ProfileActivity.class);
+                                ProfileFragment.class);
 
                 startActivity(intent);
             }

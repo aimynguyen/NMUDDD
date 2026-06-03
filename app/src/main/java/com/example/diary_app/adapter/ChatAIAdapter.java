@@ -1,4 +1,4 @@
-package com.example.diary_app.ui.pages.chat;
+package com.example.diary_app.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
