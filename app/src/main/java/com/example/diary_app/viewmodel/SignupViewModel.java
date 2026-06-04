@@ -37,6 +37,8 @@ public class SignupViewModel extends ViewModel {
 
         authRepository.register(email, password)
                         .addOnSuccessListener(authResult -> {
+                            authRepository.sendEmailVerification();
+
                             String uid = authResult.getUser().getUid();
 
                             User newUser = new User();

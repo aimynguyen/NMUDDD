@@ -61,7 +61,7 @@ public class SignupFragment extends AppCompatActivity {
                     if (success) {
 
                         Toast.makeText(this,
-                                "Signup success",
+                                "Đăng ký thành công! Hãy kiểm tra email để xác nhận tài khoản!",
                                 Toast.LENGTH_SHORT).show();
                     }
 
