@@ -27,9 +27,14 @@ public class MainActivity extends AppCompatActivity {
             NavController navController = navHostFragment.getNavController();
             NavigationUI.setupWithNavController(bottomNavigationView, navController);
 
+            int destination = getIntent().getIntExtra("destination", -1);
+            if (destination != -1) {
+                navController.navigate(destination);
+            }
+
             // 3. TỰ ĐỘNG ẨN/HIỆN HEADER VÀ NAVBAR KHI CHUYỂN TRANG
-            navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
-                int id = destination.getId();
+            navController.addOnDestinationChangedListener((controller, dest, arguments) -> {
+                int id = dest.getId();
 
                 // Cả Header cả Navbar
                 if (id == R.id.nav_home || id == R.id.nav_dashboard || id == R.id.nav_profile ) {

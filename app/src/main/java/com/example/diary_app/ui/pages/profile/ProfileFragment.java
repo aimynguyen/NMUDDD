@@ -12,9 +12,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.bumptech.glide.Glide;
+import com.example.diary_app.MainActivity;
 import com.example.diary_app.R;
+import com.example.diary_app.ui.pages.login.LoginFragment;
 import com.example.diary_app.viewmodel.ProfileViewModel;
 
 public class ProfileFragment extends Fragment {
@@ -65,8 +68,9 @@ public class ProfileFragment extends Fragment {
         // 6. Xử lý sự kiện click mở màn hình chỉnh sửa
         txtEditProfile.setOnClickListener(v -> {
             // Thay ProfileActivity.this bằng requireContext()
-            Intent intent = new Intent(requireContext(), EditProfileFragment.class);
-            startActivity(intent);
+            //Intent intent = new Intent(requireContext(), EditProfileFragment.class);
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.nav_edit_profile);
         });
 
         return view;

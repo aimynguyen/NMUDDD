@@ -2,7 +2,10 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph">
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_profile">
+
+    <!--
     <fragment
         android:id="@+id/nav_home"
         android:name="com.example.diary_app.MainActivity.java"
@@ -11,9 +14,17 @@
         android:id="@+id/nav_chat"
         android:name="com.example.diary_app.ui.pages.chat.ChatAIActivity.java"
         android:label="Chat"/>
+    -->
 
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.example.diary_app.ui.pages.profile.ProfileFragment"
+        android:label="Profile"/>
 
-
+    <fragment
+        android:id="@+id/nav_edit_profile"
+        android:name="com.example.diary_app.ui.pages.profile.EditProfileFragment"
+        android:label="EditProfile"/>
 
 
 </navigation>

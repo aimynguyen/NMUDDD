@@ -1,6 +1,7 @@
 package com.example.diary_app.ui.pages.login;
 import android.content.Intent;
 
+import com.example.diary_app.MainActivity;
 import com.example.diary_app.ui.pages.profile.ProfileFragment;
 
 import android.os.Bundle;
@@ -74,11 +75,11 @@ public class LoginFragment extends AppCompatActivity {
             }
             else {
                 Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                Intent intent =
-                        new Intent(LoginFragment.this,
-                                ProfileFragment.class);
 
+                Intent intent = new Intent(LoginFragment.this, MainActivity.class);
+                intent.putExtra("destination", R.id.nav_profile);
                 startActivity(intent);
+                finish();
             }
             finish();
 
