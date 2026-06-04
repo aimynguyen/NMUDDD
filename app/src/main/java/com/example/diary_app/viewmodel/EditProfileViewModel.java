@@ -4,54 +4,49 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.example.diary_app.model.UserModel;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.diary_app.data.model.User;
+import com.example.diary_app.repository.AuthRepository;
+import com.example.diary_app.repository.UserRepository;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class EditProfileViewModel extends ViewModel {
 
-    private FirebaseFirestore db;
-    private FirebaseAuth auth;
+   private AuthRepository authRepository;
+   private UserRepository userRepository;
 
-    private MutableLiveData<UserModel> userLiveData =
-            new MutableLiveData<>();
+    private MutableLiveData<User> userLiveData = new MutableLiveData<>();
 
-    private MutableLiveData<String> message =
-            new MutableLiveData<>();
-
+    private MutableLiveData<String> message = new MutableLiveData<>();
+    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
     public EditProfileViewModel() {
-
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
-
+        authRepository = new AuthRepository();
+        userRepository = new UserRepository();
     }
 
-    public LiveData<UserModel> getUser() {
-        return userLiveData;
-    }
-
-    public LiveData<String> getMessage() {
-        return message;
-    }
+    public LiveData<User> getUser() { return userLiveData; }
+    public LiveData<String> getMessage() { return message; }
+    public LiveData<Boolean> getIsLoading() { return isLoading; }
 
     // load profile
     public void loadProfile() {
 
-        String uid = auth.getCurrentUser().getUid();
+        String uid = authRepository.getCurrentUserId();
+        if (uid == null) return;
 
-        db.collection("users")
-                .document(uid)
-                .get()
+        isLoading.setValue(true);
+        userRepository.getUserProfile(uid)
                 .addOnSuccessListener(documentSnapshot -> {
-
-                    UserModel user =
-                            documentSnapshot.toObject(UserModel.class);
-
-                    userLiveData.setValue(user);
-
+                    isLoading.setValue(false);
+                    if (documentSnapshot.exists()) {
+                        User user = documentSnapshot.toObject(User.class);
+                        userLiveData.setValue(user);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    isLoading.setValue(false);
+                    message.setValue("Lỗi tải thông tin: " + e.getMessage());
                 });
 
     }
@@ -64,48 +59,33 @@ public class EditProfileViewModel extends ViewModel {
             String newAvatar
     ) {
 
-        String uid =
-                auth.getCurrentUser().getUid();
+        String uid = authRepository.getCurrentUserId();
+        if (uid == null) return;
 
-        Map<String, Object> updates =
-                new HashMap<>();
+        Map<String, Object> updates = new HashMap<>();
 
-        // check name
+        // So sánh để xem có thay đổi mới cập nhật
         if (!newName.equals(oldName)) {
-
             updates.put("userName", newName);
-
         }
-
-        // check avatar
         if (!newAvatar.equals(oldAvatar)) {
-
             updates.put("avatarUrl", newAvatar);
-
         }
 
-        // NOTHING CHANGED
         if (updates.isEmpty()) {
-
-            message.setValue("Nothing changed");
+            message.setValue("Không có thay đổi nào!");
             return;
-
         }
 
-        db.collection("users")
-                .document(uid)
-                .update(updates)
+        isLoading.setValue(true);
+        userRepository.updateUserProfile(uid, updates)
                 .addOnSuccessListener(unused -> {
-
-                    message.setValue("Profile updated");
-
+                    isLoading.setValue(false);
+                    message.setValue("Cập nhật thành công!");
                 })
                 .addOnFailureListener(e -> {
-
-                    message.setValue(
-                            e.getMessage()
-                    );
-
+                    isLoading.setValue(false);
+                    message.setValue("Lỗi cập nhật: " + e.getMessage());
                 });
 
     }
