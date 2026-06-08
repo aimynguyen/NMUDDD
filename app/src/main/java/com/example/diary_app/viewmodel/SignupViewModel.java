@@ -4,20 +4,23 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.google.firebase.auth.FirebaseAuth;
-
+import com.example.diary_app.data.model.User;
+import com.example.diary_app.repository.AuthRepository;
+import com.example.diary_app.repository.UserRepository;
 public class SignupViewModel extends ViewModel {
 
-    private FirebaseAuth mAuth;
+    private AuthRepository authRepository;
+    private UserRepository userRepository;
 
-    private MutableLiveData<Boolean> signupSuccess =
-            new MutableLiveData<>();
+    private MutableLiveData<Boolean> signupSuccess = new MutableLiveData<>();
 
-    private MutableLiveData<String> errorMessage =
-            new MutableLiveData<>();
+    private MutableLiveData<String> errorMessage = new MutableLiveData<>();
+
+    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
 
     public SignupViewModel() {
-        mAuth = FirebaseAuth.getInstance();
+        authRepository = new AuthRepository();
+        userRepository = new UserRepository();
     }
 
     public LiveData<Boolean> getSignupSuccess() {
@@ -27,20 +30,37 @@ public class SignupViewModel extends ViewModel {
     public LiveData<String> getErrorMessage() {
         return errorMessage;
     }
+    public LiveData<Boolean> getIsLoading() { return isLoading; }
 
-    public void signup(String email, String password) {
+    public void signup(String email, String password, String username, String dob) {
+        isLoading.setValue(true);
 
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(task -> {
+        authRepository.register(email, password)
+                        .addOnSuccessListener(authResult -> {
+                            String uid = authResult.getUser().getUid();
 
-                    if (task.isSuccessful()) {
-                        signupSuccess.setValue(true);
-                    } else {
-                        errorMessage.setValue(
-                                task.getException().getMessage()
-                        );
-                    }
+                            User newUser = new User();
+                            newUser.setUid(uid);
+                            newUser.setEmail(email);
+                            newUser.setUserName(username);
 
-                });
+                            newUser.setBirthday(dob);
+                            newUser.setRole("user");
+
+                            userRepository.createUserProfile(newUser)
+                                    .addOnSuccessListener(aVoid -> {
+                                        isLoading.setValue(false);
+                                        signupSuccess.setValue(true);
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        isLoading.setValue(false);
+                                        errorMessage.setValue("Lỗi lưu dữ liệu: " + e.getMessage());
+                                    });
+                        })
+                        .addOnFailureListener(e -> {
+                            isLoading.setValue(false);
+                            errorMessage.setValue("Lỗi đăng ký: " + e.getMessage());
+                        });
+
     }
 }
