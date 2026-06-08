@@ -1,67 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:paddingBottom="10dp"
-    android:paddingRight="4dp">
-
+    android:paddingRight="4dp"
+    android:layout_width="match_parent"
+    android:background="@drawable/bg_header_card"
+    android:layout_height="66dp"
+    android:layout_gravity="start">
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="66dp"
-        android:layout_gravity="center"
-        android:background="@drawable/bg_header_card"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_header"
         android:elevation="8dp"
         android:outlineProvider="background"
         android:clipToOutline="true">
-
-<!--        <View-->
-<!--            android:id="@+id/header_left_shape"-->
-<!--            android:layout_width="140dp"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:background="@drawable/bg_header_left" />-->
-
-        <View
-            android:id="@+id/header_circle_light"
-            android:layout_width="152dp"
-            android:layout_height="152dp"
-            android:layout_marginTop="-62dp"
-            android:layout_marginLeft="-24dp"
-            android:background="@drawable/bg_circle_light" />
-
-        <View
-            android:id="@+id/header_circle_dark"
-            android:layout_width="86dp"
-            android:layout_height="86dp"
-            android:layout_marginLeft="-22dp"
-            android:layout_marginTop="-42dp"
-            android:background="@drawable/bg_circle_dark" />
-
-        <TextView
-            android:id="@+id/header_brand_aura"
-            android:layout_width="104dp"
-            android:layout_height="44dp"
-            android:layout_marginLeft="51dp"
-            android:layout_marginTop="9dp"
-            android:text="Aura"
-            android:fontFamily="@font/oleo_script"
-            android:textColor="@color/white"
-            android:textSize="32sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/header_brand_log"
-            android:layout_width="104dp"
-            android:layout_height="44dp"
-            android:layout_marginLeft="125dp"
-            android:layout_marginTop="9dp"
-            android:text="log"
-            android:fontFamily="@font/oleo_script"
-            android:textColor="@color/blue_secondary"
-            android:textSize="32sp"
-            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/header_user_name"
@@ -82,6 +35,6 @@
             android:layout_marginTop="18dp"
             android:layout_marginEnd="20dp"
             android:background="@drawable/bg_circle_gray" />
-
     </FrameLayout>
+
 </FrameLayout>
