@@ -45,10 +45,8 @@ public class LoginFragment extends Fragment {
 
         // 4. Sự kiện khi ấn nút Đăng ký (Chuyển sang SignupFragment)
         btnRegister.setOnClickListener(v -> {
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.main, new SignupFragment()) // Thay R.id.fragment_container bằng ID định danh nơi chứa fragment trong Activity của bạn
-                    .addToBackStack(null)
-                    .commit();
+            androidx.navigation.Navigation.findNavController(v)
+                    .navigate(R.id.action_nav_login_to_nav_signin);
         });
 
         // 5. Sự kiện khi ấn nút Đăng nhập
@@ -75,14 +73,13 @@ public class LoginFragment extends Fragment {
         loginViewModel.getLoginSuccess().observe(getViewLifecycleOwner(), role -> {
             if (role.equals("admin")) {
                 Toast.makeText(requireContext(), "Xin chào Quản trị viên!", Toast.LENGTH_SHORT).show();
-                ///// TODO: Thực hiện chuyển sang màn hình admin Fragment/Activity ở đây
+                // TODO: Thực hiện chuyển sang màn hình admin nếu có
             } else {
                 Toast.makeText(requireContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-
-                // Chuyển sang ProfileFragment thay vì sử dụng Intent
-                getParentFragmentManager().beginTransaction()
-                        .replace(R.id.main, new ProfileFragment()) // Thay R.id.fragment_container bằng ID container của bạn
-                        .commit(); // Thường đăng nhập xong sẽ không cho Back quay lại màn Login nên không dùng addToBackStack
+                if (getView() != null) {
+                    androidx.navigation.Navigation.findNavController(getView())
+                            .navigate(R.id.action_nav_login_to_nav_home);
+                }
             }
         });
 
