@@ -1,72 +1,99 @@
 package com.example.diary_app.ui.pages.signup;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.diary_app.R;
 import com.example.diary_app.viewmodel.SignupViewModel;
 
-public class SignupFragment extends AppCompatActivity {
+public class SignupFragment extends Fragment {
 
-    EditText edtUsername, edtEmail,
-            edtDob, edtPassword;
+    private EditText edtUsername, edtEmail, edtDob, edtPassword;
+    private Button btnSignup;
+    private SignupViewModel signupViewModel;
 
-    Button btnSignup;
+    public SignupFragment() {
+        // Required empty public constructor
+    }
 
-    SignupViewModel signupViewModel;
-
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_signup);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // 1. Inflate layout cho Fragment
+        View view = inflater.inflate(R.layout.fragment_signup, container, false);
 
-        edtUsername = findViewById(R.id.edtUsername);
-        edtEmail = findViewById(R.id.edtEmail);
-        edtDob = findViewById(R.id.edtDob);
-        edtPassword = findViewById(R.id.edtPassword);
+        // 2. Ánh xạ các View từ đối tượng 'view'
+        edtUsername = view.findViewById(R.id.edtUsername);
+        edtEmail = view.findViewById(R.id.edtEmail);
+        edtDob = view.findViewById(R.id.edtDob);
+        edtPassword = view.findViewById(R.id.edtPassword);
+        btnSignup = view.findViewById(R.id.btnSignup);
 
-        btnSignup = findViewById(R.id.btnSignup);
+        // 3. Khởi tạo ViewModel gắn với vòng đời của Fragment
+        signupViewModel = new ViewModelProvider(this).get(SignupViewModel.class);
 
-        signupViewModel =
-                new ViewModelProvider(this)
-                        .get(SignupViewModel.class);
-
+        // 4. Xử lý sự kiện click nút Đăng ký
         btnSignup.setOnClickListener(v -> {
+            String email = edtEmail.getText().toString().trim();
+            String password = edtPassword.getText().toString().trim();
+            String dob = edtDob.getText().toString().trim();
+            String username = edtUsername.getText().toString().trim();
 
-            String email =
-                    edtEmail.getText().toString().trim();
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(requireContext(), "Vui lòng nhập đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            String password =
-                    edtPassword.getText().toString().trim();
-
-            signupViewModel.signup(email, password);
-
+            signupViewModel.signup(email, password, username, dob);
         });
 
-        signupViewModel.getSignupSuccess()
-                .observe(this, success -> {
+        // 5. Lắng nghe (Observe) các trạng thái từ ViewModel
+        observeViewModel();
 
-                    if (success) {
+        return view;
+    }
 
-                        Toast.makeText(this,
-                                "Signup success",
-                                Toast.LENGTH_SHORT).show();
-                    }
+    private void observeViewModel() {
+        // Sử dụng getViewLifecycleOwner() thay vì 'this' để lắng nghe LiveData an toàn hơn trong Fragment
+        signupViewModel.getSignupSuccess().observe(getViewLifecycleOwner(), success -> {
+            if (success) {
+                Toast.makeText(requireContext(), "Signup success", Toast.LENGTH_SHORT).show();
 
-                });
+                // TODO: Chuyển sang màn hình chính (bằng NavController hoặc FragmentTransaction)
 
-        signupViewModel.getErrorMessage()
-                .observe(this, error -> {
+                // Đóng Fragment hiện tại để quay lại màn hình trước đó (tương đương finish() của Activity)
+                if (getParentFragmentManager().getBackStackEntryCount() > 0) {
+                    getParentFragmentManager().popBackStack();
+                } else if (getActivity() != null) {
+                    getActivity().finish(); // Nếu Fragment này là màn hình duy nhất của Activity thì đóng luôn Activity
+                }
+            }
+        });
 
-                    Toast.makeText(this,
-                            error,
-                            Toast.LENGTH_SHORT).show();
+        signupViewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
+            if (error != null) {
+                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+            }
+        });
 
-                });
+        // Lắng nghe trạng thái loading để vô hiệu hóa nút bấm tránh spam click
+        signupViewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            btnSignup.setEnabled(!isLoading);
+            if (isLoading) {
+                btnSignup.setText("Đang đăng ký...");
+            } else {
+                btnSignup.setText("Đăng ký");
+            }
+        });
     }
 }

@@ -13,10 +13,11 @@ public class User {
     private String theme;
     private List<String> friendIds;
     private Timestamp createAt;
+    private String role;
 
     public User(){}
 
-    public User(String uid, String displayName, String email,String birthday, String avatarUrl, String theme, List<String> friendIds, Timestamp createAt){
+    public User(String uid, String displayName, String email,String birthday, String avatarUrl, String theme, List<String> friendIds, Timestamp createAt, String role){
         this.uid = uid;
         this.userName = displayName;
         this.email = email;
@@ -25,6 +26,7 @@ public class User {
         this.theme = theme;
         this.friendIds = friendIds;
         this.createAt = createAt;
+        this.role = role;
     }
 
     public String getUid() {return uid;}
@@ -54,4 +56,12 @@ public class User {
 
     public Timestamp getCreatedAt() { return createAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createAt = createdAt; }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 }

@@ -1,4 +1,4 @@
-package com.example.diary_app.ui.pages.chat;
+package com.example.diary_app.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,57 +12,64 @@ import com.example.diary_app.R;
 import com.example.diary_app.data.model.ChatMessage;
 
 import java.util.List;
-// 1. Thay đổi ở đây: Chỉ định rõ ChatViewHolder trong dấu ngoặc nhọn
-public class ChatAIAdapter extends RecyclerView.Adapter<ChatAIAdapter.ChatViewHolder> {
 
-    private static final int TYPE_USER = 1;
-    private static final int TYPE_BOT = 2;
+public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder> {
+    private static final int TYPE_SENDER = 1;
+    private static final int TYPE_RECEIVER = 2;
+    private String currentUserId; // Bỏ static để tránh lỗi dữ liệu khi có nhiều instance
+
     private List<ChatMessage> messageList;
 
-    public ChatAIAdapter(List<ChatMessage> messageList) {
+    public ChatAdapter(List<ChatMessage> messageList, String userId) {
         this.messageList = messageList;
+        this.currentUserId = userId;
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (messageList.get(position).getSenderId().equals("user_123")) {
-            return TYPE_USER;
+        // So sánh với currentUserId được truyền vào thay vì hardcode "user_123"
+        if (messageList.get(position).getSenderId() != null && 
+            messageList.get(position).getSenderId().equals(currentUserId)) {
+            return TYPE_SENDER;
         } else {
-            return TYPE_BOT;
+            return TYPE_RECEIVER;
         }
     }
 
     @NonNull
     @Override
-    // 2. Thay đổi ở đây: Trả về ChatViewHolder thay vì RecyclerView.ViewHolder
     public ChatViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Sử dụng item_chat_ai chứa cả 2 phía trái/phải
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_ai, parent, false);
         return new ChatViewHolder(view);
     }
 
+    public void updateList(List<ChatMessage> newList) {
+        this.messageList = newList;
+        notifyDataSetChanged();
+    }
+
     @Override
-    // 3. Thay đổi ở đây: Ép kiểu sẵn ChatViewHolder giúp code gọn hơn
     public void onBindViewHolder(@NonNull ChatViewHolder holder, int position) {
         ChatMessage message = messageList.get(position);
-
-        if (getItemViewType(position) == TYPE_USER) {
+        
+        if (getItemViewType(position) == TYPE_SENDER) {
             holder.txtMessageRight.setVisibility(View.VISIBLE);
             holder.txtMessageLeft.setVisibility(View.GONE);
             holder.txtMessageRight.setText(message.getContent());
+            // Đảm bảo background và padding được set đúng
             holder.txtMessageRight.setBackgroundResource(R.drawable.bg_message_sent);
-            holder.txtMessageRight.setPadding(32, 24, 32, 24);
         } else {
             holder.txtMessageLeft.setVisibility(View.VISIBLE);
             holder.txtMessageRight.setVisibility(View.GONE);
             holder.txtMessageLeft.setText(message.getContent());
             holder.txtMessageLeft.setBackgroundResource(R.drawable.bg_message_recieved);
-            holder.txtMessageLeft.setPadding(32, 24, 32, 24);
         }
     }
 
     @Override
     public int getItemCount() {
-        return messageList.size();
+        return messageList != null ? messageList.size() : 0;
     }
 
     public static class ChatViewHolder extends RecyclerView.ViewHolder {

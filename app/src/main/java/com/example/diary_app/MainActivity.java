@@ -15,35 +15,35 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // 1. Ánh xạ các View cần ẩn/hiện
+        // 1. Ánh xạ View
         View headerView = findViewById(R.id.header_view);
-        BottomNavigationView bottomNavigationView = findViewById(R.id.navbar_view);
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         // 2. Lấy NavController
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment);
 
-        if (navHostFragment != null) {
+        if (navHostFragment != null && bottomNavigationView != null) {
             NavController navController = navHostFragment.getNavController();
             NavigationUI.setupWithNavController(bottomNavigationView, navController);
 
-            // 3. TỰ ĐỘNG ẨN/HIỆN HEADER VÀ NAVBAR KHI CHUYỂN TRANG
+            // 3. TỰ ĐỘNG ẨN/HIỆN THEO ID FRAGMENT
             navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
                 int id = destination.getId();
 
-                // Cả Header cả Navbar
-                if (id == R.id.nav_home || id == R.id.nav_dashboard || id == R.id.nav_profile ) {
-                    headerView.setVisibility(View.VISIBLE);
+                // Các màn hình chính: Hiện cả Header và Bottom Navigation
+                if (id == R.id.nav_dashboard || id == R.id.nav_profile || id == R.id.nav_home) {
+                    if (headerView != null) headerView.setVisibility(View.VISIBLE);
                     bottomNavigationView.setVisibility(View.VISIBLE);
                 }
-                //Chỉ Nav
-                else if (id == R.id.nav_search) {
-                    headerView.setVisibility(View.GONE); // GONE là ẩn hoàn toàn và co kích thước lại
-                    bottomNavigationView.setVisibility(View.GONE);
+                // Màn hình Chat AI: Ẩn Header cho rộng chỗ, vẫn hiện Bottom Navigation
+                else if (id == R.id.nav_chatAI || id == R.id.nav_chat) {
+                    if (headerView != null) headerView.setVisibility(View.GONE);
+                    bottomNavigationView.setVisibility(View.VISIBLE);
                 }
-                //chỉ Header
-                else{
-                    headerView.setVisibility(View.VISIBLE);
+                // Các màn hình phụ (Login, Signup, Edit Profile): Ẩn toàn bộ thanh điều hướng
+                else {
+                    if (headerView != null) headerView.setVisibility(View.GONE);
                     bottomNavigationView.setVisibility(View.GONE);
                 }
             });
