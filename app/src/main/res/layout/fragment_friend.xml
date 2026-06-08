@@ -1,0 +1,37 @@
+<LinearLayout android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/bg_lineargradient"
+    android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingRight="16dp"
+        android:paddingLeft="16dp">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddFriend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tìm thêm bạn bè"
+            android:layout_gravity="end"
+            app:backgroundTint="#002C77"/>
+    </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Danh sách bạn bè"
+        android:textSize="24sp"
+        android:textColor="#002C77"
+        android:textStyle="bold"
+        android:textFontWeight="600"
+        android:textAlignment="center"/>
+    <ListView
+        android:id="@+id/listViewAcpFriend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+
+
+</LinearLayout>

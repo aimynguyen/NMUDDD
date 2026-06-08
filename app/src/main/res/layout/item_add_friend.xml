@@ -1,0 +1,69 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent">
+    <com.google.android.material.card.MaterialCardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_margin="10dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        android:elevation="4dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:foreground="?attr/selectableItemBackground"
+        android:backgroundTint="@color/white">
+
+        <!-- Header -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="60dp"
+            android:padding="8dp"
+            android:gravity="center_vertical">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                app:cardCornerRadius="25dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                android:layout_marginEnd="12dp">
+
+                <ImageView
+                    android:id="@+id/imgAvatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_launcher_foreground"
+                    android:scaleType="centerCrop" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:id="@+id/tvName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@color/mood_happy"
+                android:text="User Name"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAdd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/btn_add_gb"
+                android:backgroundTint="@null"
+                style="@style/Widget.MaterialComponents.Button"
+                android:text="Add"
+                android:textAllCaps="false"
+                app:elevation="4dp"
+                android:stateListAnimator="@null"/>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</LinearLayout>
