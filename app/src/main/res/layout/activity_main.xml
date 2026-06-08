@@ -8,12 +8,88 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <include
-        android:id="@+id/header_view"
-        layout="@layout/layout_header"
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:id="@+id/header_view"
+        android:paddingBottom="10dp"
+        android:paddingRight="4dp"
+        tools:ignore="MissingConstraints">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="66dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_header_card"
+            android:elevation="8dp"
+            android:outlineProvider="background"
+            android:clipToOutline="true">
+
+            <View
+                android:id="@+id/header_circle_light"
+                android:layout_width="152dp"
+                android:layout_height="152dp"
+                android:layout_marginTop="-62dp"
+                android:layout_marginLeft="-24dp"
+                android:background="@drawable/bg_circle_light" />
+
+            <View
+                android:id="@+id/header_circle_dark"
+                android:layout_width="86dp"
+                android:layout_height="86dp"
+                android:layout_marginLeft="-22dp"
+                android:layout_marginTop="-42dp"
+                android:background="@drawable/bg_circle_dark" />
+
+            <TextView
+                android:id="@+id/header_brand_aura"
+                android:layout_width="104dp"
+                android:layout_height="44dp"
+                android:layout_marginLeft="51dp"
+                android:layout_marginTop="9dp"
+                android:text="Aura"
+                android:fontFamily="@font/oleo_script"
+                android:textColor="@color/white"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/header_brand_log"
+                android:layout_width="104dp"
+                android:layout_height="44dp"
+                android:layout_marginLeft="125dp"
+                android:layout_marginTop="9dp"
+                android:text="log"
+                android:fontFamily="@font/oleo_script"
+                android:textColor="@color/blue_secondary"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/header_user_name"
+                android:layout_width="70dp"
+                android:layout_height="16dp"
+                android:layout_marginLeft="250dp"
+                android:layout_marginTop="25dp"
+                android:layout_gravity="top"
+                android:text="Your name"
+                android:textColor="@color/blue_secondary"
+                android:textSize="12sp"/>
+
+            <View
+                android:id="@+id/header_avatar"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="18dp"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/bg_circle_gray" />
+
+        </FrameLayout>
+    </FrameLayout>
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
@@ -23,13 +99,18 @@
         app:defaultNavHost="true"
         app:navGraph="@navigation/nav_graph"
         app:layout_constraintTop_toBottomOf="@id/header_view"
-        app:layout_constraintBottom_toTopOf="@id/navbar_view" />
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation" />
 
-    <include
-        android:id="@+id/navbar_view"
-        layout="@layout/layout_navbar"
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="parent" />
+        android:layout_height="60dp"
+        android:background="@color/blue_secondary"
+        app:menu="@menu/navbar_menu"
+        app:itemIconTint="@color/narbar_item_color"
+        app:itemTextColor="@color/white"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.HalfRounded"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
