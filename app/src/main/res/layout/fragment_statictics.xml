@@ -6,21 +6,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/bg_lineargradient">
 
-    <!-- Header fixed ở trên cùng -->
-    <include
-        android:id="@+id/header"
-        layout="@layout/layout_header"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
     <!-- ScrollView chứa nội dung, nằm giữa Header và Navbar -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintTop_toBottomOf="@id/header"
-        app:layout_constraintBottom_toTopOf="@id/navbar"> <!-- Kết thúc ScrollView tại Navbar -->
+        tools:ignore="MissingConstraints"> <!-- Kết thúc ScrollView tại Navbar -->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -507,23 +498,6 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Navbar fixed ở dưới cùng -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_height="90dp"
-        android:id="@+id/navbar"
-        android:layout_width="match_parent"
-        android:background="@color/blue_secondary"
-        app:menu="@menu/navbar_menu"
-        app:itemIconTint="@color/narbar_item_color"
-        app:itemTextColor="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.HalfRounded"
-        tools:ignore="MissingConstraints">
 
-    </com.google.android.material.bottomnavigation.BottomNavigationView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
