@@ -34,28 +34,39 @@ public class LoginViewModel extends ViewModel {
 
         authRepository.login(email, password)
                 .addOnSuccessListener(authResult -> {
-                    String uid = authResult.getUser().getUid();
 
-                    userRepository.getUserProfile(uid)
-                            .addOnSuccessListener(documentSnapshot -> {
-                                isLoading.setValue(false);
+                    if (authRepository.isEmailVerified()) {
 
-                                if(documentSnapshot.exists()){
-                                    User user = documentSnapshot.toObject(User.class);
-                                    // Kiểm tra xem có phải Admin không
-                                    if (user != null && "admin".equals(user.getRole())) {
-                                        loginSuccess.setValue("admin");
-                                    } else {
+                        // Đã xác thực email
+                        String uid = authResult.getUser().getUid();
+
+                        userRepository.getUserProfile(uid)
+                                .addOnSuccessListener(documentSnapshot -> {
+                                    isLoading.setValue(false);
+
+                                    if(documentSnapshot.exists()){
+                                        User user = documentSnapshot.toObject(User.class);
+                                        // Kiểm tra xem có phải Admin không
+                                        if (user != null && "admin".equals(user.getRole())) {
+                                            loginSuccess.setValue("admin");
+                                        } else {
+                                            loginSuccess.setValue("user");
+                                        }
+                                    } else{
                                         loginSuccess.setValue("user");
                                     }
-                                } else{
-                                    loginSuccess.setValue("user");
-                                }
-                            })
-                            .addOnFailureListener(e -> {
-                                isLoading.setValue(false);
-                                errorMessage.setValue("Lỗi tải thông tin người dùng: " + e.getMessage());
-                            });
+                                })
+                                .addOnFailureListener(e -> {
+                                    isLoading.setValue(false);
+                                    errorMessage.setValue("Lỗi tải thông tin người dùng: " + e.getMessage());
+                                });
+
+                    } else {
+                        // CHƯA XÁC THỰC EMAIL
+                        isLoading.setValue(false);
+                        authRepository.logout(); // logout ngay để xóa phiên đăng nhập ngầm
+                        errorMessage.setValue("Vui lòng xác thực email trước khi đăng nhập!");
+                    }
                 })
                 .addOnFailureListener(e -> {
                     isLoading.setValue(false);

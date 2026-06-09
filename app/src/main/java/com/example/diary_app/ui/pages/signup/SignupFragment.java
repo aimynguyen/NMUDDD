@@ -67,7 +67,7 @@ public class SignupFragment extends Fragment {
         // Sử dụng getViewLifecycleOwner() thay vì 'this' để lắng nghe LiveData an toàn hơn trong Fragment
         signupViewModel.getSignupSuccess().observe(getViewLifecycleOwner(), success -> {
             if (success) {
-                Toast.makeText(requireContext(), "Signup success", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Đăng ký thành công! Vui lòng kiểm tra Email để xác nhận tài khoản.", Toast.LENGTH_SHORT).show();
 
                 // TODO: Chuyển sang màn hình chính (bằng NavController hoặc FragmentTransaction)
 
