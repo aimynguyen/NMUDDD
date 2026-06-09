@@ -16,7 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.example.diary_app.R;
-import com.example.diary_app.model.UserModel;
+import com.example.diary_app.data.model.User;
 import com.example.diary_app.viewmodel.EditProfileViewModel;
 
 public class EditProfileFragment extends Fragment {
@@ -24,6 +24,7 @@ public class EditProfileFragment extends Fragment {
     private ImageView imgAvatar;
     private EditText edtName;
     private EditText edtAvatarUrl;
+    private EditText edtEmail;
     private Button btnFinish;
 
     private EditProfileViewModel viewModel;
@@ -46,6 +47,7 @@ public class EditProfileFragment extends Fragment {
         imgAvatar = view.findViewById(R.id.imgAvatar);
         edtName = view.findViewById(R.id.edtName);
         edtAvatarUrl = view.findViewById(R.id.edtAvatarUrl);
+        edtEmail = view.findViewById(R.id.edtEmail);
         btnFinish = view.findViewById(R.id.btnFinish);
 
         // 3. Khởi tạo VIEWMODEL gắn liền với Fragment
@@ -61,9 +63,19 @@ public class EditProfileFragment extends Fragment {
             }
         });
 
+        // Lắng nghe Loading để khóa nút
+        viewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            btnFinish.setEnabled(!isLoading);
+            btnFinish.setText(isLoading ? "Đang lưu..." : "Hoàn thành");
+        });
+
         // Observe message thông báo
         viewModel.getMessage().observe(getViewLifecycleOwner(), message -> {
             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+            // Nếu thành công thì tự động đóng màn hình Edit, quay lại trang Profile
+            if (message.equals("Cập nhật thành công!")) {
+                requireActivity().getSupportFragmentManager().popBackStack();
+            }
         });
 
         // 6. Xử lý sự kiện click button finish
@@ -89,14 +101,15 @@ public class EditProfileFragment extends Fragment {
         return view;
     }
 
-    private void loadUserData(UserModel user) {
+    private void loadUserData(User user) {
         // Lưu lại dữ liệu cũ
-        oldName = user.getUserName();
-        oldAvatar = user.getAvatarUrl();
+        oldName = user.getUserName() != null ? user.getUserName() : "";
+        oldAvatar = user.getAvatarUrl() != null ? user.getAvatarUrl() : "";
 
         // Set text lên các ô nhập liệu
         edtName.setText(oldName);
         edtAvatarUrl.setText(oldAvatar);
+        edtEmail.setText(user.getEmail());
 
         // Load ảnh đại diện bằng Glide (Dùng requireContext() thay vì 'this')
         Glide.with(requireContext())

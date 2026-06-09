@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.bumptech.glide.Glide;
 import com.example.diary_app.R;
@@ -64,9 +65,8 @@ public class ProfileFragment extends Fragment {
 
         // 6. Xử lý sự kiện click mở màn hình chỉnh sửa
         txtEditProfile.setOnClickListener(v -> {
-            // Thay ProfileActivity.this bằng requireContext()
-            Intent intent = new Intent(requireContext(), EditProfileFragment.class);
-            startActivity(intent);
+            NavHostFragment.findNavController(ProfileFragment.this)
+                    .navigate(R.id.action_nav_profile_to_nav_edit_profile);
         });
 
         return view;

@@ -27,11 +27,6 @@
         android:label="Dashboard"/>
 
     <fragment
-        android:id="@+id/nav_profile"
-        android:name="com.example.diary_app.ui.pages.profile.ProfileFragment"
-        android:label="Profile"/>
-
-    <fragment
         android:id="@+id/nav_login"
         android:name="com.example.diary_app.ui.pages.login.LoginFragment"
         android:label="Login">
@@ -54,8 +49,18 @@
         android:label="Signup"/>
 
     <fragment
-        android:id="@+id/nav_editprofile"
+        android:id="@+id/nav_profile"
+        android:name="com.example.diary_app.ui.pages.profile.ProfileFragment"
+        android:label="Profile">
+
+        <action
+            android:id="@+id/action_nav_profile_to_nav_edit_profile"
+            app:destination="@id/nav_edit_profile" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_edit_profile"
         android:name="com.example.diary_app.ui.pages.profile.EditProfileFragment"
-        android:label="EditProfile"/>
+        android:label="Edit Profile" />
 
 </navigation>
