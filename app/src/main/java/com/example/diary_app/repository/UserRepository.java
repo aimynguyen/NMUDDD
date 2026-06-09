@@ -40,6 +40,10 @@ public class UserRepository {
     }
 
     // 4. Cập nhật thông tin cá nhân
+    public Task<Void> updateUserProfile(String uid, Map<String, Object> updates) {
+        return db.collection("users").document(uid).update(updates);
+    }
+
     public Task<Void> updateUserField(String uid, String field, Object value){
         return db.collection("users").document(uid).update(field, value);
     }
