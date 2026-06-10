@@ -13,10 +13,12 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.diary_app.MainActivity;
 import com.example.diary_app.R;
 import com.example.diary_app.ui.pages.profile.ProfileFragment;
 import com.example.diary_app.ui.pages.signup.SignupFragment;
 import com.example.diary_app.viewmodel.LoginViewModel;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginFragment extends Fragment {
 
@@ -76,6 +78,12 @@ public class LoginFragment extends Fragment {
                 // TODO: Thực hiện chuyển sang màn hình admin nếu có
             } else {
                 Toast.makeText(requireContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+
+                String uid = FirebaseAuth.getInstance().getUid();
+                if (uid != null && getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).saveUserIdAndFetchName(uid);
+                }
+
                 if (getView() != null) {
                     androidx.navigation.Navigation.findNavController(getView())
                             .navigate(R.id.action_nav_login_to_nav_home);
