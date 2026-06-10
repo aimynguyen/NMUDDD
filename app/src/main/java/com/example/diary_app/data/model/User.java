@@ -14,6 +14,7 @@ public class User {
     private List<String> friendIds;
     private Timestamp createAt;
     private String role;
+    private PetInfo petInfo;
 
     public User(){}
 
@@ -64,4 +65,7 @@ public class User {
     public void setRole(String role) {
         this.role = role;
     }
+
+    public PetInfo getPetInfo() { return petInfo; }
+    public void setPetInfo(PetInfo petInfo) { this.petInfo = petInfo; }
 }
