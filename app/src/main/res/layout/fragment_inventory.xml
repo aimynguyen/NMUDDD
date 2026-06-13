@@ -9,11 +9,11 @@
     <!-- Back -->
     <ImageButton
         android:id="@+id/btnBack"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="15dp"
+        android:layout_height="20dp"
         android:layout_marginStart="12dp"
         android:layout_marginTop="12dp"
-        android:background="@drawable/back_arrow"
+        android:background="@drawable/ic_back"
         app:tint="@color/text_primary"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
@@ -23,7 +23,7 @@
         android:id="@+id/txtTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="15dp"
+        android:layout_marginLeft="20dp"
         android:text="Kho đồ"
         android:textSize="28sp"
         android:textStyle="bold"
