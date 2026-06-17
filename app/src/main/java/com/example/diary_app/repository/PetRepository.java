@@ -107,7 +107,7 @@ public class PetRepository {
                 });
     }
 
-    interface OnPetInfoFetchedListener {
+    public interface OnPetInfoFetchedListener {
         void onSuccess(PetInfo petInfo);
         void onError(String error);
     }
@@ -125,7 +125,7 @@ public class PetRepository {
                 });
     }
 
-    interface OnActionCompleteListener{
+    public interface OnActionCompleteListener{
         void onSuccess();
         void onError(String error);
     }
