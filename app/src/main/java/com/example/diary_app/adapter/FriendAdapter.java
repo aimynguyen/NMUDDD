@@ -11,19 +11,23 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.diary_app.R;
-import com.example.diary_app.model.UserModel;
+import com.example.diary_app.data.model.User;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FriendAdapter
         extends RecyclerView.Adapter<FriendAdapter.FriendViewHolder> {
 
-    private ArrayList<UserModel> friendList;
+    private List<User> friendList;
 
-    public FriendAdapter(ArrayList<UserModel> friendList) {
-
+    public FriendAdapter(List<User> friendList) {
         this.friendList = friendList;
+    }
 
+    public void updateList(List<User> newList) {
+        this.friendList = newList;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -32,16 +36,13 @@ public class FriendAdapter
             @NonNull ViewGroup parent,
             int viewType
     ) {
-
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(
                         R.layout.item_friend,
                         parent,
                         false
                 );
-
         return new FriendViewHolder(view);
-
     }
 
     @Override
@@ -49,40 +50,30 @@ public class FriendAdapter
             @NonNull FriendViewHolder holder,
             int position
     ) {
-
-        UserModel user = friendList.get(position);
-
+        User user = friendList.get(position);
         holder.txtName.setText(user.getUserName());
 
         Glide.with(holder.itemView.getContext())
                 .load(user.getAvatarUrl())
                 .placeholder(R.drawable.human_human)
+                .circleCrop()
                 .into(holder.imgAvatar);
-
     }
 
     @Override
     public int getItemCount() {
-
-        return friendList.size();
-
+        return friendList != null ? friendList.size() : 0;
     }
 
     static class FriendViewHolder
             extends RecyclerView.ViewHolder {
-
         ImageView imgAvatar;
-
         TextView txtName;
 
         public FriendViewHolder(@NonNull View itemView) {
             super(itemView);
-
-            imgAvatar =
-                    itemView.findViewById(R.id.imgAvatar);
-
-            txtName =
-                    itemView.findViewById(R.id.txtName);
+            imgAvatar = itemView.findViewById(R.id.imgAvatar);
+            txtName = itemView.findViewById(R.id.txtName);
         }
     }
 }

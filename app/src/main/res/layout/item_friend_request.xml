@@ -20,13 +20,20 @@
         android:layout_weight="1"
         android:layout_marginStart="12dp"
         android:text="Username"
-        android:textSize="16sp" />
-
+        android:textSize="18sp"
+        android:textStyle="bold"/>
     <Button
         android:id="@+id/btnAccept"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_button_rounded"
         android:text="Accept" />
+
+    <Button
+        android:id="@+id/btnReject"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_button_rounded"
+        android:text="Reject" />
 
 </LinearLayout>
