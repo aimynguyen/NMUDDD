@@ -2,15 +2,19 @@ package com.example.diary_app.repository;
 
 import com.example.diary_app.data.model.User;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class UserRepository {
@@ -39,7 +43,48 @@ public class UserRepository {
                 .whereEqualTo("email", email).get();
     }
 
-    // 4. Cập nhật thông tin cá nhân
+    public Task<List<User>> getPendingFriendRequestsAsUsers(String userId) {
+        return db.collection("friend_requests")
+                .whereEqualTo("receiverId", userId)
+                .whereEqualTo("status", "pending")
+                .get()
+                .continueWithTask(task -> {
+                    QuerySnapshot querySnapshot = task.getResult();
+                    List<String> senderIds = new ArrayList<>();
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        String senderId = doc.getString("senderId");
+                        if (senderId != null) senderIds.add(senderId);
+                    }
+                    return getUsersByIds(senderIds);
+                });
+    }
+
+    public Task<List<User>> getUsersByIds(List<String> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Tasks.forResult(new ArrayList<>());
+        }
+
+        List<Task<DocumentSnapshot>> tasks = new ArrayList<>();
+        for (String id : userIds) {
+            tasks.add(db.collection("users").document(id).get());
+        }
+
+        return Tasks.whenAllSuccess(tasks).continueWith(task -> {
+            List<User> users = new ArrayList<>();
+            for (Object obj : task.getResult()) {
+                DocumentSnapshot doc = (DocumentSnapshot) obj;
+                if (doc.exists()) {
+                    User user = doc.toObject(User.class);
+                    if (user != null) {
+                        users.add(user);
+                    }
+                }
+            }
+            return users;
+        });
+    }
+
+    // Cập nhật thông tin cá nhân
     public Task<Void> updateUserProfile(String uid, Map<String, Object> updates) {
         return db.collection("users").document(uid).update(updates);
     }
@@ -58,20 +103,26 @@ public class UserRepository {
         return db.collection("friend_requests").add(request);
     }
 
-    // 6. Lấy danh sách Lời mời kết bạn
-    public Task<QuerySnapshot> getPendingRequest(String myUid){
-        return db.collection("friend_request")
+    // CHẤP NHẬN kết bạn
+    public Task<Void> acceptFriendRequestBySender(String myUid, String senderUid) {
+        return db.collection("friend_requests")
+                .whereEqualTo("senderId", senderUid)
                 .whereEqualTo("receiverId", myUid)
                 .whereEqualTo("status", "pending")
-                .orderBy("createAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                .get();
+                .get()
+                .continueWithTask(task -> {
+                    QuerySnapshot qs = task.getResult();
+                    if (!qs.isEmpty()) {
+                        String requestId = qs.getDocuments().get(0).getId();
+                        return acceptFriendRequest(requestId, myUid, senderUid);
+                    }
+                    return Tasks.forResult(null);
+                });
     }
 
-    // 7. CHẤP NHẬN kết bạn
     public Task<Void> acceptFriendRequest(String requestId, String myUid, String senderUid){
         WriteBatch batch = db.batch();
-
-        DocumentReference requestRef = db.collection("friend_request").document(requestId);
+        DocumentReference requestRef = db.collection("friend_requests").document(requestId);
         batch.update(requestRef, "status", "accepted");
 
         DocumentReference myRef = db.collection("users").document(myUid);
@@ -83,9 +134,22 @@ public class UserRepository {
     }
 
     // 8. Từ chối kết bạn / Hủy kết bạn
-    public Task<Void> deleteFriendRequest(String requestId){
-        return db.collection("friend_request")
-                .document(requestId)
-                .delete();
+    public Task<Void> deleteFriendRequestBySender(String myUid, String senderUid) {
+        return db.collection("friend_requests")
+                .whereEqualTo("senderId", senderUid)
+                .whereEqualTo("receiverId", myUid)
+                .whereEqualTo("status", "pending")
+                .get()
+                .continueWithTask(task -> {
+                    QuerySnapshot qs = task.getResult();
+                    if (!qs.isEmpty()) {
+                        return qs.getDocuments().get(0).getReference().delete();
+                    }
+                    return Tasks.forResult(null);
+                });
+    }
+
+    public Task<Void> deleteFriendRequest(String requestId) {
+        return db.collection("friend_requests").document(requestId).delete();
     }
 }
