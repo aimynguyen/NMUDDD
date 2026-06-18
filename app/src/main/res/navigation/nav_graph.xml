@@ -10,6 +10,10 @@
         android:name="com.example.diary_app.ui.pages.homepage.HomeFragment"
         android:label="Home"/>
 
+    <fragment
+            android:id="@+id/nav_chatroom"
+            android:name="com.example.diary_app.ui.pages.chat.ChatDashboardFragment"
+            android:label="ChatRoom"/>
 
     <fragment
         android:id="@+id/nav_chat"
@@ -20,6 +24,10 @@
         android:id="@+id/nav_chatAI"
         android:name="com.example.diary_app.ui.pages.chat.ChatAIFragment"
         android:label="ChatAI"/>
+    <fragment
+        android:id="@+id/nav_pet"
+        android:name="com.example.diary_app.ui.pages.pet.PetFragment"
+        android:label="Pet"/>
 
     <fragment
         android:id="@+id/nav_dashboard"
