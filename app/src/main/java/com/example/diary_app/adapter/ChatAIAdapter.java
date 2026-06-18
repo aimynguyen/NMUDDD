@@ -17,15 +17,17 @@ public class ChatAIAdapter extends RecyclerView.Adapter<ChatAIAdapter.ChatViewHo
 
     private static final int TYPE_USER = 1;
     private static final int TYPE_BOT = 2;
+    private String currentUserId;
     private List<ChatMessage> messageList;
 
-    public ChatAIAdapter(List<ChatMessage> messageList) {
+    public ChatAIAdapter(List<ChatMessage> messageList, String userId) {
         this.messageList = messageList;
+        this.currentUserId = userId;
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (messageList.get(position).getSenderId().equals("user_123")) {
+        if (messageList.get(position).getSenderId().equals(currentUserId)) {
             return TYPE_USER;
         } else {
             return TYPE_BOT;
