@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="@android:color/white">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="15dp">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imgFriendAvatar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/avatar_placeholder"
+            app:shapeAppearanceOverlay="@style/CircleImage" />
+
+        <TextView
+            android:id="@+id/tvFriendName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/imgFriendAvatar"
+            android:layout_marginStart="15dp"
+            android:text="Tên Bạn Bè"
+            android:textColor="#0D47A1"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvLastMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvFriendName"
+            android:layout_toEndOf="@id/imgFriendAvatar"
+            android:layout_toStartOf="@+id/tvTime"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="Nội dung tin nhắn cuối..."
+            android:textColor="#78909C"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignTop="@id/tvFriendName"
+            android:text="10:45"
+            android:textColor="#90A4AE"
+            android:textSize="12sp" />
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>
