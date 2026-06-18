@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.example.diary_app.R;
 import com.example.diary_app.adapter.NotificationAdapter;
 import com.example.diary_app.core.NotiType;
+import com.example.diary_app.core.Quotes;
 import com.example.diary_app.data.model.Notification;
 import com.example.diary_app.viewmodel.NotificationViewModel;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,7 +30,7 @@ public class NotificationFragment extends Fragment {
 
     private ImageButton btnBack, btnSetting;
     private RecyclerView rvNewest, rvPrevious;
-    private TextView txtNewest, txtPrevious;
+    private TextView txtNewest, txtPrevious, txtEncourageContent;
 
     private NotificationAdapter newestAdapter;
     private NotificationAdapter previousAdapter;
@@ -53,6 +54,11 @@ public class NotificationFragment extends Fragment {
         // 1. Ánh xạ View
         initViews(view);
 
+        // Hiển thị quote ngẫu nhiên
+        if (txtEncourageContent != null) {
+            txtEncourageContent.setText(Quotes.getRandomQuote());
+        }
+
         // 2. Cài đặt RecyclerView và Adapter
         setupRecyclerViews();
 
@@ -70,6 +76,7 @@ public class NotificationFragment extends Fragment {
         rvPrevious = view.findViewById(R.id.rvPrevious);
         txtNewest = view.findViewById(R.id.txtNewest);
         txtPrevious = view.findViewById(R.id.txtPrevious);
+        txtEncourageContent = view.findViewById(R.id.txtEncourageContent);
     }
 
     private void setupRecyclerViews() {
