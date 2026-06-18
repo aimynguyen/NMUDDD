@@ -22,6 +22,7 @@ constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayo
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
+firebase-database = { group = "com.google.firebase", name = "firebase-database" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

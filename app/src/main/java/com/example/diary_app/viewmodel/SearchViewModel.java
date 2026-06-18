@@ -8,6 +8,8 @@ import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.example.diary_app.DTOs.DiaryListItemDTO;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +61,47 @@ public class SearchViewModel extends ViewModel {
     private LiveData<List<DiaryListItemDTO>> performSearchFromDB(String keyword) {
         MutableLiveData<List<DiaryListItemDTO>> result = new MutableLiveData<>();
         isLoading.setValue(true); // Bật loading
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("diaries")
+                .orderBy("title")
+                .startAt(keyword)
+                .endAt(keyword + "\uf8ff")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<DiaryListItemDTO> list = new ArrayList<>();
+
+                    // Duyệt qua từng kết quả Firebase trả về
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        try {
+                            int id = doc.getLong("id").intValue();
+                            String title = doc.getString("title");
+                            String date = doc.getString("date");
+                            String moodEmoji = doc.getString("moodEmoji");
+                            double latitude = doc.getDouble("latitude");
+                            double longitude = doc.getDouble("longitude");
+
+                            // Đóng gói vào DTO
+                            DiaryListItemDTO item = new DiaryListItemDTO(
+                                    id, title, date, null, moodEmoji, latitude, longitude
+                            );
+
+                            list.add(item);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            // Bỏ qua document bị lỗi cấu trúc để không làm chết app
+                        }
+                    }
+
+                    // Đẩy danh sách lên cho UI và TẮT loading
+                    result.setValue(list);
+                    isLoading.setValue(false);
+                })
+                .addOnFailureListener(e -> {
+                    e.printStackTrace();
+                    // Nếu lỗi (mất mạng, sai tên bảng...), vẫn phải tắt loading và trả về mảng rỗng
+                    result.setValue(new ArrayList<>());
+                    isLoading.setValue(false);
+                });
         return result;
     }
 }
