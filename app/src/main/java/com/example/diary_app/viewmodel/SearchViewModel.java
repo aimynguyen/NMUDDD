@@ -10,6 +10,9 @@ import androidx.lifecycle.ViewModel;
 import com.example.diary_app.data.model.Post;
 import com.example.diary_app.repository.PostRepository;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.example.diary_app.DTOs.DiaryListItemDTO;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,27 +59,51 @@ public class SearchViewModel extends ViewModel {
         handler.postDelayed(searchRunnable, 400);
     }
 
-    private LiveData<List<Post>> performSearchFromDB(String keyword) {
-        MutableLiveData<List<Post>> result = new MutableLiveData<>();
+    // HÀM LOGIC GỌI DATABASE
+    private LiveData<List<DiaryListItemDTO>> performSearchFromDB(String keyword) {
+        MutableLiveData<List<DiaryListItemDTO>> result = new MutableLiveData<>();
+        isLoading.setValue(true); // Bật loading
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("diaries")
+                .orderBy("title")
+                .startAt(keyword)
+                .endAt(keyword + "\uf8ff")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<DiaryListItemDTO> list = new ArrayList<>();
 
-        // Sử dụng hàm searchPostByTag có sẵn trong PostRepository của bạn
-        postRepository.searchPostByTag(keyword).addOnCompleteListener(task -> {
-            isLoading.setValue(false);
-            if (task.isSuccessful() && task.getResult() != null) {
-                List<Post> posts = new ArrayList<>();
-                for (DocumentSnapshot doc : task.getResult().getDocuments()) {
-                    Post post = doc.toObject(Post.class);
-                    if (post != null) {
-                        post.setPostId(doc.getId());
-                        posts.add(post);
+                    // Duyệt qua từng kết quả Firebase trả về
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        try {
+                            int id = doc.getLong("id").intValue();
+                            String title = doc.getString("title");
+                            String date = doc.getString("date");
+                            String moodEmoji = doc.getString("moodEmoji");
+                            double latitude = doc.getDouble("latitude");
+                            double longitude = doc.getDouble("longitude");
+
+                            // Đóng gói vào DTO
+                            DiaryListItemDTO item = new DiaryListItemDTO(
+                                    id, title, date, null, moodEmoji, latitude, longitude
+                            );
+
+                            list.add(item);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            // Bỏ qua document bị lỗi cấu trúc để không làm chết app
+                        }
                     }
-                }
-                result.setValue(posts);
-            } else {
-                result.setValue(new ArrayList<>());
-            }
-        });
 
+                    // Đẩy danh sách lên cho UI và TẮT loading
+                    result.setValue(list);
+                    isLoading.setValue(false);
+                })
+                .addOnFailureListener(e -> {
+                    e.printStackTrace();
+                    // Nếu lỗi (mất mạng, sai tên bảng...), vẫn phải tắt loading và trả về mảng rỗng
+                    result.setValue(new ArrayList<>());
+                    isLoading.setValue(false);
+                });
         return result;
     }
 }
