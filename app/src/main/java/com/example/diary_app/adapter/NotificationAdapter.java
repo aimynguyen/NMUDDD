@@ -10,7 +10,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.diary_app.R;
+import com.example.diary_app.data.model.Notification;
 import com.example.diary_app.model.NotificationModel;
 import com.google.firebase.Timestamp;
 
@@ -19,10 +21,10 @@ import java.util.ArrayList;
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.ViewHolder> {
 
     private Context context;
-    private ArrayList<NotificationModel> list;
+    private ArrayList<Notification> list;
     private OnItemClickListener listener;
 
-    public NotificationAdapter(Context context, ArrayList<NotificationModel> list) {
+    public NotificationAdapter(Context context, ArrayList<Notification> list) {
         this.context = context;
         this.list = list;
     }
@@ -40,7 +42,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        NotificationModel notification = list.get(position);
+        Notification notification = list.get(position);
 
         holder.txtContent.setText(notification.getMessage());
         holder.txtTime.setText(getTimeAgo(notification.getCreatedAt()));
@@ -54,35 +56,36 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             holder.viewUnread.setVisibility(View.VISIBLE);
         }
 
+        // Phân loại thông báo
+        if (notification.getType() != null) {
+            switch (notification.getType()) {
+                case DELETE_POST:
+                    holder.imgAvatar.setImageResource(R.drawable.warning);
+                    holder.viewWarning.setVisibility(View.VISIBLE);
+                    break;
 
-        // Avatar mặc định
-        holder.imgAvatar.setImageResource(R.drawable.avatar_circle);
+                case PET_FEED:
+                    holder.imgAvatar.setImageResource(R.drawable.cute_treat);
+                    break;
 
-        // Loại thông báo
-        switch (notification.getType()) {
+                case PET_LEVEL_UP:
+                    holder.imgAvatar.setImageResource(R.drawable.auralog_logo);
+                    break;
 
-            case "DELETE_POST":
-                holder.imgAvatar.setImageResource(R.drawable.warning);
-                holder.viewWarning.setVisibility(View.VISIBLE);
-                break;
+                case REACT_POST:
+                    loadSenderAvatar(holder, notification);
+                    break;
+                case FRIEND_REQUEST:
+                    loadSenderAvatar(holder, notification);
+                    break;
+                case FRIEND_ACCEPT:
+                    loadSenderAvatar(holder, notification);
+                    break;
 
-            case "PET_FEED":
-                holder.imgAvatar.setImageResource(R.drawable.cute_treat);
-                break;
-
-            case "PET_LEVEL_UP":
-                holder.imgAvatar.setImageResource(R.drawable.auralog_logo);
-                break;
-
-            case "REACT_POST":
-            case "COMMENT_POST":
-            case "FRIEND_REQUEST":
-            case "FRIEND_ACCEPT":
-                // TODO: Load avatar của sender
-                break;
-
-            default:
-                break;
+                default:
+                    holder.imgAvatar.setImageResource(R.drawable.avatar_circle);
+                    break;
+            }
         }
 
         holder.itemView.setOnClickListener(v -> {
@@ -92,18 +95,32 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         });
     }
 
+    private void loadSenderAvatar(ViewHolder holder, Notification notification) {
+        String avatarUrl = notification.getSenderAvatarUrl();
+        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+            Glide.with(context)
+                    .load(avatarUrl)
+                    .placeholder(R.drawable.avatar_circle)
+                    .error(R.drawable.avatar_circle)
+                    .circleCrop()
+                    .into(holder.imgAvatar);
+        } else {
+            holder.imgAvatar.setImageResource(R.drawable.avatar_circle);
+        }
+    }
+
     @Override
     public int getItemCount() {
         return list == null ? 0 : list.size();
     }
 
-    public void setData(ArrayList<NotificationModel> list) {
+    public void setData(ArrayList<Notification> list) {
         this.list = list;
         notifyDataSetChanged();
     }
 
     public interface OnItemClickListener {
-        void onItemClick(NotificationModel notification);
+        void onItemClick(Notification notification);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {

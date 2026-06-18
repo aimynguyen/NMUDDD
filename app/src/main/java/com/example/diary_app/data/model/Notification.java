@@ -2,8 +2,12 @@ package com.example.diary_app.data.model;
 
 import com.example.diary_app.core.NotiType;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.PropertyName;
 
 public class Notification {
+    @Exclude
+    private String senderAvatarUrl;
     private String notificationId;
     private String receiverId;
     private String senderId;
@@ -36,6 +40,16 @@ public class Notification {
         this.message = message;
         this.isRead = false; // Mặc định là chưa đọc
         this.createdAt = Timestamp.now();
+    }
+
+    @Exclude
+    public String getSenderAvatarUrl() {
+        return senderAvatarUrl;
+    }
+
+    @Exclude
+    public void setSenderAvatarUrl(String senderAvatarUrl) {
+        this.senderAvatarUrl = senderAvatarUrl;
     }
 
     public String getNotificationId() {
@@ -86,10 +100,12 @@ public class Notification {
         this.message = message;
     }
 
+    @PropertyName("isRead")
     public boolean isRead() {
         return isRead;
     }
 
+    @PropertyName("isRead")
     public void setRead(boolean read) {
         isRead = read;
     }

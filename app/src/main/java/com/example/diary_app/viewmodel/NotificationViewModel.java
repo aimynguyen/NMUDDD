@@ -5,8 +5,12 @@ import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.diary_app.core.NotiType;
 import com.example.diary_app.data.model.Notification;
 import com.example.diary_app.repository.NotificationRepository;
+import com.example.diary_app.repository.UserRepository;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
@@ -15,15 +19,15 @@ import java.util.List;
 public class NotificationViewModel extends ViewModel {
     private static String TAG = "NotificationViewModel";
     private NotificationRepository notificationRepository;
+    private UserRepository userRepository;
 
     private MutableLiveData<List<Notification>> notificationsLiveData;
-
     private MutableLiveData<Boolean> isLoading;
-
     private MutableLiveData<String> errorMessage;
 
     public NotificationViewModel() {
         notificationRepository = new NotificationRepository();
+        userRepository = new UserRepository();
         notificationsLiveData = new MutableLiveData<>();
         isLoading = new MutableLiveData<>();
         errorMessage = new MutableLiveData<>();
@@ -50,24 +54,48 @@ public class NotificationViewModel extends ViewModel {
         notificationRepository.getNotificationsForUser(userId)
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Notification> list = new ArrayList<>();
-                    for(DocumentSnapshot document : queryDocumentSnapshots) {
+                    List<Task<DocumentSnapshot>> tasks = new ArrayList<>();
+
+                    for (DocumentSnapshot document : queryDocumentSnapshots) {
                         Notification notification = document.toObject(Notification.class);
                         if (notification != null) {
-                            // Gán ID của document vào object
                             notification.setNotificationId(document.getId());
                             list.add(notification);
+
+                            // Kiểm tra type để fetch avatar
+                            NotiType type = notification.getType();
+                            if (type == NotiType.REACT_POST || type == NotiType.FRIEND_REQUEST ||
+                                    type == NotiType.FRIEND_ACCEPT) {
+                                
+                                if (notification.getSenderId() != null) {
+                                    Task<DocumentSnapshot> userTask = userRepository.getUserProfile(notification.getSenderId());
+                                    userTask.addOnSuccessListener(userDoc -> {
+                                        if (userDoc.exists()) {
+                                            String avatarUrl = userDoc.getString("avatarUrl");
+                                            notification.setSenderAvatarUrl(avatarUrl);
+                                        }
+                                    });
+                                    tasks.add(userTask);
+                                }
+                            }
                         }
                     }
 
-                    // Đẩy dữ liệu mới vào LiveData
-                    notificationsLiveData.setValue(list);
-                    isLoading.setValue(false);
-                    })
+                    if (tasks.isEmpty()) {
+                        notificationsLiveData.setValue(list);
+                        isLoading.setValue(false);
+                    } else {
+                        // Đợi tất cả các task fetch avatar hoàn thành
+                        Tasks.whenAllComplete(tasks).addOnCompleteListener(t -> {
+                            notificationsLiveData.setValue(list);
+                            isLoading.setValue(false);
+                        });
+                    }
+                })
                 .addOnFailureListener(e -> {
                     isLoading.setValue(false);
                     errorMessage.setValue(e.getMessage());
                 });
-
     }
 
     /**
@@ -77,6 +105,7 @@ public class NotificationViewModel extends ViewModel {
         notificationRepository.markAsRead(notificationId)
                 .addOnSuccessListener(aVoid -> {
                     // TODO: Update UI thành đã đọc
+                    notificationRepository.markAsRead(notificationId);
                 })
                 .addOnFailureListener(e -> {
                     Log.d("NotificationViewModel", "Lỗi đánh dấu đã đọc:", e);
