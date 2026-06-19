@@ -6,21 +6,19 @@ plugins {
 
 android {
     namespace = "com.example.diary_app"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36 // Sửa compileSdk cho hợp lý (thường là 34 hoặc 35)
 
     defaultConfig {
         applicationId = "com.example.diary_app"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         //gemini
-        val localProperties =Properties()
+        val localProperties = Properties()
         val localPropertiesFile = project.rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
             localProperties.load(localPropertiesFile.inputStream())
@@ -74,7 +72,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
 
     //material3 cho dep
-    implementation("com.google.android.material:material:1.11.0")
+    // implementation("com.google.android.material:material:1.11.0") // Đã có libs.material ở trên
 
     //map
     implementation("com.google.android.gms:play-services-maps:18.2.0")
@@ -84,11 +82,11 @@ dependencies {
     implementation("com.github.AnyChart:AnyChart-Android:1.1.5")
 
     //glide
-    implementation(libs.appcompat)
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
     //navigation
     implementation("androidx.navigation:navigation-fragment:2.8.5")
     implementation("androidx.navigation:navigation-ui:2.8.5")
+
 }
