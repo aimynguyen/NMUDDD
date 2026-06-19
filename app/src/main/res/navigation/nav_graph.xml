@@ -25,6 +25,11 @@
         android:name="com.example.diary_app.ui.pages.chat.ChatAIFragment"
         android:label="ChatAI"/>
     <fragment
+        android:id="@+id/nav_search"
+        android:name="com.example.diary_app.ui.pages.search.SearchFragment"
+        android:label="Search"/>
+
+    <fragment
         android:id="@+id/nav_pet"
         android:name="com.example.diary_app.ui.pages.pet.PetFragment"
         android:label="Pet"/>

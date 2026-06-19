@@ -10,8 +10,6 @@ import androidx.lifecycle.ViewModel;
 import com.example.diary_app.data.model.Post;
 import com.example.diary_app.repository.PostRepository;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.example.diary_app.DTOs.DiaryListItemDTO;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -30,9 +28,9 @@ public class SearchViewModel extends ViewModel {
         postRepository = new PostRepository();
 
         searchResults = Transformations.switchMap(searchQuery, query -> {
-            MutableLiveData<List<Post>> liveDataResults = new MutableLiveData<>();
             if (query == null || query.trim().isEmpty()) {
                 isLoading.setValue(false);
+                MutableLiveData<List<Post>> liveDataResults = new MutableLiveData<>();
                 liveDataResults.setValue(new ArrayList<>());
                 return liveDataResults;
             }
@@ -50,57 +48,47 @@ public class SearchViewModel extends ViewModel {
 
         searchRunnable = () -> {
             if (!query.equals(searchQuery.getValue())) {
-                isLoading.setValue(true); // Kích hoạt hiệu ứng quay vòng tròn chờ dữ liệu
+                isLoading.setValue(true);
                 searchQuery.setValue(query.trim());
             }
         };
 
-        // Delay 400ms để người dùng gõ xong chữ mới gọi Firebase (Tiết kiệm băng thông)
+        // Delay 400ms to debounce search requests
         handler.postDelayed(searchRunnable, 400);
     }
 
-    // HÀM LOGIC GỌI DATABASE
-    private LiveData<List<DiaryListItemDTO>> performSearchFromDB(String keyword) {
-        MutableLiveData<List<DiaryListItemDTO>> result = new MutableLiveData<>();
-        isLoading.setValue(true); // Bật loading
+    // Logic to search for Posts in Firestore
+    private LiveData<List<Post>> performSearchFromDB(String keyword) {
+        MutableLiveData<List<Post>> result = new MutableLiveData<>();
+        isLoading.setValue(true);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("diaries")
-                .orderBy("title")
+        
+        // Searching by caption in the "posts" collection to match the Post model
+        db.collection("posts")
+                .orderBy("caption")
                 .startAt(keyword)
                 .endAt(keyword + "\uf8ff")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    List<DiaryListItemDTO> list = new ArrayList<>();
+                    List<Post> list = new ArrayList<>();
 
-                    // Duyệt qua từng kết quả Firebase trả về
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
                         try {
-                            int id = doc.getLong("id").intValue();
-                            String title = doc.getString("title");
-                            String date = doc.getString("date");
-                            String moodEmoji = doc.getString("moodEmoji");
-                            double latitude = doc.getDouble("latitude");
-                            double longitude = doc.getDouble("longitude");
-
-                            // Đóng gói vào DTO
-                            DiaryListItemDTO item = new DiaryListItemDTO(
-                                    id, title, date, null, moodEmoji, latitude, longitude
-                            );
-
-                            list.add(item);
+                            Post post = doc.toObject(Post.class);
+                            if (post != null) {
+                                post.setPostId(doc.getId());
+                                list.add(post);
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
-                            // Bỏ qua document bị lỗi cấu trúc để không làm chết app
                         }
                     }
 
-                    // Đẩy danh sách lên cho UI và TẮT loading
                     result.setValue(list);
                     isLoading.setValue(false);
                 })
                 .addOnFailureListener(e -> {
                     e.printStackTrace();
-                    // Nếu lỗi (mất mạng, sai tên bảng...), vẫn phải tắt loading và trả về mảng rỗng
                     result.setValue(new ArrayList<>());
                     isLoading.setValue(false);
                 });

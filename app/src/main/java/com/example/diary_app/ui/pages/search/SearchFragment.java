@@ -29,7 +29,6 @@ public class SearchFragment extends Fragment {
     private EditText edtSearch;
     private ImageButton iconClear;
     private ImageButton iconAddFriend;
-    private ProgressBar progressBar;
     private RecyclerView rvPosts;
 
     @Nullable
@@ -46,7 +45,6 @@ public class SearchFragment extends Fragment {
         edtSearch = view.findViewById(R.id.edtSearch);
         iconClear = view.findViewById(R.id.iconClear);
         iconAddFriend = view.findViewById(R.id.iconAddFriend);
-        progressBar = view.findViewById(R.id.progressBar);
         rvPosts = view.findViewById(R.id.rvPosts);
 
         // Khởi tạo Adapter và gán Grid Layout 2 cột cho RecyclerView
@@ -60,11 +58,6 @@ public class SearchFragment extends Fragment {
         // Theo dõi LiveData danh sách bài viết từ Firebase đổ về
         viewModel.getSearchResults().observe(getViewLifecycleOwner(), posts -> {
             adapter.setData(posts);
-        });
-
-        // Theo dõi trạng thái xoay vòng tròn Loading
-        viewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
-            progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         });
 
         // Bắt sự kiện gõ chữ trên Search Bar
@@ -96,7 +89,7 @@ public class SearchFragment extends Fragment {
 
         // Click nút Add Friend
         iconAddFriend.setOnClickListener(v -> {
-            // Thực hiện chức năng chuyển fragment hoặc mở màn hình thêm bạn bè ở đây
+//            Fragment addFriendFragment = new Add
         });
     }
 }

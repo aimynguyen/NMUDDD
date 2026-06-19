@@ -19,6 +19,7 @@ import com.example.diary_app.R;
 import com.example.diary_app.adapter.ChatAIAdapter;
 import com.example.diary_app.data.model.ChatMessage;
 import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -71,7 +72,12 @@ public class ChatAIFragment extends Fragment {
         sendButton = view.findViewById(R.id.btnSend);
 
         messageList = new ArrayList<>();
-        chatAdapter = new ChatAIAdapter(messageList);
+
+        // Lấy userId hiện tại từ Firebase
+        String currentUserId = FirebaseAuth.getInstance().getUid();
+        if (currentUserId == null) currentUserId = "user_123";
+
+        chatAdapter = new ChatAIAdapter(messageList, currentUserId);
 
         // Thay "this" bằng "getContext()"
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -121,9 +127,12 @@ public class ChatAIFragment extends Fragment {
     }
 
     private void sendChatToGemini(String userMessage) {
+        String currentUserId = FirebaseAuth.getInstance().getUid();
+        if (currentUserId == null) currentUserId = "user_123";
+
         ChatMessage userChat = new ChatMessage(
                 String.valueOf(System.currentTimeMillis()),
-                "user_123",
+                currentUserId,
                 userMessage,
                 Timestamp.now()
         );

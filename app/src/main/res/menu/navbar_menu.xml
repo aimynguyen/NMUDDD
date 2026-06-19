@@ -8,6 +8,10 @@
         android:icon="@drawable/ic_chat"
         android:title="ChatRoom"/>
     <item
+        android:id="@+id/nav_search"
+        android:icon="@drawable/ic_search"
+        android:title="Search"/>
+    <item
         android:id="@+id/nav_pet"
         android:icon="@drawable/ic_pet"
         android:title="Pet"/>
