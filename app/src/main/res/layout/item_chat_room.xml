@@ -17,7 +17,7 @@
             android:id="@+id/imgFriendAvatar"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/avatar_placeholder"
+            android:src="@drawable/bg_circle_dark"
             app:shapeAppearanceOverlay="@style/CircleImage" />
 
         <TextView

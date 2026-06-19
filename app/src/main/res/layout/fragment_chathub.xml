@@ -22,7 +22,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_centerVertical="true"
-                android:src="@drawable/ic_auralog_logo" /> <TextView
+                android:src="@drawable/auralog_logo" /> <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
@@ -38,7 +38,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_alignParentEnd="true"
-                android:src="@drawable/avatar_placeholder"
+                android:src="@drawable/bg_circle_dark"
                 app:shapeAppearanceOverlay="@style/CircleImage" />
         </RelativeLayout>
 
@@ -79,7 +79,7 @@
                     android:id="@+id/imgAiIcon"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:src="@drawable/ic_ai_robot" /> <TextView
+                    android:src="@drawable/auralog_logo" /> <TextView
                 android:id="@+id/tvAiTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -153,7 +153,7 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="15dp"
-            android:background="@drawable/bg_search_input"
+            android:background="@drawable/bg_message_chat_ai"
             android:hint="Tìm kiếm cuộc hội thoại..."
             android:inputType="text"
             android:paddingStart="15dp"
