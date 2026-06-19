@@ -50,45 +50,40 @@ public class ChatAIFragment extends Fragment {
 
     private final String API_KEY = BuildConfig.GEMINI_API_KEY;
     private OkHttpClient client;
+    private boolean isSending = false; // Biến cờ ngăn gửi tin nhắn liên tục
 
     // BỘ NHỚ ĐỆM TẠM THỜI (CACHE)
     private String cachedTodayMood = "Hôm nay người dùng chưa ghi lại cảm xúc hay nhật ký nào.";
 
-    // Constructor rỗng bắt buộc phải có đối với Fragment
     public ChatAIFragment() {
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // 1. Inflate layout cho Fragment này
         View view = inflater.inflate(R.layout.fragment_chat_ai, container, false);
 
         client = new OkHttpClient();
 
-        // 2. Ánh xạ các View thông qua đối tượng "view"
         recyclerView = view.findViewById(R.id.recyclerView);
         editText = view.findViewById(R.id.edtMessage);
         sendButton = view.findViewById(R.id.btnSend);
 
         messageList = new ArrayList<>();
 
-        // Lấy userId hiện tại từ Firebase
         String currentUserId = FirebaseAuth.getInstance().getUid();
         if (currentUserId == null) currentUserId = "user_123";
 
         chatAdapter = new ChatAIAdapter(messageList, currentUserId);
 
-        // Thay "this" bằng "getContext()"
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(chatAdapter);
 
-        // Đọc dữ liệu từ Firebase
         loadTodayMoodFromFirebase();
 
         sendButton.setOnClickListener(v -> {
             String message = editText.getText().toString().trim();
-            if (!message.isEmpty()) {
+            if (!message.isEmpty() && !isSending) {
                 sendChatToGemini(message);
             }
         });
@@ -111,7 +106,6 @@ public class ChatAIFragment extends Fragment {
                 .whereLessThanOrEqualTo("timestamp", new Timestamp(endOfDay))
                 .get()
                 .addOnCompleteListener(task -> {
-                    // Kiểm tra xem Fragment có còn gắn với Activity hay không trước khi xử lý UI/Data
                     if (isAdded() && task.isSuccessful() && task.getResult() != null && !task.getResult().isEmpty()) {
                         StringBuilder sb = new StringBuilder();
                         sb.append("Dữ liệu nhật ký hôm nay của người dùng: ");
@@ -127,6 +121,9 @@ public class ChatAIFragment extends Fragment {
     }
 
     private void sendChatToGemini(String userMessage) {
+        isSending = true;
+        sendButton.setEnabled(false);
+
         String currentUserId = FirebaseAuth.getInstance().getUid();
         if (currentUserId == null) currentUserId = "user_123";
 
@@ -139,6 +136,7 @@ public class ChatAIFragment extends Fragment {
         updateUI(userChat);
         editText.setText("");
 
+        // SỬA LẠI ĐÚNG TÊN MODEL TRÊN DASHBOARD CỦA BẠN ĐỂ HẾT LỖI 404
         String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=" + API_KEY;
 
         String systemInstructionText = "Role: Act as an empathetic psychologist or a close, supportive friend.\n" +
@@ -156,17 +154,42 @@ public class ChatAIFragment extends Fragment {
         String jsonString = "";
         try {
             JSONObject jsonBody = new JSONObject();
-
             JSONArray contentsArray = new JSONArray();
-            JSONObject contentObj = new JSONObject();
-            JSONArray partsArray = new JSONArray();
-            JSONObject partObj = new JSONObject();
-            partObj.put("text", userMessage);
-            partsArray.put(partObj);
-            contentObj.put("parts", partsArray);
-            contentsArray.put(contentObj);
+
+            String currentUId = FirebaseAuth.getInstance().getUid();
+            if (currentUId == null) currentUId = "user_123";
+
+            // 1. DUYỆT QUA LỊCH SỬ CHAT TRONG messageList ĐỂ ĐÓNG GÓI GỬI ĐI
+            // (Giới hạn khoảng 6-10 câu gần nhất để không bị quá tải số lượng chữ - TPM)
+            int startIdx = Math.max(0, messageList.size() - 10);
+            for (int i = startIdx; i < messageList.size(); i++) {
+                ChatMessage msg = messageList.get(i);
+
+                JSONObject historyContentObj = new JSONObject();
+                // Xác định ai là người nói dựa trên ID
+                if (msg.getSenderId().equals(currentUserId)) {
+                    historyContentObj.put("role", "user");
+                } else {
+                    historyContentObj.put("role", "model");
+                }
+
+                JSONArray historyPartsArray = new JSONArray();
+                JSONObject historyPartObj = new JSONObject();
+                historyPartObj.put("text", msg.getContent());
+                historyPartsArray.put(historyPartObj);
+
+                historyContentObj.put("parts", historyPartsArray);
+                contentsArray.put(historyContentObj);
+            }
+
+            // 2. THÊM CHÍNH CÂU HỎI HIỆN TẠI VÀO CUỐI DANH SÁCH (Vì câu này đã được updateUI trước đó)
+            // Lưu ý: Do hàm updateUI(userChat) của bạn chạy TRƯỚC khi tạo JSON,
+            // nên vòng lặp FOR ở trên đã tự động lấy luôn cả câu hỏi hiện tại này rồi.
+            // Bạn không cần phải add thủ công userMessage thêm lần nữa để tránh bị lặp đúp.
+
             jsonBody.put("contents", contentsArray);
 
+            // 3. GIỮ NGUYÊN SYSTEM INSTRUCTION CỦA BẠN
             JSONObject systemInstructionObj = new JSONObject();
             JSONArray siPartsArray = new JSONArray();
             JSONObject siPartObj = new JSONObject();
@@ -179,22 +202,24 @@ public class ChatAIFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         RequestBody body = RequestBody.create(jsonString, MediaType.get("application/json; charset=utf-8"));
-
-        Request request = new Request.Builder()
-                .url(url)
-                .post(body)
-                .build();
+        Request request = new Request.Builder().url(url).post(body).build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                resetSendingStatus();
                 showToast("Lỗi mạng: " + e.getMessage());
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                if (response.code() == 429) {
+                    resetSendingStatus();
+                    showToast("Bạn gửi quá nhanh! Hãy đợi khoảng 1 phút.");
+                    return;
+                }
+
                 String rawResponse = response.body() != null ? response.body().string() : "";
 
                 if (response.isSuccessful()) {
@@ -207,7 +232,6 @@ public class ChatAIFragment extends Fragment {
                                 .getJSONObject(0)
                                 .getString("text");
 
-                        // Thay runOnUiThread trực tiếp bằng getActivity().runOnUiThread(...)
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(() -> {
                                 ChatMessage botChat = new ChatMessage(
@@ -217,17 +241,29 @@ public class ChatAIFragment extends Fragment {
                                         Timestamp.now()
                                 );
                                 updateUI(botChat);
+                                resetSendingStatus();
                             });
                         }
                     } catch (Exception e) {
-                        showToast("Lỗi xử lý dữ liệu AI");
+                        resetSendingStatus();
+                        showToast("AI phản hồi không đúng định dạng.");
                     }
                 } else {
+                    resetSendingStatus();
                     android.util.Log.e("GEMINI_ERROR", "Code: " + response.code() + " | Body: " + rawResponse);
-                    showToast("Lỗi từ máy chủ: " + response.code());
+                    showToast("Lỗi: " + response.code());
                 }
             }
         });
+    }
+
+    private void resetSendingStatus() {
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                isSending = false;
+                sendButton.setEnabled(true);
+            });
+        }
     }
 
     private void updateUI(ChatMessage message) {
@@ -242,7 +278,6 @@ public class ChatAIFragment extends Fragment {
 
     private void showToast(String msg) {
         if (getActivity() != null) {
-            // Thay "this" trong Toast thành "getContext()"
             getActivity().runOnUiThread(() -> Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show());
         }
     }
