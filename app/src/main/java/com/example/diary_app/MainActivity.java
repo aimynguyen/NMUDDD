@@ -5,14 +5,17 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -99,6 +102,27 @@ public class MainActivity extends AppCompatActivity {
                             String fullName = doc.getString("userName"); // lấy field userName
                             if (tvName != null) tvName.setText(fullName);
                         }
+                    }
+                });
+    }
+    private void listenForNotifications() {
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        FirebaseFirestore.getInstance().collection("notifications")
+                .whereEqualTo("toUid", currentUserId)
+                .whereEqualTo("isRead", false) // Chỉ lấy thông báo chưa đọc
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null || snapshots == null || snapshots.isEmpty()) return;
+
+                    for (QueryDocumentSnapshot doc : snapshots) {
+                        String title = doc.getString("title");
+                        String body = doc.getString("body");
+
+                        // Hiển thị một Toast hoặc một Dialog thông báo cho User biết
+                        Toast.makeText(MainActivity.this, title + ": " + body, Toast.LENGTH_LONG).show();
+
+                        // Đánh dấu thông báo này là đã đọc/đã xử lý để lần sau không hiện lại nữa
+                        doc.getReference().update("isRead", true);
                     }
                 });
     }

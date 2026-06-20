@@ -14,11 +14,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.diary_app.R;
 import com.example.diary_app.adapter.SearchAdapter;
+import com.example.diary_app.ui.pages.friend.AddFriendFragment;
 import com.example.diary_app.viewmodel.SearchViewModel;
 
 public class SearchFragment extends Fragment {
@@ -89,7 +91,7 @@ public class SearchFragment extends Fragment {
 
         // Click nút Add Friend
         iconAddFriend.setOnClickListener(v -> {
-//            Fragment addFriendFragment = new Add
+            Navigation.findNavController(v).navigate(R.id.nav_addfriend);
         });
     }
 }
