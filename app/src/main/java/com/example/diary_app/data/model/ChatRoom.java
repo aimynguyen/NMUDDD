@@ -8,6 +8,8 @@ public class ChatRoom {
     private List<String> participants;
     private String lastMessage;
     private Timestamp lastUpdated;
+    private String roomName;
+    private String avatarUrl;
 
     public ChatRoom() {}
 
@@ -50,7 +52,14 @@ public class ChatRoom {
         this.lastUpdated = lastUpdated;
     }
 
-    private String roomName;
     public String getRoomName() { return roomName; }
     public void setRoomName(String roomName) { this.roomName = roomName; }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
 }

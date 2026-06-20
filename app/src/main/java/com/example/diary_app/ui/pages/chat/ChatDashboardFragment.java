@@ -62,21 +62,23 @@ public class ChatDashboardFragment extends Fragment {
         listenToChatRooms();
 
         // 3. THIẾT LẬP TÍNH NĂNG TÌM KIẾM REALTIME KHI GÕ CHỮ
-        etSearchFriends.addTextChangedListener(new android.text.TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+        if (etSearchFriends != null) {
+            etSearchFriends.addTextChangedListener(new android.text.TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Gọi hàm lọc từ adapter khi người dùng đang gõ chữ
-                if (adapter != null) {
-                    adapter.filter(s.toString());
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    // Gọi hàm lọc từ adapter khi người dùng đang gõ chữ
+                    if (adapter != null) {
+                        adapter.filter(s.toString());
+                    }
                 }
-            }
 
-            @Override
-            public void afterTextChanged(android.text.Editable s) {}
-        });
+                @Override
+                public void afterTextChanged(android.text.Editable s) {}
+            });
+        }
 
         // CLICK CHUYỂN SANG CHAT BOT AI
         btnAiAssistant.setOnClickListener(v -> {
@@ -136,6 +138,7 @@ public class ChatDashboardFragment extends Fragment {
                         for (com.example.diary_app.data.model.User friend : users) {
                             ChatRoom room = new ChatRoom();
                             room.setRoomName(friend.getUserName()); // Gán tên bạn bè vào tên phòng
+                            room.setAvatarUrl(friend.getAvatarUrl()); // Gán avatar bạn bè
 
                             // Thiết lập danh sách participants (gồm bạn và người bạn này)
                             List<String> participants = new ArrayList<>();
