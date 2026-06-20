@@ -4,19 +4,61 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/bg_lineargradient"
     android:orientation="vertical">
-    <TextView
+
+    <androidx.cardview.widget.CardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="Tìm kiếm bạn bè"
-        android:textColor="#002C77"
-        android:textStyle="bold"
-        android:textFontWeight="600"
-        android:textAlignment="center"
-        android:textSize="24dp"
-        android:layout_marginTop="16dp"/>
-    <ListView
-        android:id="@+id/listViewSuggestFriend"
+        android:layout_height="48dp"
+        android:layout_margin="12dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="6dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_searchbar"
+            android:paddingHorizontal="12dp">
+
+            <!--Icon search-->
+            <ImageView
+                android:id="@+id/iconSearch"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/ic_menu_search"
+                app:tint="#888"/>
+
+            <!--Input-->
+            <EditText
+                android:id="@+id/edtSearch"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:hint="Search..."
+                android:background="@android:color/transparent"
+                android:paddingStart="8dp"
+                android:textSize="14sp"
+                android:maxLines="1"/>
+
+            <!--Clear button-->
+            <ImageView
+                android:id="@+id/iconClear"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                app:tint="#888"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewSuggestFriend"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:clipToPadding="false"/>
 
 </LinearLayout>

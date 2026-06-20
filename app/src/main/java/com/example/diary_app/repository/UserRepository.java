@@ -38,9 +38,14 @@ public class UserRepository {
     }
 
     // 3. Tìm kiếm người dùng (Tìm theo Email)
-    public Task<QuerySnapshot> searchUserByEmail(String email){
+// 3. Tìm kiếm người dùng (Tìm theo Email - Gõ đến đâu tìm đến đó)
+    public Task<QuerySnapshot> searchUserByEmail(String emailQuery){
+        // Lưu ý: Đảm bảo field lưu email trên Firebase của bạn tên chính xác là "email"
         return db.collection("users")
-                .whereEqualTo("email", email).get();
+                .orderBy("email")
+                .startAt(emailQuery)
+                .endAt(emailQuery + "\uf8ff")
+                .get();
     }
 
     public Task<List<User>> getPendingFriendRequestsAsUsers(String userId) {
