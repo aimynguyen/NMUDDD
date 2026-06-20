@@ -215,12 +215,17 @@ public class CreatePostFragment extends Fragment {
                     String myAvatar = "";
 
                     if (documentSnapshot.exists()) {
-                        // LƯU Ý: Thay "name" và "avatar" bằng đúng tên cột trong Firestore của nhóm bạn
-                        if (documentSnapshot.contains("name")) {
-                            myName = documentSnapshot.getString("name");
-                        }
-                        if (documentSnapshot.contains("avatar")) {
-                            myAvatar = documentSnapshot.getString("avatar");
+                        // LƯU Ý: Ép kiểu dữ liệu trả về thành Object User để lấy chính xác các trường
+                        com.example.diary_app.data.model.User currentUser =
+                                documentSnapshot.toObject(com.example.diary_app.data.model.User.class);
+
+                        if (currentUser != null) {
+                            if (currentUser.getUserName() != null && !currentUser.getUserName().isEmpty()) {
+                                myName = currentUser.getUserName();
+                            }
+                            if (currentUser.getAvatarUrl() != null) {
+                                myAvatar = currentUser.getAvatarUrl();
+                            }
                         }
                     }
 
