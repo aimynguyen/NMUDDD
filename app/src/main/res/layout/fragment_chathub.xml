@@ -11,9 +11,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="20dp">
-
-
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -25,7 +22,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bạn muốn trò chuyện với\nai hôm nay?"
+            android:text="Hôm nay bạn muốn trò chuyện\nvới ai?"
             android:textColor="#0D47A1"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -49,8 +46,8 @@
 
                 <ImageView
                     android:id="@+id/imgAiIcon"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
                     android:src="@drawable/auralog_logo" />
                 <TextView
                 android:id="@+id/tvAiTitle"
@@ -58,7 +55,7 @@
                 android:layout_height="wrap_content"
                 android:layout_toEndOf="@id/imgAiIcon"
                 android:layout_marginStart="15dp"
-                android:text="AI Assistant"
+                android:text="Auau Assistant"
                 android:textColor="#0D47A1"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -71,7 +68,7 @@
                     android:layout_toEndOf="@id/imgAiIcon"
                     android:layout_marginStart="15dp"
                     android:layout_marginTop="4dp"
-                    android:text="Lắng nghe và hỗ trợ bạn mọi lúc, mọi nơi"
+                    android:text="Lắng nghe và thấu hiểu"
                     android:textColor="#78909C"
                     android:textSize="13sp" />
 
@@ -88,11 +85,12 @@
                     <View
                         android:layout_width="8dp"
                         android:layout_height="8dp"
-                        android:background="@android:color/holo_green_light" /> <TextView
+                        android:background="@android:color/holo_green_light" />
+                    <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Đang sẵn sàng trò chuyện"
+                    android:text="Sẵn sàng trò chuyện"
                     android:textColor="#4CAF50"
                     android:textSize="12sp" />
                 </LinearLayout>
@@ -112,13 +110,6 @@
                 android:textColor="#0D47A1"
                 android:textSize="20sp"
                 android:textStyle="bold" />
-
-            <ImageView
-                android:id="@+id/btnAddFriend"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignParentEnd="true"
-                android:src="@drawable/ic_add_friend" />
         </RelativeLayout>
 
         <EditText
