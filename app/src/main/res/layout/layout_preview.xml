@@ -215,7 +215,10 @@
                 android:completionThreshold="1"
                 android:hint="Choose location"
                 android:paddingHorizontal="18dp"
-                android:elevation="6dp"/>
+                android:elevation="6dp"
+                android:focusable="false"
+                android:clickable="true"
+                android:cursorVisible="false"/>
 
             <!-- post -->
 
