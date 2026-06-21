@@ -59,8 +59,21 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         holder.reactCry.setOnClickListener(v -> listener.onReactionClick(currentPost, "cry"));
         holder.reactCalm.setOnClickListener(v -> listener.onReactionClick(currentPost, "calm"));
         holder.reactFire.setOnClickListener(v -> listener.onReactionClick(currentPost, "fire"));
-    }
+        //Load ảnh
+        if (currentPost.getImageUrl() != null && !currentPost.getImageUrl().isEmpty()) {
 
+            // Dùng thư viện Glide để tải ảnh
+            com.bumptech.glide.Glide.with(holder.itemView.getContext())
+                    .load(currentPost.getImageUrl())
+                    .into(holder.imgPostContent);
+            // Đảm bảo khung ảnh hiện ra
+            holder.imgPostContent.setVisibility(android.view.View.VISIBLE);
+
+        } else {
+            // Nếu bài viết không có ảnh, ra lệnh giấu luôn cái khung đi
+            holder.imgPostContent.setVisibility(android.view.View.GONE);
+        }
+    }
     @Override
     public int getItemCount() {
         return postList != null ? postList.size() : 0;
@@ -74,7 +87,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         TextView reactHeart, reactHappy, reactShy, reactCry, reactCalm, reactFire;
 
         TextView tvUsername, tvCaption;
-
+        android.widget.ImageView imgPostContent;
         public FeedViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -87,6 +100,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
             tvUsername = itemView.findViewById(R.id.tvUsername);
             tvCaption = itemView.findViewById(R.id.tvCaption);
+            imgPostContent = itemView.findViewById(R.id.imgDiary);
         }
     }
 }
