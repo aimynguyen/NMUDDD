@@ -157,4 +157,15 @@ public class UserRepository {
     public Task<Void> deleteFriendRequest(String requestId) {
         return db.collection("friend_requests").document(requestId).delete();
     }
+
+    // Hủy kết bạn
+    public Task<Void> unfriendUser(String myUid, String friendUid) {
+        WriteBatch batch = db.batch();
+        DocumentReference myRef = db.collection("users").document(myUid);
+        batch.update(myRef, "friendIds", FieldValue.arrayRemove(friendUid));
+
+        DocumentReference friendRef = db.collection("users").document(friendUid);
+        batch.update(friendRef, "friendIds", FieldValue.arrayRemove(myUid));
+        return batch.commit();
+    }
 }

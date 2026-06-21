@@ -88,4 +88,12 @@ public class ProfileViewModel extends ViewModel {
         userRepository.deleteFriendRequestBySender(currentUser.getUid(), senderId)
                 .addOnSuccessListener(aVoid -> loadProfile());
     }
+
+    public void unfriendUser(String friendUid) {
+        FirebaseUser currentUser = auth.getCurrentUser();
+        if (currentUser == null) return;
+
+        userRepository.unfriendUser(currentUser.getUid(), friendUid)
+                .addOnSuccessListener(aVoid -> loadProfile());
+    }
 }
