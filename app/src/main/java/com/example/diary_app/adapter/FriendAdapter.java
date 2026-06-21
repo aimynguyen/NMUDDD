@@ -21,8 +21,15 @@ public class FriendAdapter
 
     private List<User> friendList;
 
-    public FriendAdapter(List<User> friendList) {
+    public interface OnFriendActionListener {
+        void onUnfriend(User user);
+    }
+
+    private OnFriendActionListener listener;
+
+    public FriendAdapter(List<User> friendList, OnFriendActionListener listener) {
         this.friendList = friendList;
+        this.listener = listener;
     }
 
     public void updateList(List<User> newList) {
@@ -45,7 +52,6 @@ public class FriendAdapter
         return new FriendViewHolder(view);
     }
 
-    @Override
     public void onBindViewHolder(
             @NonNull FriendViewHolder holder,
             int position
@@ -58,6 +64,12 @@ public class FriendAdapter
                 .placeholder(R.drawable.human_human)
                 .circleCrop()
                 .into(holder.imgAvatar);
+
+        holder.btnDeleteFriend.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onUnfriend(user);
+            }
+        });
     }
 
     @Override
@@ -69,11 +81,13 @@ public class FriendAdapter
             extends RecyclerView.ViewHolder {
         ImageView imgAvatar;
         TextView txtName;
+        ImageView btnDeleteFriend;
 
         public FriendViewHolder(@NonNull View itemView) {
             super(itemView);
             imgAvatar = itemView.findViewById(R.id.imgAvatar);
             txtName = itemView.findViewById(R.id.txtName);
+            btnDeleteFriend = itemView.findViewById(R.id.btnDeleteFriend);
         }
     }
 }
