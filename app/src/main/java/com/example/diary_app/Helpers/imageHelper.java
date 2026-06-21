@@ -20,6 +20,23 @@ public class imageHelper {
         }
     }
 
+    public static android.net.Uri getBitmapToUri(android.content.Context context, android.graphics.Bitmap bitmap) {
+        try {
+            java.io.File cachePath = new java.io.File(context.getCacheDir(), "images");
+            cachePath.mkdirs();
+            java.io.File tempFile = new java.io.File(cachePath, "temp_camera.png");
+
+            java.io.FileOutputStream stream = new java.io.FileOutputStream(tempFile);
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, stream);
+            stream.close();
+
+            return android.net.Uri.fromFile(tempFile);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     /**
      * Hàm nén ảnh (Compress) để lưu vào Database hoặc gửi đi
      * Trả về mảng byte[] để dễ dàng lưu vào kiểu dữ liệu BLOB trong DB
