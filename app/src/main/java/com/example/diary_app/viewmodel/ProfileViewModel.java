@@ -4,7 +4,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.diary_app.core.NotiType;
 import com.example.diary_app.data.model.User;
+import com.example.diary_app.repository.NotificationRepository;
 import com.example.diary_app.repository.UserRepository;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -16,6 +18,7 @@ public class ProfileViewModel extends ViewModel {
 
     private FirebaseAuth auth;
     private UserRepository userRepository;
+    private NotificationRepository notificationRepository;
 
     private MutableLiveData<String> userName = new MutableLiveData<>();
     private MutableLiveData<String> avatarUrl = new MutableLiveData<>();
@@ -26,6 +29,7 @@ public class ProfileViewModel extends ViewModel {
     public ProfileViewModel() {
         auth = FirebaseAuth.getInstance();
         userRepository = new UserRepository();
+        notificationRepository = new NotificationRepository();
     }
 
     public LiveData<String> getUserName() { return userName; }
@@ -78,7 +82,19 @@ public class ProfileViewModel extends ViewModel {
         if (currentUser == null) return;
 
         userRepository.acceptFriendRequestBySender(currentUser.getUid(), senderId)
-                .addOnSuccessListener(aVoid -> loadProfile());
+                .addOnSuccessListener(aVoid -> {
+                    loadProfile();
+                    String name = userName.getValue();
+                    if (name == null) name = "Ai đó";
+                    // Gửi thông báo cho người gửi lời mời
+                    notificationRepository.sendNotification(
+                            senderId, 
+                            currentUser.getUid(), 
+                            NotiType.FRIEND_ACCEPT, 
+                            currentUser.getUid(), 
+                            name + " đã chấp nhận lời mời kết bạn của bạn"
+                    );
+                });
     }
 
     public void rejectRequestBySender(String senderId) {

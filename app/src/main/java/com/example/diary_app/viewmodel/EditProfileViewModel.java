@@ -53,8 +53,52 @@ public class EditProfileViewModel extends ViewModel {
                 });
     }
 
+    // upload avatar
+    public void uploadAvatar(byte[] imageBytes, String oldAvatarUrl) {
+        isLoading.setValue(true);
+        userRepository.uploadImageToStorage(imageBytes)
+                .addOnSuccessListener(taskSnapshot -> {
+                    userRepository.getDownloadUrl(taskSnapshot.getStorage())
+                            .addOnSuccessListener(uri -> {
+                                String newAvatarUrl = uri.toString();
+                                updateAvatarUrl(newAvatarUrl, oldAvatarUrl);
+                            })
+                            .addOnFailureListener(e -> {
+                                isLoading.setValue(false);
+                                message.setValue("Lỗi lấy link ảnh: " + e.getMessage());
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    isLoading.setValue(false);
+                    message.setValue("Lỗi tải ảnh lên: " + e.getMessage());
+                });
+    }
+
+    private void updateAvatarUrl(String newAvatarUrl, String oldAvatarUrl) {
+        String uid = authRepository.getCurrentUserId();
+        if (uid == null) return;
+        userRepository.updateUserField(uid, "avatarUrl", newAvatarUrl)
+                .addOnSuccessListener(unused -> {
+                    // Xóa ảnh cũ
+                    if (oldAvatarUrl != null && !oldAvatarUrl.isEmpty()) {
+                        userRepository.deleteImageFromStorage(oldAvatarUrl);
+                    }
+                    isLoading.setValue(false);
+                    message.setValue("Cập nhật ảnh đại diện thành công!");
+                    User currentUser = userLiveData.getValue();
+                    if(currentUser != null) {
+                        currentUser.setAvatarUrl(newAvatarUrl);
+                        userLiveData.setValue(currentUser);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    isLoading.setValue(false);
+                    message.setValue("Lỗi lưu ảnh: " + e.getMessage());
+                });
+    }
+
     // update profile
-    public void updateProfile(String oldName, String oldAvatar, String newName, String newAvatar) {
+    public void updateProfile(String oldName, String oldBirthday, String newName, String newBirthday) {
 
         String uid = authRepository.getCurrentUserId();
         if (uid == null) return;
@@ -66,8 +110,8 @@ public class EditProfileViewModel extends ViewModel {
             updates.put("userName", newName);
         }
 
-        if (!newAvatar.equals(oldAvatar)) {
-            updates.put("avatarUrl", newAvatar);
+        if (newBirthday != null && !newBirthday.equals(oldBirthday)) {
+            updates.put("birthday", newBirthday);
         }
 
         // NOTHING CHANGED
