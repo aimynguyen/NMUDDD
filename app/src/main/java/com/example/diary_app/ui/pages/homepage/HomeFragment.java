@@ -315,17 +315,30 @@ public class HomeFragment extends Fragment {
         // 1. Cài đặt giao diện danh sách (RecyclerView)
         recyclerFeed.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        com.example.diary_app.repository.PostRepository postRepository = new com.example.diary_app.repository.PostRepository();
+
         feedAdapter = new FeedAdapter(getContext(), new ArrayList<>(), new FeedAdapter.OnPostInteractionListener() {
             @Override
             public void onReactionClick(Post post, String reactionType) {
-                // Đi đường tắt: Gọi trực tiếp Repository để thả cảm xúc
-                String realUid = authRepository.getCurrentUserId();
-                if (realUid != null) {
-                    postRepository.addReaction(post.getPostId(), realUid, reactionType)
-                            .addOnFailureListener(e -> Toast.makeText(getContext(), "Lỗi thả tim: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                } else {
-                    Toast.makeText(getContext(), "Vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
+                // 1. Lấy ID của chính mình
+                String myUid = authRepository.getCurrentUserId();
+                if (myUid == null) {
+                    Toast.makeText(getContext(), "Lỗi: Không tìm thấy ID người dùng!", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+
+                // 2. Gọi thẳng xuống hàm addReaction của Repository
+                postRepository.addReaction(post.getPostId(), myUid, reactionType)
+                        .addOnSuccessListener(aVoid -> {
+                            // Hiện thông báo thả thành công cho vui mắt
+                            Toast.makeText(getContext(), "Đã thả " + reactionType, Toast.LENGTH_SHORT).show();
+
+                            // để app tự động tải lại bảng tin nhằm cập nhật giao diện mặt cười ngay lập tức
+                            fetchFeedData();
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(getContext(), "Lỗi thả cảm xúc: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
             }
         });
         recyclerFeed.setAdapter(feedAdapter);

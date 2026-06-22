@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.diary_app.R;
 import com.example.diary_app.data.model.Post;
 
@@ -63,15 +64,59 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         if (currentPost.getImageUrl() != null && !currentPost.getImageUrl().isEmpty()) {
 
             // Dùng thư viện Glide để tải ảnh
-            com.bumptech.glide.Glide.with(holder.itemView.getContext())
+            Glide.with(holder.itemView.getContext())
                     .load(currentPost.getImageUrl())
                     .into(holder.imgPostContent);
             // Đảm bảo khung ảnh hiện ra
-            holder.imgPostContent.setVisibility(android.view.View.VISIBLE);
+            holder.imgPostContent.setVisibility(View.VISIBLE);
 
         } else {
             // Nếu bài viết không có ảnh, ra lệnh giấu luôn cái khung đi
-            holder.imgPostContent.setVisibility(android.view.View.GONE);
+            holder.imgPostContent.setVisibility(View.GONE);
+        }
+        // ==========================================
+        // 1. HIỂN THỊ AVATAR NGƯỜI DÙNG
+        // ==========================================
+        if (currentPost.getUserAvatar() != null && !currentPost.getUserAvatar().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(currentPost.getUserAvatar())
+                    .circleCrop()
+                    .into(holder.imgAvatar);
+        } else {
+            // Nếu user chưa cài avatar, cho hiển thị cái nền tròn mặc định
+            holder.imgAvatar.setImageResource(R.drawable.avatar_circle);
+        }
+        // ==========================================
+        // 2. HIỂN THỊ MOOD CỦA BÀI VIẾT
+        // ==========================================
+        String mood = currentPost.getEmotion();
+
+        if (mood != null && !mood.isEmpty()) {
+            holder.imgMood.setVisibility(View.VISIBLE); // Bật hình tròn lên
+            switch (mood) {
+                case "😊":
+                    holder.imgMood.setText("😊");
+                    break;
+                case "😳":
+                    holder.imgMood.setText("😳");
+                    break;
+                case "😭":
+                    holder.imgMood.setText("😭");
+                    break;
+                case "😌":
+                    holder.imgMood.setText("😌");
+                    break;
+                case "💗":
+                    holder.imgMood.setText("💗");
+                    break;
+                default:
+                    // Nếu là mood lạ, tạm thời ẩn đi
+                    holder.imgMood.setVisibility(View.GONE);
+                    break;
+            }
+        } else {
+            // Nếu bài viết không gắn Mood, giấu hình tròn góc phải đi cho đỡ trống
+            holder.imgMood.setVisibility(View.GONE);
         }
     }
     @Override
@@ -88,6 +133,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
         TextView tvUsername, tvCaption;
         android.widget.ImageView imgPostContent;
+        android.widget.ImageView imgAvatar;
+        android.widget.TextView imgMood;
         public FeedViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -101,6 +148,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             tvUsername = itemView.findViewById(R.id.tvUsername);
             tvCaption = itemView.findViewById(R.id.tvCaption);
             imgPostContent = itemView.findViewById(R.id.imgDiary);
+            imgAvatar = itemView.findViewById(R.id.imgAvatar);
+            imgMood = itemView.findViewById(R.id.imgMood);
         }
     }
 }
