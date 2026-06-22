@@ -32,7 +32,7 @@
 
     <fragment
         android:id="@+id/nav_pet"
-        android:name="com.example.diary_app.ui.pages.pet.PetFragment"
+        android:name="com.example.diary_app.fragment_pet_home"
         android:label="Pet"/>
 
     <fragment
@@ -96,7 +96,5 @@
         android:id="@+id/nav_admin"
         android:name="com.example.diary_app.fragment_adminreview"
         android:label="admin"/>
-
-
 
 </navigation>
