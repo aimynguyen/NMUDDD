@@ -94,10 +94,6 @@
             android:textColorHint="#9AA0A6" />
 
         <!-- Birthday -->
-
-
-        <!-- Confirm Your Password -->
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -118,7 +114,19 @@
             android:textColorHint="#9AA0A6" />
 
         <!-- Note -->
-
+        <TextView
+            android:id="@+id/tvChangePassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Change Password?"
+            android:textColor="@color/blue_secondary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:padding="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:layout_marginTop="16dp" />
         <!-- Button -->
         <Button
             android:id="@+id/btnFinish"

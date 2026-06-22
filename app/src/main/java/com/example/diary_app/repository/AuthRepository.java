@@ -1,9 +1,12 @@
 package com.example.diary_app.repository;
 
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.android.gms.tasks.Tasks;
 
 public class AuthRepository {
     private FirebaseAuth mAuth;
@@ -62,5 +65,21 @@ public class AuthRepository {
     // 7. Quên mật khẩu (Gửi email reset password)
     public Task<Void> resetPassword(String email){
        return mAuth.sendPasswordResetEmail(email);
+    }
+
+    // 8. Đổi mật khẩu
+    public Task<Void> changePassword(String currentPassword, String newPassword) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null && user.getEmail() != null) {
+            AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(), currentPassword);
+            return user.reauthenticate(credential).continueWithTask(task -> {
+                if (task.isSuccessful()) {
+                    return user.updatePassword(newPassword);
+                } else {
+                    throw task.getException() != null ? task.getException() : new Exception("Re-authentication failed");
+                }
+            });
+        }
+        return Tasks.forException(new Exception("No user logged in"));
     }
 }
