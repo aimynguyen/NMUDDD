@@ -111,13 +111,15 @@
 
     </androidx.cardview.widget.CardView>
 
+
+    <!-- thay animation pet vo day -->
     <!-- Pet -->
     <ImageView
         android:id="@+id/imgPet"
         android:layout_width="96dp"
         android:layout_height="96dp"
         android:layout_marginTop="245dp"
-        android:src="@drawable/panda_sleep"
+        android:src="@drawable/panda_sleep01"
         android:scaleType="fitCenter"
         app:layout_constraintTop_toBottomOf="@id/cardPetInfo"
         app:layout_constraintStart_toStartOf="parent"
