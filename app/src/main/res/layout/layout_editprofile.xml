@@ -117,26 +117,6 @@
             android:textColor="@color/text_primary"
             android:textColorHint="#9AA0A6" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Confirm your password"
-            android:textColor="@color/text_primary"
-            android:textSize="18sp" />
-
-        <EditText
-            android:id="@+id/edtConfirmPassword"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/bg_rounded"
-            android:hint="Confirm your password"
-            android:inputType="textPassword"
-            android:paddingHorizontal="16dp"
-            android:textColor="@color/text_primary"
-            android:textColorHint="#9AA0A6" />
-
         <!-- Note -->
 
         <!-- Button -->
