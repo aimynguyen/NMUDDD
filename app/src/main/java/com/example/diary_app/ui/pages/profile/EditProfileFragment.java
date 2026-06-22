@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.appcompat.app.AlertDialog;
 
 import java.util.Calendar;
 
@@ -39,6 +40,7 @@ public class EditProfileFragment extends Fragment {
     private TextView tvBirthday;
     private EditText edtEmail;
     private Button btnFinish;
+    private TextView tvChangePassword;
 
     private EditProfileViewModel viewModel;
 
@@ -92,6 +94,7 @@ public class EditProfileFragment extends Fragment {
         tvBirthday = view.findViewById(R.id.tvBirthday);
         edtEmail = view.findViewById(R.id.edtEmail);
         btnFinish = view.findViewById(R.id.btnFinish);
+        tvChangePassword = view.findViewById(R.id.tvChangePassword);
 
         // 3. Khởi tạo VIEWMODEL gắn liền với Fragment
         viewModel = new ViewModelProvider(this).get(EditProfileViewModel.class);
@@ -146,6 +149,9 @@ public class EditProfileFragment extends Fragment {
             datePickerDialog.show();
         });
 
+        // Xử lý sự kiện click đổi mật khẩu
+        tvChangePassword.setOnClickListener(v -> showChangePasswordDialog());
+
         // Xử lý sự kiện click btnCamera
         btnCamera.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -192,5 +198,60 @@ public class EditProfileFragment extends Fragment {
                 .placeholder(R.drawable.human_human)
                 .circleCrop()
                 .into(imgAvatar);
+    }
+
+    private void showChangePasswordDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        View dialogView = getLayoutInflater().inflate(R.layout.layout_dialog_change_password, null);
+        builder.setView(dialogView);
+
+        AlertDialog dialog = builder.create();
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        EditText edtCurrentPassword = dialogView.findViewById(R.id.edtCurrentPassword);
+        EditText edtNewPassword = dialogView.findViewById(R.id.edtNewPassword);
+        EditText edtConfirmNewPassword = dialogView.findViewById(R.id.edtConfirmNewPassword);
+        Button btnCancel = dialogView.findViewById(R.id.btnCancelChangePassword);
+        Button btnConfirm = dialogView.findViewById(R.id.btnConfirmChangePassword);
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnConfirm.setOnClickListener(v -> {
+            String currentPw = edtCurrentPassword.getText().toString().trim();
+            String newPw = edtNewPassword.getText().toString().trim();
+            String confirmPw = edtConfirmNewPassword.getText().toString().trim();
+
+            if (currentPw.isEmpty() || newPw.isEmpty() || confirmPw.isEmpty()) {
+                Toast.makeText(requireContext(), "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (newPw.length() < 6) {
+                Toast.makeText(requireContext(), "Mật khẩu mới phải có ít nhất 6 ký tự", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!newPw.equals(confirmPw)) {
+                Toast.makeText(requireContext(), "Mật khẩu xác nhận không khớp", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            viewModel.changePassword(currentPw, newPw);
+        });
+
+        viewModel.getChangePasswordSuccess().observe(getViewLifecycleOwner(), msg -> {
+            if (msg != null && !msg.isEmpty()) {
+                Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            }
+        });
+
+        viewModel.getChangePasswordError().observe(getViewLifecycleOwner(), errorMsg -> {
+            if (errorMsg != null && !errorMsg.isEmpty()) {
+                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        dialog.show();
     }
 }

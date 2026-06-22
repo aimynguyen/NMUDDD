@@ -83,7 +83,7 @@ public class ProfileFragment extends Fragment {
                 public void onUnfriend(User user) {
                     new android.app.AlertDialog.Builder(getContext())
                             .setTitle("Hủy kết bạn")
-                            .setMessage("Bạn chắc chắn muốn hủy kết bạn với '" + user.getUserName() + "' không?")
+                            .setMessage("Bạn chắc chắn muốn hủy kết bạn với " + user.getUserName() + " không?")
                             .setPositiveButton("Có", (dialog, which) -> {
                                 profileViewModel.unfriendUser(user.getUid());
                             })
@@ -152,13 +152,6 @@ public class ProfileFragment extends Fragment {
             NavHostFragment.findNavController(ProfileFragment.this)
                     .navigate(R.id.action_nav_profile_to_nav_edit_profile);
         });
-
-        // tạm gán notification vào setting để test
-        if (btnSetting != null) {
-            btnSetting.setOnClickListener(v -> {
-                Navigation.findNavController(v).navigate(R.id.action_nav_profile_to_nav_notification);
-            });
-        }
 
         return view;
     }

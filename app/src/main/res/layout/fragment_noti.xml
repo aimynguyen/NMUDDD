@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="@color/blue_primary">
 
-    <!-- Back -->
     <ImageButton
         android:id="@+id/btnBack"
         android:layout_width="15dp"
@@ -18,7 +17,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <!-- Title -->
     <TextView
         android:id="@+id/txtTitle"
         android:layout_width="wrap_content"
@@ -32,25 +30,14 @@
         app:layout_constraintTop_toTopOf="@id/btnBack"
         app:layout_constraintBottom_toBottomOf="@id/btnBack"/>
 
-    <!-- Setting -->
-    <ImageButton
-        android:id="@+id/btnSetting"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/setting_icon"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
-    <!-- Scroll -->
     <ScrollView
         android:id="@+id/scrollNotification"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintTop_toBottomOf="@id/btnBack"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/txtTitle"
+        app:layout_constraintBottom_toTopOf="@id/cardEncourage"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -58,9 +45,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="16dp">
 
-            <!-- Newest -->
             <TextView
                 android:id="@+id/txtNewest"
                 android:layout_width="wrap_content"
@@ -77,7 +64,6 @@
                 android:layout_marginTop="12dp"
                 android:nestedScrollingEnabled="false"/>
 
-            <!-- Previous -->
             <TextView
                 android:id="@+id/txtPrevious"
                 android:layout_width="wrap_content"
@@ -93,49 +79,60 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
+                android:layout_marginBottom="20dp"
                 android:nestedScrollingEnabled="false"/>
 
-            <!-- encourage card -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardEncourage"
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardEncourage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="24dp"
+        app:cardCornerRadius="18dp"
+        app:cardElevation="8dp"
+        app:strokeWidth="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_gradient_01"
+            android:padding="15dp"
+            android:clipChildren="false">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="&#8220;"
+                android:textSize="90sp"
+                android:textColor="#FFFFFF"
+                android:alpha="0.5"
+                android:textStyle="bold"
+                android:fontFamily="serif"
+                android:includeFontPadding="false"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="-25dp"
+                android:layout_marginStart="-5dp" />
+
+            <TextView
+                android:id="@+id/txtEncourageContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="20dp"
-                app:cardCornerRadius="18dp"
-                app:cardBackgroundColor="@color/text_primary"
-                app:cardElevation="0dp">
+                android:text="Hãy dành 5 phút hôm nay để phản hồi lại các thông báo và kết nối với mọi người nhé."
+                android:textColor="#2A3B45"
+                android:textSize="17sp"
+                android:textStyle="italic"
+                android:lineSpacingExtra="6dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginStart="18dp"/>
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:id="@+id/txtEncourageTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Bạn đang làm rất tốt"
-                        android:textColor="@color/white"
-                        android:textStyle="bold"
-                        android:textSize="18sp"/>
-
-                    <TextView
-                        android:id="@+id/txtEncourageContent"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/txtEncourageTitle"
-                        android:layout_marginTop="8dp"
-                        android:text="Hãy dành 5 phút hôm nay để phản hồi lại các thông báo và kết nối với mọi người nhé."
-                        android:textColor="@android:color/white"
-                        android:textSize="15sp"/>
-
-                </RelativeLayout>
-
-            </androidx.cardview.widget.CardView>
-
-        </LinearLayout>
-
-    </ScrollView>
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

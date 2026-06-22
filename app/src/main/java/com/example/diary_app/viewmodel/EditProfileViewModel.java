@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel;
 import com.example.diary_app.data.model.User;
 import com.example.diary_app.repository.AuthRepository;
 import com.example.diary_app.repository.UserRepository;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,9 @@ public class EditProfileViewModel extends ViewModel {
     private MutableLiveData<String> message = new MutableLiveData<>();
     private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
 
+    private MutableLiveData<String> changePasswordSuccess = new MutableLiveData<>();
+    private MutableLiveData<String> changePasswordError = new MutableLiveData<>();
+
     public EditProfileViewModel() {
 
         authRepository = new AuthRepository();
@@ -31,6 +35,8 @@ public class EditProfileViewModel extends ViewModel {
     public LiveData<User> getUser() { return userLiveData; }
     public LiveData<String> getMessage() { return message; }
     public LiveData<Boolean> getIsLoading() { return isLoading; }
+    public LiveData<String> getChangePasswordSuccess() { return changePasswordSuccess; }
+    public LiveData<String> getChangePasswordError() { return changePasswordError; }
 
     // load profile
     public void loadProfile() {
@@ -131,6 +137,25 @@ public class EditProfileViewModel extends ViewModel {
                     message.setValue("Lỗi cập nhật: " + e.getMessage());
                 });
 
+    }
+
+    public void changePassword(String currentPassword, String newPassword) {
+        isLoading.setValue(true);
+        authRepository.changePassword(currentPassword, newPassword)
+                .addOnSuccessListener(aVoid -> {
+                    isLoading.setValue(false);
+                    changePasswordSuccess.setValue("Đổi mật khẩu thành công!");
+                })
+                .addOnFailureListener(e -> {
+                    isLoading.setValue(false);
+                    if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                        changePasswordError.setValue("Mật khẩu hiện tại không đúng.");
+                    } else if (e.getMessage() != null && e.getMessage().contains("Re-authentication failed")) {
+                        changePasswordError.setValue("Mật khẩu hiện tại không đúng.");
+                    } else {
+                        changePasswordError.setValue("Lỗi đổi mật khẩu: " + e.getMessage());
+                    }
+                });
     }
 
 }
