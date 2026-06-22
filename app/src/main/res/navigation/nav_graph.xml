@@ -94,6 +94,11 @@
         android:id="@+id/nav_addfriend"
         android:name="com.example.diary_app.ui.pages.friend.AddFriendFragment"
         android:label="Add Friend"/>
+    <fragment
+        android:id="@+id/nav_admin"
+        android:name="com.example.diary_app.fragment_adminreview"
+        android:label="admin"/>
+
 
 
 </navigation>
