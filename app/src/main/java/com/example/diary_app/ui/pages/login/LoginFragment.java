@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -41,6 +42,11 @@ public class LoginFragment extends Fragment {
         btnRegister = view.findViewById(R.id.btnRegister);
 
         loginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
+
+        TextView txtForgot = view.findViewById(R.id.txtForgot);
+        txtForgot.setOnClickListener(v -> {
+            showForgotPasswordDialog();
+        });
 
         btnRegister.setOnClickListener(v -> {
             Navigation.findNavController(v).navigate(R.id.action_nav_login_to_nav_signin);
@@ -111,5 +117,68 @@ public class LoginFragment extends Fragment {
                 btnLogin.setText("Đăng nhập");
             }
         });
+    }
+
+    private void showForgotPasswordDialog() {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(requireContext());
+        View dialogView = getLayoutInflater().inflate(R.layout.layout_dialog_forgot_password, null);
+        builder.setView(dialogView);
+
+        android.app.AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        EditText edtEmail = dialogView.findViewById(R.id.edtForgotEmail);
+        Button btnSend = dialogView.findViewById(R.id.btnSendForgot);
+        Button btnCancel = dialogView.findViewById(R.id.btnCancelForgot);
+        android.widget.ProgressBar progressBar = dialogView.findViewById(R.id.progressBarForgot);
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnSend.setOnClickListener(v -> {
+            String email = edtEmail.getText().toString().trim();
+            if (email.isEmpty()) {
+                Toast.makeText(requireContext(), "Vui lòng nhập email!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(requireContext(), "Email không đúng định dạng!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            loginViewModel.forgotPassword(email);
+        });
+
+        loginViewModel.getIsForgotPasswordLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            if (isLoading != null) {
+                if (isLoading) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    btnSend.setEnabled(false);
+                    btnSend.setText("Đang gửi...");
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                    btnSend.setEnabled(true);
+                    btnSend.setText("Gửi yêu cầu");
+                }
+            }
+        });
+
+        loginViewModel.getForgotPasswordSuccess().observe(getViewLifecycleOwner(), message -> {
+            if (message != null) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                loginViewModel.clearForgotPasswordStatus();
+                dialog.dismiss();
+            }
+        });
+
+        loginViewModel.getForgotPasswordError().observe(getViewLifecycleOwner(), error -> {
+            if (error != null) {
+                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+                loginViewModel.clearForgotPasswordStatus();
+            }
+        });
+
+        dialog.show();
     }
 }
