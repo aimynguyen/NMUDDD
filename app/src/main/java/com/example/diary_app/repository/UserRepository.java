@@ -33,7 +33,7 @@ public class UserRepository {
     }
 
     /**
-     * 1. Lưu thông tin User mới vào bảng "users"
+     * Lưu thông tin User mới vào bảng "users"
      * (Gọi hàm này ngay sau khi Đăng ký và Xác minh email thành công)
      */
     public Task<Void> createUserProfile(User user){
@@ -65,13 +65,17 @@ public class UserRepository {
         return Tasks.forResult(null);
     }
 
-    // 2. Lấy thông tin Profile của một User bất kỳ dựa vào UID
+    // Lấy thông tin Profile của một User bất kỳ dựa vào UID
     public Task<DocumentSnapshot> getUserProfile(String uid){
         return db.collection("users").document(uid).get();
     }
 
-    // 3. Tìm kiếm người dùng (Tìm theo Email)
-// 3. Tìm kiếm người dùng (Tìm theo Email - Gõ đến đâu tìm đến đó)
+    // Kiểm tra xem email có tồn tại trong hệ thống hay không
+    public Task<QuerySnapshot> checkEmailExists(String email){
+        return db.collection("users").whereEqualTo("email", email).get();
+    }
+
+    // Tìm kiếm người dùng (Tìm theo Email - Gõ đến đâu tìm đến đó)
     public Task<QuerySnapshot> searchUserByEmail(String emailQuery){
         // Lưu ý: Đảm bảo field lưu email trên Firebase của bạn tên chính xác là "email"
         return db.collection("users")
@@ -131,7 +135,7 @@ public class UserRepository {
         return db.collection("users").document(uid).update(field, value);
     }
 
-    // 5. Gửi lời mời kết bạn
+    // Gửi lời mời kết bạn
     public Task<DocumentReference> sendFriendRequest(String myUid, String targetUid){
         Map<String, Object> request = new HashMap<>();
         request.put("senderId", myUid);
@@ -171,7 +175,7 @@ public class UserRepository {
         return batch.commit();
     }
 
-    // 8. Từ chối kết bạn / Hủy kết bạn
+    // Từ chối kết bạn / Hủy kết bạn
     public Task<Void> deleteFriendRequestBySender(String myUid, String senderUid) {
         return db.collection("friend_requests")
                 .whereEqualTo("senderId", senderUid)

@@ -15,6 +15,10 @@ public class LoginViewModel extends ViewModel {
     private MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
 
+    private MutableLiveData<String> forgotPasswordSuccess = new MutableLiveData<>();
+    private MutableLiveData<String> forgotPasswordError = new MutableLiveData<>();
+    private MutableLiveData<Boolean> isForgotPasswordLoading = new MutableLiveData<>();
+
     public LoginViewModel() {
         authRepository = new AuthRepository();
         userRepository = new UserRepository();
@@ -28,6 +32,50 @@ public class LoginViewModel extends ViewModel {
         return errorMessage;
     }
     public LiveData<Boolean> getIsLoading() { return isLoading; }
+
+    public LiveData<String> getForgotPasswordSuccess() {
+        return forgotPasswordSuccess;
+    }
+
+    public LiveData<String> getForgotPasswordError() {
+        return forgotPasswordError;
+    }
+
+    public LiveData<Boolean> getIsForgotPasswordLoading() {
+        return isForgotPasswordLoading;
+    }
+
+    public void forgotPassword(String email) {
+        isForgotPasswordLoading.setValue(true);
+
+        // Kiểm tra xem email có tồn tại không
+        userRepository.checkEmailExists(email)
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        authRepository.resetPassword(email)
+                                .addOnSuccessListener(aVoid -> {
+                                    isForgotPasswordLoading.setValue(false);
+                                    forgotPasswordSuccess.setValue("Email khôi phục mật khẩu đã được gửi!");
+                                })
+                                .addOnFailureListener(e -> {
+                                    isForgotPasswordLoading.setValue(false);
+                                    forgotPasswordError.setValue("Lỗi: Không thể gửi email. Vui lòng thử lại!");
+                                });
+                    } else {
+                        isForgotPasswordLoading.setValue(false);
+                        forgotPasswordError.setValue("Email không tồn tại trong hệ thống!");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    isForgotPasswordLoading.setValue(false);
+                    forgotPasswordError.setValue("Lỗi kiểm tra hệ thống: " + e.getMessage());
+                });
+    }
+
+    public void clearForgotPasswordStatus() {
+        forgotPasswordSuccess.setValue(null);
+        forgotPasswordError.setValue(null);
+    }
 
     public void login(String email, String password) {
         isLoading.setValue(true);
