@@ -28,58 +28,70 @@
                 app:cardCornerRadius="16dp"
                 app:cardElevation="8dp"
                 android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                >
+                android:layout_marginRight="16dp">
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:orientation="vertical">
+
                     <TextView
-                       android:text="Top emotion"
-                       android:layout_height="wrap_content"
-                       android:layout_width="match_parent"
-                       android:layout_marginTop="5dp"
-                       android:textSize="16dp"
+                        android:text="Top emotion"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:textSize="16dp"
                         android:textStyle="bold"
                         android:layout_marginLeft="30dp"/>
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:layout_marginTop="5dp"
-                        android:layout_marginBottom="12dp">
-                        <LinearLayout
+                        android:layout_marginBottom="12dp"
+                        android:weightSum="3"> <LinearLayout
+                        android:id="@+id/layout_top1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:visibility="invisible"> <View
+                        android:id="@+id/img_top1"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:background="@drawable/bg_circle_happy"
+                        android:layout_gravity="center_vertical"/>
+                        <TextView
+                            android:id="@+id/txt_top1"
+                            android:text="Top 1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginLeft="30dp">
-                            <View
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:background="@drawable/bg_circle_happy"
-                                android:layout_gravity="center_vertical"/>
-                            <TextView
-                                android:text="Happy"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="5dp"
-                                android:textSize="12dp"
-                                android:textStyle="normal"
-                                android:layout_gravity="center_vertical"/>
-                        </LinearLayout>
+                            android:layout_marginLeft="5dp"
+                            android:textSize="12dp"
+                            android:textStyle="normal"
+                            android:layout_gravity="center_vertical"/>
+                    </LinearLayout>
+
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:id="@+id/layout_top2"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:orientation="horizontal"
-                            android:layout_marginLeft="50dp">
+                            android:gravity="center"
+                            android:visibility="invisible">
                             <View
+                                android:id="@+id/img_top2"
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
                                 android:background="@drawable/bg_circle_angry"
                                 android:layout_gravity="center_vertical"/>
                             <TextView
-                                android:text="Angry"
+                                android:id="@+id/txt_top2"
+                                android:text="Top 2"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="5dp"
@@ -87,18 +99,24 @@
                                 android:textStyle="normal"
                                 android:layout_gravity="center_vertical"/>
                         </LinearLayout>
+
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:id="@+id/layout_top3"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:orientation="horizontal"
-                            android:layout_marginLeft="50dp">
+                            android:gravity="center"
+                            android:visibility="invisible">
                             <View
+                                android:id="@+id/img_top3"
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
                                 android:background="@drawable/bg_circle_neutral"
                                 android:layout_gravity="center_vertical"/>
                             <TextView
-                                android:text="Neutral"
+                                android:id="@+id/txt_top3"
+                                android:text="Top 3"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="5dp"
@@ -157,11 +175,13 @@
                 android:layout_marginRight="16dp"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp">
-               <LinearLayout
-                    android:layout_width="wrap_content"
+
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:orientation="horizontal"
-                    android:layout_marginLeft="10dp">
+                    android:gravity="center_vertical">
                     <View
                         android:layout_width="20dp"
                         android:layout_height="20dp"
@@ -172,15 +192,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="5dp"
-                        android:textSize="12dp"
+                        android:textSize="12sp"
                         android:textStyle="normal"
                         android:layout_gravity="center_vertical"/>
                 </LinearLayout>
+
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:orientation="horizontal"
-                    android:layout_marginLeft="15dp">
+                    android:gravity="center_vertical">
                     <View
                         android:layout_width="20dp"
                         android:layout_height="20dp"
@@ -191,15 +213,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="5dp"
-                        android:textSize="12dp"
+                        android:textSize="12sp"
                         android:textStyle="normal"
                         android:layout_gravity="center_vertical"/>
                 </LinearLayout>
+
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:orientation="horizontal"
-                    android:layout_marginLeft="15dp">
+                    android:gravity="center_vertical">
                     <View
                         android:layout_width="20dp"
                         android:layout_height="20dp"
@@ -210,15 +234,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="5dp"
-                        android:textSize="12dp"
+                        android:textSize="12sp"
                         android:textStyle="normal"
                         android:layout_gravity="center_vertical"/>
                 </LinearLayout>
+
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:orientation="horizontal"
-                    android:layout_marginLeft="15dp">
+                    android:gravity="center_vertical">
                     <View
                         android:layout_width="20dp"
                         android:layout_height="20dp"
@@ -229,15 +255,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="5dp"
-                        android:textSize="12dp"
+                        android:textSize="12sp"
                         android:textStyle="normal"
                         android:layout_gravity="center_vertical"/>
                 </LinearLayout>
+
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:orientation="horizontal"
-                    android:layout_marginLeft="15dp">
+                    android:gravity="center_vertical">
                     <View
                         android:layout_width="20dp"
                         android:layout_height="20dp"
@@ -248,7 +276,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="5dp"
-                        android:textSize="12dp"
+                        android:textSize="12sp"
                         android:textStyle="normal"
                         android:layout_gravity="center_vertical"/>
                 </LinearLayout>
