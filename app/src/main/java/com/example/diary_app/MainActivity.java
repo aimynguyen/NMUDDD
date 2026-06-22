@@ -40,6 +40,14 @@ public class MainActivity extends AppCompatActivity {
             if (avatar != null) {
                 avatar.setOnClickListener(this::showAvatarMenu);
             }
+            View notiIcon = headerView.findViewById(R.id.header_noti);
+            if (notiIcon != null) {
+                notiIcon.setOnClickListener(v -> {
+                    if (navController != null) {
+                        navController.navigate(R.id.nav_notification);
+                    }
+                });
+            }
         }
 
         updateHeaderFromStorage();
