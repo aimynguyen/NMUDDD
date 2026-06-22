@@ -88,16 +88,18 @@ public class ChatViewModel extends ViewModel{
      * GỬI TIN NHẮN
      */
     public void sendMessage(String chatId, String myUid, String content, List<String> participants) {
-        // Tự tay đóng gói object tin nhắn
+        if (content.trim().isEmpty()) return;
+
+        // 1. Tự tay đóng gói object tin nhắn để lưu vào sub-collection "messages"
         ChatMessage newMessage = new ChatMessage();
         newMessage.setSenderId(myUid);
         newMessage.setContent(content.trim());
         newMessage.setCreatedAt(Timestamp.now());
 
+        // 2. Gọi Repository xử lý: Vừa gửi tin nhắn, vừa cập nhật thông tin ChatRoom cùng một lúc
         chatRepository.sendMessage(chatId, newMessage, participants)
                 .addOnFailureListener(e -> {
                     // Chỉ báo lỗi nếu thất bại (rớt mạng).
-                    // Nếu thành công, không làm gì vì SnapshotListener ở trên sẽ tự "bắt" được tin nhắn mới và vẽ lên UI.
                     errorMessage.setValue("Không thể gửi tin nhắn: " + e.getMessage());
                 });
     }
@@ -113,36 +115,3 @@ public class ChatViewModel extends ViewModel{
         if (messagesListener != null) messagesListener.remove();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

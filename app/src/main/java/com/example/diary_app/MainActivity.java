@@ -64,7 +64,8 @@ public class MainActivity extends AppCompatActivity {
                 int id = destination.getId();
 
                 // Các màn hình chính: Hiện cả Header và Bottom Navigation
-                if (id == R.id.nav_dashboard || id == R.id.nav_profile || id == R.id.nav_home || id == R.id.nav_chatroom || id == R.id.nav_search || id == R.id.nav_pet) {
+                if (id == R.id.nav_dashboard || id == R.id.nav_profile || id == R.id.nav_home || id == R.id.nav_chatroom || id == R.id.nav_search || id == R.id.nav_pet
+                || id == R.id.nav_addfriend) {
                     if (headerView != null) headerView.setVisibility(View.VISIBLE);
                     if (bottomNavigationView != null) bottomNavigationView.setVisibility(View.VISIBLE);
 

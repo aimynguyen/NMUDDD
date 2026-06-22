@@ -39,6 +39,10 @@ public class ChatDashboardFragment extends Fragment {
 
     public ChatDashboardFragment() {}
 
+    // Khai báo thêm một biến toàn cục để quản lý danh sách các Listener phòng chat nhằm tránh rò rỉ bộ nhớ
+    private List<ListenerRegistration> roomListeners = new ArrayList<>();
+    private com.example.diary_app.repository.UserRepository userRepository = new com.example.diary_app.repository.UserRepository();
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -50,47 +54,131 @@ public class ChatDashboardFragment extends Fragment {
             currentUid = "user_123";
         }
 
-        chatRepository = new ChatRepository();
-
         btnAiAssistant = view.findViewById(R.id.btnAiAssistant);
         rvFriendChats = view.findViewById(R.id.rvFriendChats);
-
-        // 2. Ánh xạ ô tìm kiếm (Nhớ bổ sung ID này vào file XML fragment_chathub của bạn)
         etSearchFriends = view.findViewById(R.id.edtSearchChat);
 
         setupRecyclerView();
-        listenToChatRooms();
 
-        // 3. THIẾT LẬP TÍNH NĂNG TÌM KIẾM REALTIME KHI GÕ CHỮ
+        // Gọi hàm lắng nghe hỗn hợp: Vừa lấy đủ bạn bè, vừa cập nhật tin nhắn và thứ tự realtime
+        listenToAllFriendsAndChats();
+
+        // Logic ô tìm kiếm tìm kiếm
         if (etSearchFriends != null) {
             etSearchFriends.addTextChangedListener(new android.text.TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    // Gọi hàm lọc từ adapter khi người dùng đang gõ chữ
-                    if (adapter != null) {
-                        adapter.filter(s.toString());
-                    }
+                    if (adapter != null) adapter.filter(s.toString());
                 }
-
-                @Override
-                public void afterTextChanged(android.text.Editable s) {}
+                @Override public void afterTextChanged(android.text.Editable s) {}
             });
         }
 
-        // CLICK CHUYỂN SANG CHAT BOT AI
+        // Click chuyển đổi AI
         btnAiAssistant.setOnClickListener(v -> {
             Bundle args = new Bundle();
             args.putString("MY_UID", currentUid);
-
-            // Sử dụng Navigation để chuyển sang ChatAIFragment
-            androidx.navigation.Navigation.findNavController(v)
-                    .navigate(R.id.nav_chatAI, args);
+            androidx.navigation.Navigation.findNavController(v).navigate(R.id.nav_chatAI, args);
         });
 
         return view;
+    }
+
+    private void listenToAllFriendsAndChats() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // 1. Lắng nghe Realtime danh sách bạn bè của User hiện tại
+        db.collection("users").document(currentUid)
+                .addSnapshotListener((documentSnapshot, error) -> {
+                    if (error != null || documentSnapshot == null || !documentSnapshot.exists()) return;
+
+                    List<String> friendIds = (List<String>) documentSnapshot.get("friendIds");
+                    if (friendIds == null || friendIds.isEmpty()) {
+                        chatRoomList.clear();
+                        adapter.updateData(new ArrayList<>());
+                        return;
+                    }
+
+                    // Hủy các listener cũ của các phòng chat trước đó để tránh trùng lặp dữ liệu
+                    for (ListenerRegistration lr : roomListeners) {
+                        if (lr != null) lr.remove();
+                    }
+                    roomListeners.clear();
+
+                    // 2. Lấy thông tin chi tiết (Tên, avatar) của tất cả bạn bè
+                    userRepository.getUsersByIds(friendIds).addOnSuccessListener(users -> {
+                        chatRoomList.clear();
+
+                        // Tạo sẵn danh sách khung chứa thông tin bạn bè ban đầu
+                        for (com.example.diary_app.data.model.User friend : users) {
+                            ChatRoom room = new ChatRoom();
+                            room.setRoomName(friend.getUserName());
+                            room.setAvatarUrl(friend.getAvatarUrl());
+
+                            List<String> participants = new ArrayList<>();
+                            participants.add(currentUid);
+                            participants.add(friend.getUid());
+                            room.setParticipants(participants);
+
+                            String uniqueChatId = generateChatId(currentUid, friend.getUid());
+                            room.setChatId(uniqueChatId);
+
+                            // Giá trị mặc định nếu chưa từng chat
+                            room.setLastMessage("Bấm để bắt đầu trò chuyện");
+                            room.setLastUpdated(null);
+
+                            chatRoomList.add(room);
+                        }
+
+                        // Cập nhật giao diện tạm thời bằng danh sách bạn bè
+                        adapter.updateData(new ArrayList<>(chatRoomList));
+
+                        // 3. Với mỗi người bạn, tiến hành lắng nghe Realtime chính phòng chat đó trên Firestore
+                        // Sửa tại Bước 3 trong hàm listenToAllFriendsAndChats() của ChatDashboardFragment:
+                        for (int i = 0; i < chatRoomList.size(); i++) {
+                            final int index = i;
+                            ChatRoom currentRoom = chatRoomList.get(index);
+
+                            // ĐỔI THÀNH "chats" CHO KHỚP VỚI REPOSITORY
+                            ListenerRegistration lr = db.collection("chats").document(currentRoom.getChatId())
+                                    .addSnapshotListener((roomSnap, roomErr) -> {
+                                        if (roomErr != null || roomSnap == null || !roomSnap.exists()) return;
+
+                                        String lastMsg = roomSnap.getString("lastMessage");
+                                        com.google.firebase.Timestamp timestamp = roomSnap.getTimestamp("lastUpdated");
+                                        String lastSenderId = roomSnap.getString("lastSenderId"); // Đọc trường vừa thêm ở trên
+
+                                        if (lastMsg != null) {
+                                            if (lastSenderId != null) {
+                                                // Nếu ID người nhắn cuối là mình -> Hiện "Bạn: ...", nếu là bạn mình -> Hiện "Tên bạn: ..."
+                                                String prefix = lastSenderId.equals(currentUid) ? "Bạn" : currentRoom.getRoomName();
+                                                currentRoom.setLastMessage(prefix + ": " + lastMsg);
+                                            } else {
+                                                currentRoom.setLastMessage(lastMsg);
+                                            }
+                                        }
+
+                                        if (timestamp != null) {
+                                            currentRoom.setLastUpdated(timestamp);
+                                        }
+
+                                        adapter.updateData(new ArrayList<>(chatRoomList));
+                                    });
+
+                            roomListeners.add(lr);
+                        }
+                    });
+                });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Giải phóng bộ nhớ khi thoát màn hình
+        for (ListenerRegistration lr : roomListeners) {
+            if (lr != null) lr.remove();
+        }
     }
 
     private void setupRecyclerView() {
@@ -173,11 +261,5 @@ public class ChatDashboardFragment extends Fragment {
     }
 
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (chatListener != null) {
-            chatListener.remove(); // Hủy lắng nghe Firebase để tránh tràn RAM
-        }
-    }
+
 }

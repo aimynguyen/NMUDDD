@@ -145,7 +145,6 @@ public class StaticticsFragment extends Fragment {
             updateCalendar();
         });
     }
-
     private void showPieChart(Map<String, Integer> emotionDatas) {
         if (pieChartView == null) return;
 
@@ -153,15 +152,25 @@ public class StaticticsFragment extends Fragment {
         Pie pie = AnyChart.pie();
 
         List<DataEntry> datas = new ArrayList<>();
+        List<String> colorPalette = new ArrayList<>();
+
+        // Lặp qua dữ liệu và map chuẩn màu cho từng cột/miếng bánh
         for (Map.Entry<String, Integer> item : emotionDatas.entrySet()) {
             datas.add(new ValueDataEntry(item.getKey(), item.getValue()));
+            // Lấy mã màu HEX chính xác dựa trên tên cảm xúc
+            colorPalette.add(getEmotionHexColor(item.getKey()));
         }
 
         pie.data(datas);
         pie.title("Thống kê tâm trạng");
-        pie.title().fontSize("12");
+        pie.title().fontSize("14");
         pie.legend().enabled(false);
-        pie.palette(new String[]{"#FEFACA", "#CBE5C2", "#D6C7DE", "#CDEBF3", "#F7BDB1"});
+
+        // Đặt bảng màu động dựa theo thứ tự dữ liệu truyền vào
+        if (!colorPalette.isEmpty()) {
+            pie.palette(colorPalette.toArray(new String[0]));
+        }
+
         pieChartView.setChart(pie);
     }
 
@@ -170,16 +179,77 @@ public class StaticticsFragment extends Fragment {
 
         APIlib.getInstance().setActiveAnyChartView(barChartView);
         Cartesian bar = AnyChart.cartesian();
+
         List<DataEntry> datas = new ArrayList<>();
+        List<String> colorPalette = new ArrayList<>();
+
         for (Map.Entry<String, Integer> item : emotionDatas.entrySet()) {
             datas.add(new ValueDataEntry(item.getKey(), item.getValue()));
+            colorPalette.add(getEmotionHexColor(item.getKey()));
         }
 
-        bar.column(datas);
+        // Đổi sang cột dọc chuẩn (column) thay vì thanh ngang (bar) để khớp tiêu đề trends
+        com.anychart.core.cartesian.series.Column column = bar.column(datas);
+
         bar.title("Emotion trends");
-        bar.title().fontSize("12");
-        bar.palette(new String[]{"#FEFACA", "#CBE5C2", "#D6C7DE", "#CDEBF3", "#F7BDB1"});
+        bar.title().fontSize("14");
+
+        // Khóa cứng bảng màu chuẩn cho các cột dữ liệu
+        if (!colorPalette.isEmpty()) {
+            bar.palette(colorPalette.toArray(new String[0]));
+        }
+
         barChartView.setChart(bar);
+    }
+
+    /**
+     * Hàm lấy mã màu HEX khớp 100% với ảnh colors.xml của bạn
+     */
+    /**
+     * Hàm lấy mã màu HEX cho Biểu đồ - Đã cập nhật nhận diện cả Emoji từ Firebase
+     */
+    private String getEmotionHexColor(String emotionName) {
+        if (emotionName == null) return "#FBD1DD"; // Mặc định là màu hồng nhạt
+
+        String name = emotionName.toLowerCase().trim();
+
+        // Kiểm tra nếu chuỗi chứa ký tự Emoji hoặc chữ tương ứng
+        if (name.contains("happy") || name.contains("😁") || name.contains("😀")) {
+            return "#FEFACA"; // Màu vàng
+        } else if (name.contains("calm") || name.contains("😌") || name.contains("😊")) {
+            return "#CBE5C2"; // Màu xanh lá
+        } else if (name.contains("neutral") || name.contains("😳") || name.contains("😐")) {
+            return "#FBD1DD"; // Màu hồng
+        } else if (name.contains("sad") || name.contains("😭") || name.contains("😢")) {
+            return "#CDEBF3"; // Màu xanh dương
+        } else if (name.contains("angry") || name.contains("😡") || name.contains("❤️")) {
+            return "#F7BDB1"; // Màu cam đỏ (Angry)
+        }
+
+        return "#FBD1DD"; // Mặc định lọt lưới thì trả về màu hồng nhạt
+    }
+
+    /**
+     * Hàm lấy hình tròn màu cho mục Top Emotion - Đã cập nhật nhận diện cả Emoji từ Firebase
+     */
+    private int getEmotionDrawable(String emotionName) {
+        if (emotionName == null) return R.drawable.bg_circle_neutral;
+
+        String name = emotionName.toLowerCase().trim();
+
+        if (name.contains("happy") || name.contains("😁") || name.contains("😀")) {
+            return R.drawable.bg_circle_happy;
+        } else if (name.contains("calm") || name.contains("😌") || name.contains("😊")) {
+            return R.drawable.bg_circle_calm;
+        } else if (name.contains("neutral") || name.contains("😳") || name.contains("😐")) {
+            return R.drawable.bg_circle_neutral;
+        } else if (name.contains("sad") || name.contains("😭") || name.contains("😢")) {
+            return R.drawable.bg_circle_sad;
+        } else if (name.contains("angry") || name.contains("😡") || name.contains("❤️")) {
+            return R.drawable.bg_circle_angry;
+        }
+
+        return R.drawable.bg_circle_neutral;
     }
 
     /**
@@ -214,23 +284,6 @@ public class StaticticsFragment extends Fragment {
         // Đổi màu nền chấm tròn tương ứng với tên
         int drawableId = getEmotionDrawable(data.first);
         dotView.setBackgroundResource(drawableId);
-    }
-
-    private int getEmotionDrawable(String emotionName) {
-        if (emotionName == null) return R.drawable.bg_circle_neutral;
-
-        switch (emotionName.toLowerCase().trim()) {
-            case "happy":
-                return R.drawable.bg_circle_happy;
-            case "angry":
-                return R.drawable.bg_circle_angry;
-            case "calm":
-                return R.drawable.bg_circle_calm;
-            case "sad":
-                return R.drawable.bg_circle_sad;
-            default:
-                return R.drawable.bg_circle_neutral;
-        }
     }
 
     private void updateCalendar() {

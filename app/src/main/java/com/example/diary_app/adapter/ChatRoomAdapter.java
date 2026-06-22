@@ -13,6 +13,8 @@ import com.example.diary_app.R;
 import com.example.diary_app.data.model.ChatRoom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections; // Nhớ kiểm tra xem đã có import này chưa nhé bạn
+
 
 public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ChatRoomViewHolder> {
 
@@ -33,11 +35,29 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ChatRo
     }
 
     public void updateData(List<ChatRoom> newList) {
-        this.chatRoomList = newList;
-        this.chatRoomListFull = new ArrayList<>(newList);
+        if (newList != null) {
+            Collections.sort(newList, (room1, room2) -> {
+                // Nếu cả hai đều chưa chat bao giờ thì giữ nguyên vị trí (hoặc xếp theo tên)
+                if (room1.getLastUpdated() == null && room2.getLastUpdated() == null) {
+                    if (room1.getRoomName() != null && room2.getRoomName() != null) {
+                        // Sửa compareToAll thành compareToIgnoreCase để xếp theo bảng chữ cái A-Z
+                        return room1.getRoomName().compareToIgnoreCase(room2.getRoomName());
+                    }
+                    return 0;
+                }
+                // Phòng nào chưa chat (null) sẽ bị đẩy xuống dưới cùng
+                if (room1.getLastUpdated() == null) return 1;
+                if (room2.getLastUpdated() == null) return -1;
+
+                // Sắp xếp giảm dần: Phòng có tin nhắn mới hơn (Timestamp lớn hơn) lên đầu
+                return room2.getLastUpdated().compareTo(room1.getLastUpdated());
+            });
+        }
+
+        this.chatRoomList = newList != null ? newList : new ArrayList<>();
+        this.chatRoomListFull = new ArrayList<>(this.chatRoomList);
         notifyDataSetChanged();
     }
-
     public void filter(String text) {
         if (chatRoomListFull == null) return;
 
