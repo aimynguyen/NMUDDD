@@ -150,9 +150,11 @@ public class PostRepository {
     /**
      * DÀNH CHO ADMIN: Lấy toàn bộ bài viết trên hệ thống để kiểm duyệt
      */
+// Sửa "createdAt" thành "createAt" để chuẩn với cấu trúc Model của bạn
     public Task<QuerySnapshot> getAllPostsForAdmin() {
         return db.collection("posts")
-                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .orderBy("createAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
                 .get();
     }
+
 }
