@@ -16,12 +16,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import android.net.Uri;
+
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 public class UserRepository {
     private FirebaseFirestore db;
+    private FirebaseStorage storage;
 
     public UserRepository(){
         db = FirebaseFirestore.getInstance();
+        storage = FirebaseStorage.getInstance();
     }
 
     /**
@@ -30,6 +38,31 @@ public class UserRepository {
      */
     public Task<Void> createUserProfile(User user){
         return db.collection("users").document(user.getUid()).set(user);
+    }
+
+    // Đẩy ảnh đại diện lên Firebase Storage
+    public UploadTask uploadImageToStorage(byte[] imageBytes) {
+        String fileName = "avatar_images/" + UUID.randomUUID().toString() + ".jpg";
+        StorageReference ref = storage.getReference().child(fileName);
+        return ref.putBytes(imageBytes);
+    }
+
+    // Lấy link Download URL cho ảnh
+    public Task<Uri> getDownloadUrl(StorageReference imageRef){
+        return imageRef.getDownloadUrl();
+    }
+
+    // Xóa ảnh cũ trên Firebase Storage
+    public Task<Void> deleteImageFromStorage(String imageUrl) {
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            try {
+                StorageReference imageRef = storage.getReferenceFromUrl(imageUrl);
+                return imageRef.delete();
+            } catch (Exception e) {
+                return Tasks.forException(e);
+            }
+        }
+        return Tasks.forResult(null);
     }
 
     // 2. Lấy thông tin Profile của một User bất kỳ dựa vào UID
