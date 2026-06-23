@@ -25,15 +25,16 @@
 
         <Button
             android:id="@+id/btnRemove"
-            android:layout_width="160dp"
+            android:layout_width="140dp"
             android:layout_height="48dp"
             android:background="@drawable/bg_button_rounded"
+            app:backgroundTint="#9B4D5A"
             android:text="Remove"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textStyle="bold"
-            android:textSize="16sp"
-            android:elevation="4dp"/>
+            android:textSize="18sp"
+            android:elevation="6dp"/>
     </LinearLayout>
 
 </LinearLayout>

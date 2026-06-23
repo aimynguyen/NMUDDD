@@ -3,8 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="307dp"
-    android:layout_height="307dp"
+    android:layout_width="300dp"
+    android:layout_height="300dp"
     android:layout_margin="8dp"
     android:layout_gravity="center"
     card_view:cardCornerRadius="24dp"
@@ -14,13 +14,12 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp"
         >
         <!--Image-->
         <ImageView
             android:id="@+id/imgDiary"
-            android:layout_width="263dp"
-            android:layout_height="263dp"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
             android:layout_gravity="center"
             android:background="@drawable/bg_rounded"
             android:scaleType="centerCrop"
