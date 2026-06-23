@@ -109,6 +109,7 @@
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="6dp"
                 android:text="Caption caption caption"
+                android:textColor="@color/text_primary"
                 android:textSize="12sp" />
 
         </LinearLayout>
