@@ -1,64 +1,114 @@
 package com.example.diary_app;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link fragment_adminreview#newInstance} factory method to
- * create an instance of this fragment.
- */
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.diary_app.adapter.AdminPostAdapter;
+import com.example.diary_app.data.model.Post;
+import com.example.diary_app.viewmodel.AdminReviewViewModel;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class fragment_adminreview extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private AdminReviewViewModel viewModel;
+    private AdminPostAdapter adapter;
+    private List<Post> postList = new ArrayList<>();
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private RecyclerView rvPostList;
+    private ImageButton btnBack;
 
     public fragment_adminreview() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment fragment_adminreview.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static fragment_adminreview newInstance(String param1, String param2) {
-        fragment_adminreview fragment = new fragment_adminreview();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public static fragment_adminreview newInstance() {
+        return new fragment_adminreview();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        // Khởi tạo ViewModel gắn với scope của Fragment này
+        viewModel = new ViewModelProvider(this).get(AdminReviewViewModel.class);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        // Inflate layout của fragment kiểm duyệt bài viết
         return inflater.inflate(R.layout.fragment_adminreview, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // 1. Ánh xạ các View từ Layout của Fragment
+        rvPostList = view.findViewById(R.id.rvPostList);
+        btnBack = view.findViewById(R.id.btnBack);
+
+        // 2. Xử lý nút quay lại (Bởi vì là Fragment nên ta pop BackStack của FragmentManager)
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> {
+                if (getActivity() != null) {
+                    getActivity().getSupportFragmentManager().popBackStack();
+                }
+            });
+        }
+
+        // 3. Cấu hình RecyclerView với LayoutManager và Adapter
+        rvPostList.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        adapter = new AdminPostAdapter(postList, new AdminPostAdapter.OnPostDeleteListener() {
+            @Override
+            public void onDeleteClick(Post post, int position) {
+                // Gọi ViewModel thực hiện xóa bài viết khi admin đồng ý xóa trên Dialog
+                viewModel.deletePost(post, position);
+            }
+        });
+        rvPostList.setAdapter(adapter);
+
+        // 4. Lắng nghe (Observe) các thay đổi từ ViewModel
+        observeViewModel();
+
+        // 5. Bắt đầu kích hoạt lấy dữ liệu bài viết từ Firebase Firestore lên
+        viewModel.fetchAllPosts();
+    }
+
+    private void observeViewModel() {
+        // Lắng nghe khi dữ liệu toàn bộ bài viết đổ về thành công
+        viewModel.getPostsLiveData().observe(getViewLifecycleOwner(), posts -> {
+            if (posts != null) {
+                postList.clear();
+                postList.addAll(posts);
+                adapter.notifyDataSetChanged();
+            } else {
+                Toast.makeText(getContext(), "Không thể tải danh sách bài viết kiểm duyệt!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Lắng nghe phản hồi trạng thái xóa từ Firebase
+        viewModel.getDeleteStatusLiveData().observe(getViewLifecycleOwner(), status -> {
+            if ("SUCCESS".equals(status)) {
+                Toast.makeText(getContext(), "Đã xóa bài viết vi phạm thành công", Toast.LENGTH_SHORT).show();
+                // Đồng bộ cập nhật lại giao diện danh sách sau khi xóa phần tử
+                adapter.notifyDataSetChanged();
+            } else if ("FAILED".equals(status)) {
+                Toast.makeText(getContext(), "Xóa thất bại, vui lòng kiểm tra kết nối mạng!", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

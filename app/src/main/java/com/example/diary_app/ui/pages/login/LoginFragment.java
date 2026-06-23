@@ -6,19 +6,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import com.example.diary_app.MainActivity;
 import com.example.diary_app.R;
-import com.example.diary_app.ui.pages.profile.ProfileFragment;
-import com.example.diary_app.ui.pages.signup.SignupFragment;
 import com.example.diary_app.viewmodel.LoginViewModel;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginFragment extends Fragment {
 
@@ -33,25 +34,24 @@ public class LoginFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // 1. Inflate layout cho Fragment này
         View view = inflater.inflate(R.layout.fragment_login, container, false);
 
-        // 2. Ánh xạ các View từ đối tượng 'view' vừa inflate
         edtEmail = view.findViewById(R.id.edtEmail);
         edtPassword = view.findViewById(R.id.edtPassword);
         btnLogin = view.findViewById(R.id.btnLogin);
         btnRegister = view.findViewById(R.id.btnRegister);
 
-        // 3. Khởi tạo ViewModel gắn với Lifecycle của Fragment
         loginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
 
-        // 4. Sự kiện khi ấn nút Đăng ký (Chuyển sang SignupFragment)
-        btnRegister.setOnClickListener(v -> {
-            androidx.navigation.Navigation.findNavController(v)
-                    .navigate(R.id.action_nav_login_to_nav_signin);
+        TextView txtForgot = view.findViewById(R.id.txtForgot);
+        txtForgot.setOnClickListener(v -> {
+            showForgotPasswordDialog();
         });
 
-        // 5. Sự kiện khi ấn nút Đăng nhập
+        btnRegister.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.action_nav_login_to_nav_signin);
+        });
+
         btnLogin.setOnClickListener(v -> {
             String email = edtEmail.getText().toString().trim();
             String password = edtPassword.getText().toString().trim();
@@ -64,18 +64,30 @@ public class LoginFragment extends Fragment {
             loginViewModel.login(email, password);
         });
 
-        // 6. Lắng nghe dữ liệu (Observe) từ ViewModel
         observeViewModel();
-
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // 1. Kiểm tra trạng thái đăng nhập
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser != null) {
+            // 2. SỬA LỖI TẠI ĐÂY: Dùng Navigation để chuyển màn hình thay vì khởi chạy lại MainActivity
+            if (getView() != null) {
+                Navigation.findNavController(getView())
+                        .navigate(R.id.action_nav_login_to_nav_home);
+            }
+        }
+    }
+
     private void observeViewModel() {
-        // Sử dụng getViewLifecycleOwner() để đảm bảo an toàn cho vòng đời UI trong Fragment
         loginViewModel.getLoginSuccess().observe(getViewLifecycleOwner(), role -> {
             if (role.equals("admin")) {
                 Toast.makeText(requireContext(), "Xin chào Quản trị viên!", Toast.LENGTH_SHORT).show();
-                // TODO: Thực hiện chuyển sang màn hình admin nếu có
             } else {
                 Toast.makeText(requireContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
 
@@ -85,20 +97,18 @@ public class LoginFragment extends Fragment {
                 }
 
                 if (getView() != null) {
-                    androidx.navigation.Navigation.findNavController(getView())
+                    Navigation.findNavController(getView())
                             .navigate(R.id.action_nav_login_to_nav_home);
                 }
             }
         });
 
-        // Lắng nghe lỗi đăng nhập
         loginViewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
                 Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
             }
         });
 
-        // Lắng nghe trạng thái loading để đóng/mở nút tránh spam click
         loginViewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
             btnLogin.setEnabled(!isLoading);
             if (isLoading) {
@@ -107,5 +117,68 @@ public class LoginFragment extends Fragment {
                 btnLogin.setText("Đăng nhập");
             }
         });
+    }
+
+    private void showForgotPasswordDialog() {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(requireContext());
+        View dialogView = getLayoutInflater().inflate(R.layout.layout_dialog_forgot_password, null);
+        builder.setView(dialogView);
+
+        android.app.AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        EditText edtEmail = dialogView.findViewById(R.id.edtForgotEmail);
+        Button btnSend = dialogView.findViewById(R.id.btnSendForgot);
+        Button btnCancel = dialogView.findViewById(R.id.btnCancelForgot);
+        android.widget.ProgressBar progressBar = dialogView.findViewById(R.id.progressBarForgot);
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnSend.setOnClickListener(v -> {
+            String email = edtEmail.getText().toString().trim();
+            if (email.isEmpty()) {
+                Toast.makeText(requireContext(), "Vui lòng nhập email!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(requireContext(), "Email không đúng định dạng!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            loginViewModel.forgotPassword(email);
+        });
+
+        loginViewModel.getIsForgotPasswordLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            if (isLoading != null) {
+                if (isLoading) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    btnSend.setEnabled(false);
+                    btnSend.setText("Đang gửi...");
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                    btnSend.setEnabled(true);
+                    btnSend.setText("Gửi yêu cầu");
+                }
+            }
+        });
+
+        loginViewModel.getForgotPasswordSuccess().observe(getViewLifecycleOwner(), message -> {
+            if (message != null) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                loginViewModel.clearForgotPasswordStatus();
+                dialog.dismiss();
+            }
+        });
+
+        loginViewModel.getForgotPasswordError().observe(getViewLifecycleOwner(), error -> {
+            if (error != null) {
+                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+                loginViewModel.clearForgotPasswordStatus();
+            }
+        });
+
+        dialog.show();
     }
 }

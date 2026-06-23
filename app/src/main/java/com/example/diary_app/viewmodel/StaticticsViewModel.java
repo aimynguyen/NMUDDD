@@ -1,7 +1,7 @@
 package com.example.diary_app.viewmodel;
 
 import android.app.Application;
-
+import android.util.Pair;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -12,97 +12,85 @@ import com.example.diary_app.repository.PostRepository;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class StaticticsViewModel extends AndroidViewModel{
-    private PostRepository repo = new PostRepository();
+public class StaticticsViewModel extends AndroidViewModel {
+    private PostRepository repo;
+
+    // LiveData lưu danh sách cảm xúc thô (Dùng cho Biểu đồ ở Fragment)
     private MutableLiveData<List<String>> _reactionList = new MutableLiveData<>();
-    public LiveData<List<String>> getReactionList(){
+    public LiveData<List<String>> getReactionList() {
         return _reactionList;
     }
 
+    // LiveData lưu danh sách Top 3 cảm xúc (Dùng cho UI hiển thị Top Emotion)
+    private MutableLiveData<List<Pair<String, Integer>>> _topEmotions = new MutableLiveData<>();
+    public LiveData<List<Pair<String, Integer>>> getTopEmotions() {
+        return _topEmotions;
+    }
+
     private MutableLiveData<String> _errorMessage = new MutableLiveData<>();
-    public LiveData<String> getErrorMessage(){
+    public LiveData<String> getErrorMessage() {
         return _errorMessage;
     }
 
-    public StaticticsViewModel(@NonNull Application application){
+    public StaticticsViewModel(@NonNull Application application) {
         super(application);
         this.repo = new PostRepository();
     }
 
-    public void getReactionList(String UId, Date startDate, Date endDate){
-        if (startDate == null || endDate == null){
-            String tempE="Invalid date range";
-            _errorMessage.setValue(tempE);
+    /**
+     * Hàm duy nhất dùng để kéo data từ Firebase về và phân phối cho toàn bộ màn hình Thống kê
+     */
+    public void loadData(String UId, Date startDate, Date endDate) {
+        if (startDate == null || endDate == null) {
+            _errorMessage.setValue("Invalid date range");
             return;
         }
 
         repo.getPostByTimeRange(UId, startDate, endDate)
                 .addOnSuccessListener(querySnapshot -> {
-                    List<String> allMoods=new ArrayList<>();
+                    List<String> allMoods = new ArrayList<>();
+                    Map<String, Integer> emotionCountMap = new HashMap<>();
 
-                    for(DocumentSnapshot doc: querySnapshot.getDocuments()){
+                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
                         Post post = doc.toObject(Post.class);
+                        if (post != null) {
+                            // Lấy cảm xúc lúc đăng bài của chính User
+                            String emotion = post.getEmotion();
 
-                        if(post != null && post.getReactions() != null){
-                            Map <String,String> reactions;
-                            reactions = post.getReactions();
-                            allMoods.addAll(reactions.values());
+                            if (emotion != null && !emotion.isEmpty()) {
+                                allMoods.add(emotion);
+                                // Đếm số lần xuất hiện để làm Top 3
+                                emotionCountMap.put(emotion, emotionCountMap.getOrDefault(emotion, 0) + 1);
+                            }
                         }
-                        _reactionList.setValue(allMoods);
                     }
 
+                    // 1. Cập nhật danh sách thô cho Biểu đồ ở Fragment
+                    _reactionList.setValue(allMoods);
+
+                    // 2. Xử lý tính toán Top 3 cảm xúc nhiều nhất
+                    List<Pair<String, Integer>> emotionList = new ArrayList<>();
+                    for (Map.Entry<String, Integer> entry : emotionCountMap.entrySet()) {
+                        emotionList.add(new Pair<>(entry.getKey(), entry.getValue()));
+                    }
+
+                    // Sắp xếp giảm dần theo số lượng bài viết
+                    Collections.sort(emotionList, (p1, p2) -> p2.second.compareTo(p1.second));
+
+                    // Lấy tối đa Top 3 phần tử nhiều nhất
+                    List<Pair<String, Integer>> top3 = new ArrayList<>();
+                    for (int i = 0; i < Math.min(3, emotionList.size()); i++) {
+                        top3.add(emotionList.get(i));
+                    }
+                    _topEmotions.setValue(top3);
+
                 })
-                .addOnFailureListener(  (Exception e)-> {
-                    _errorMessage.setValue(e.getMessage());
-                });
-
+                .addOnFailureListener(e -> _errorMessage.setValue(e.getMessage()));
     }
-
 }
-//
-//public class StaticticsViewModel extends AndroidViewModel {
-//
-//    private MutableLiveData<List<Pair<String, Integer>>> moodData = new MutableLiveData<>();
-//    private MutableLiveData<List<Pair<String, Integer>>> emotionData = new MutableLiveData<>();
-//    private PostRepository postRepository = new PostRepository();
-//
-//
-//    public StaticticsViewModel(@NonNull Application application) {
-//        super(application);
-//
-//        Date startDate = new Date();
-//        Date endDate = new Date();
-//
-//        private void getDatas= postRepository.getP
-//
-//        List<Pair<>>
-//        // Giả lập dữ liệu, sau này thay bằng API hoặc Firestore
-//        List<Pair<String, Integer>> moods = new ArrayList<>();
-//        moods.add(new Pair<>("Happy", 10));
-//        moods.add(new Pair<>("Sad", 5));
-//        moods.add(new Pair<>("Excited", 8));
-//        moods.add(new Pair<>("Calm", 6));
-//        moods.add(new Pair<>("Angry", 3));
-//        moodData.setValue(moods);
-//
-//        List<Pair<String, Integer>> emotions = new ArrayList<>();
-//        emotions.add(new Pair<>("Mon", 5));
-//        emotions.add(new Pair<>("Tue", 8));
-//        emotions.add(new Pair<>("Wed", 6));
-//        emotions.add(new Pair<>("Thu", 10));
-//        emotions.add(new Pair<>("Fri", 7));
-//        emotionData.setValue(emotions);
-//    }
-//
-//    public LiveData<List<Pair<String, Integer>>> getMoodData() {
-//        return moodData;
-//    }
-//
-//    public LiveData<List<Pair<String, Integer>>> getEmotionData() {
-//        return emotionData;
-//    }
-//}

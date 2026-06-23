@@ -1,12 +1,14 @@
 package com.example.diary_app.ui.pages.statistics;
 
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +54,11 @@ public class StaticticsFragment extends Fragment {
     private Calendar calendar;
     private Date startDate;
     private Date endDate;
+
+    // Các thành phần UI cho Top 3 Emotion
+    private LinearLayout layoutTop1, layoutTop2, layoutTop3;
+    private View imgTop1, imgTop2, imgTop3;
+    private TextView txtTop1, txtTop2, txtTop3;
     //endregion
 
     public StaticticsFragment() {
@@ -60,7 +67,6 @@ public class StaticticsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Nạp layout XML fragment_statictics
         return inflater.inflate(R.layout.fragment_statictics, container, false);
     }
 
@@ -80,18 +86,25 @@ public class StaticticsFragment extends Fragment {
         startDate = new Date();
         endDate = new Date();
 
+        // Ánh xạ các View của Top Emotion từ XML đã đặt ID
+        layoutTop1 = view.findViewById(R.id.layout_top1);
+        layoutTop2 = view.findViewById(R.id.layout_top2);
+        layoutTop3 = view.findViewById(R.id.layout_top3);
+
+        imgTop1 = view.findViewById(R.id.img_top1);
+        imgTop2 = view.findViewById(R.id.img_top2);
+        imgTop3 = view.findViewById(R.id.img_top3);
+
+        txtTop1 = view.findViewById(R.id.txt_top1);
+        txtTop2 = view.findViewById(R.id.txt_top2);
+        txtTop3 = view.findViewById(R.id.txt_top3);
+
         // Gắn ViewModel với vòng đời của Fragment hiện tại
         viewModel = new ViewModelProvider(this).get(StaticticsViewModel.class);
         //endregion
 
-        String Uid = "";
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            Uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        }
-
-        // Lắng nghe danh sách cảm xúc từ LiveData
+        // Lắng nghe danh sách cảm xúc thô để vẽ biểu đồ
         viewModel.getReactionList().observe(getViewLifecycleOwner(), (List<String> reactions) -> {
-            // An toàn giao diện: Chỉ cập nhật khi Fragment còn tồn tại và đã được đính kèm vào Activity
             if (isAdded() && getContext() != null) {
                 if (reactions != null && !reactions.isEmpty()) {
                     Map<String, Integer> emotionCounts = countReactions(reactions);
@@ -101,6 +114,13 @@ public class StaticticsFragment extends Fragment {
                     showPieChart(new HashMap<>());
                     showBarChart(new HashMap<>());
                 }
+            }
+        });
+
+        // Lắng nghe Top 3 Emotion từ ViewModel truyền về để cập nhật UI Top Emotion
+        viewModel.getTopEmotions().observe(getViewLifecycleOwner(), (List<Pair<String, Integer>> topEmotions) -> {
+            if (isAdded() && getContext() != null) {
+                updateTopEmotionsUI(topEmotions);
             }
         });
 
@@ -125,7 +145,6 @@ public class StaticticsFragment extends Fragment {
             updateCalendar();
         });
     }
-
     private void showPieChart(Map<String, Integer> emotionDatas) {
         if (pieChartView == null) return;
 
@@ -133,15 +152,25 @@ public class StaticticsFragment extends Fragment {
         Pie pie = AnyChart.pie();
 
         List<DataEntry> datas = new ArrayList<>();
+        List<String> colorPalette = new ArrayList<>();
+
+        // Lặp qua dữ liệu và map chuẩn màu cho từng cột/miếng bánh
         for (Map.Entry<String, Integer> item : emotionDatas.entrySet()) {
             datas.add(new ValueDataEntry(item.getKey(), item.getValue()));
+            // Lấy mã màu HEX chính xác dựa trên tên cảm xúc
+            colorPalette.add(getEmotionHexColor(item.getKey()));
         }
 
         pie.data(datas);
         pie.title("Thống kê tâm trạng");
-        pie.title().fontSize("12");
+        pie.title().fontSize("14");
         pie.legend().enabled(false);
-        pie.palette(new String[]{"#FEFACA", "#CBE5C2", "#D6C7DE", "#CDEBF3", "#F7BDB1"});
+
+        // Đặt bảng màu động dựa theo thứ tự dữ liệu truyền vào
+        if (!colorPalette.isEmpty()) {
+            pie.palette(colorPalette.toArray(new String[0]));
+        }
+
         pieChartView.setChart(pie);
     }
 
@@ -150,16 +179,111 @@ public class StaticticsFragment extends Fragment {
 
         APIlib.getInstance().setActiveAnyChartView(barChartView);
         Cartesian bar = AnyChart.cartesian();
+
         List<DataEntry> datas = new ArrayList<>();
+        List<String> colorPalette = new ArrayList<>();
+
         for (Map.Entry<String, Integer> item : emotionDatas.entrySet()) {
             datas.add(new ValueDataEntry(item.getKey(), item.getValue()));
+            colorPalette.add(getEmotionHexColor(item.getKey()));
         }
 
-        bar.column(datas);
+        // Đổi sang cột dọc chuẩn (column) thay vì thanh ngang (bar) để khớp tiêu đề trends
+        com.anychart.core.cartesian.series.Column column = bar.column(datas);
+
         bar.title("Emotion trends");
-        bar.title().fontSize("12");
-        bar.palette(new String[]{"#FEFACA", "#CBE5C2", "#D6C7DE", "#CDEBF3", "#F7BDB1"});
+        bar.title().fontSize("14");
+
+        // Khóa cứng bảng màu chuẩn cho các cột dữ liệu
+        if (!colorPalette.isEmpty()) {
+            bar.palette(colorPalette.toArray(new String[0]));
+        }
+
         barChartView.setChart(bar);
+    }
+
+    /**
+     * Hàm lấy mã màu HEX khớp 100% với ảnh colors.xml của bạn
+     */
+    /**
+     * Hàm lấy mã màu HEX cho Biểu đồ - Đã cập nhật nhận diện cả Emoji từ Firebase
+     */
+    private String getEmotionHexColor(String emotionName) {
+        if (emotionName == null) return "#FBD1DD"; // Mặc định là màu hồng nhạt
+
+        String name = emotionName.toLowerCase().trim();
+
+        // Kiểm tra nếu chuỗi chứa ký tự Emoji hoặc chữ tương ứng
+        if (name.contains("happy") || name.contains("😁") || name.contains("😀")) {
+            return "#FEFACA"; // Màu vàng
+        } else if (name.contains("calm") || name.contains("😌") || name.contains("😊")) {
+            return "#CBE5C2"; // Màu xanh lá
+        } else if (name.contains("neutral") || name.contains("😳") || name.contains("😐")) {
+            return "#FBD1DD"; // Màu hồng
+        } else if (name.contains("sad") || name.contains("😭") || name.contains("😢")) {
+            return "#CDEBF3"; // Màu xanh dương
+        } else if (name.contains("angry") || name.contains("😡") || name.contains("❤️")) {
+            return "#F7BDB1"; // Màu cam đỏ (Angry)
+        }
+
+        return "#FBD1DD"; // Mặc định lọt lưới thì trả về màu hồng nhạt
+    }
+
+    /**
+     * Hàm lấy hình tròn màu cho mục Top Emotion - Đã cập nhật nhận diện cả Emoji từ Firebase
+     */
+    private int getEmotionDrawable(String emotionName) {
+        if (emotionName == null) return R.drawable.bg_circle_neutral;
+
+        String name = emotionName.toLowerCase().trim();
+
+        if (name.contains("happy") || name.contains("😁") || name.contains("😀")) {
+            return R.drawable.bg_circle_happy;
+        } else if (name.contains("calm") || name.contains("😌") || name.contains("😊")) {
+            return R.drawable.bg_circle_calm;
+        } else if (name.contains("neutral") || name.contains("😳") || name.contains("😐")) {
+            return R.drawable.bg_circle_neutral;
+        } else if (name.contains("sad") || name.contains("😭") || name.contains("😢")) {
+            return R.drawable.bg_circle_sad;
+        } else if (name.contains("angry") || name.contains("😡") || name.contains("❤️")) {
+            return R.drawable.bg_circle_angry;
+        }
+
+        return R.drawable.bg_circle_neutral;
+    }
+
+    /**
+     * Nhận danh sách Top 3 đã được xử lý từ ViewModel và đổ lên UI ô màu
+     */
+    private void updateTopEmotionsUI(List<Pair<String, Integer>> topEmotions) {
+        // Mặc định ẩn tất cả các ô đi để dọn sạch dữ liệu cũ của tháng trước
+        if (layoutTop1 != null) layoutTop1.setVisibility(View.INVISIBLE);
+        if (layoutTop2 != null) layoutTop2.setVisibility(View.INVISIBLE);
+        if (layoutTop3 != null) layoutTop3.setVisibility(View.INVISIBLE);
+
+        if (topEmotions == null || topEmotions.isEmpty()) return;
+
+        // Đổ dữ liệu động vào các ô tương ứng nếu có phần tử tương thích
+        if (topEmotions.size() >= 1 && layoutTop1 != null) {
+            setSingleEmotionItem(layoutTop1, imgTop1, txtTop1, topEmotions.get(0));
+        }
+        if (topEmotions.size() >= 2 && layoutTop2 != null) {
+            setSingleEmotionItem(layoutTop2, imgTop2, txtTop2, topEmotions.get(1));
+        }
+        if (topEmotions.size() >= 3 && layoutTop3 != null) {
+            setSingleEmotionItem(layoutTop3, imgTop3, txtTop3, topEmotions.get(2));
+        }
+    }
+
+    private void setSingleEmotionItem(LinearLayout layout, View dotView, TextView textView, Pair<String, Integer> data) {
+        layout.setVisibility(View.VISIBLE);
+
+        // Gán text hiển thị, ví dụ: "Happy (5)"
+        textView.setText(data.first + " (" + data.second + ")");
+
+        // Đổi màu nền chấm tròn tương ứng với tên
+        int drawableId = getEmotionDrawable(data.first);
+        dotView.setBackgroundResource(drawableId);
     }
 
     private void updateCalendar() {
@@ -222,7 +346,8 @@ public class StaticticsFragment extends Fragment {
         }
 
         if (!Uid.isEmpty()) {
-            viewModel.getReactionList(Uid, startDate, endDate);
+            // Thay đổi từ hàm cũ sang hàm loadData hợp nhất mới của ViewModel
+            viewModel.loadData(Uid, startDate, endDate);
         }
     }
 
@@ -234,7 +359,6 @@ public class StaticticsFragment extends Fragment {
         return counts;
     }
 
-    // TỐI ƯU BỘ NHỚ: Giải phóng tài nguyên đồ thị WebView khi Fragment bị huỷ giao diện
     @Override
     public void onDestroyView() {
         super.onDestroyView();

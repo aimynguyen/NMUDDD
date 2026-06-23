@@ -26,7 +26,7 @@
                 android:src="@drawable/human_human"
                 android:background="@drawable/bg_circle_white"
                 android:elevation="8dp"
-                android:padding="15dp"
+                android:padding="5dp"
                 />
 
             <ImageView
@@ -93,57 +93,40 @@
             android:textColor="@color/text_primary"
             android:textColorHint="#9AA0A6" />
 
-        <!-- Avatarurl -->
+        <!-- Birthday -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Avatar URL"
+            android:text="Date of birth"
             android:textColor="@color/text_primary"
             android:textSize="18sp" />
 
-        <EditText
-            android:id="@+id/edtAvatarUrl"
+        <TextView
+            android:id="@+id/tvBirthday"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="8dp"
             android:background="@drawable/bg_rounded"
-            android:hint="Enter your avatar URL"
-            android:paddingHorizontal="16dp"
-            android:textColor="@color/text_primary"
-            android:textColorHint="#9AA0A6" />
-
-
-        <!-- Confirm Your Password -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Confirm your password"
-            android:textColor="@color/text_primary"
-            android:textSize="18sp" />
-
-        <EditText
-            android:id="@+id/edtConfirmPassword"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/bg_rounded"
-            android:hint="Confirm your password"
-            android:inputType="textPassword"
+            android:gravity="center_vertical"
+            android:hint="Select your birthday"
             android:paddingHorizontal="16dp"
             android:textColor="@color/text_primary"
             android:textColorHint="#9AA0A6" />
 
         <!-- Note -->
         <TextView
-            android:layout_width="match_parent"
+            android:id="@+id/tvChangePassword"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
-            android:lineSpacingExtra="3dp"
-            android:text="You can only change your name once every 14 days."
-            android:textColor="@color/gray_medium"
-            android:textSize="13sp" />
-
+            android:text="Change Password?"
+            android:textColor="@color/blue_secondary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:padding="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:layout_marginTop="16dp" />
         <!-- Button -->
         <Button
             android:id="@+id/btnFinish"

@@ -18,7 +18,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.diary_app.R;
 import com.example.diary_app.adapter.SearchUserAdapter;
+import com.example.diary_app.core.NotiType;
 import com.example.diary_app.data.model.User;
+import com.example.diary_app.repository.NotificationRepository;
 import com.example.diary_app.repository.UserRepository;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -39,7 +41,10 @@ public class AddFriendFragment extends Fragment {
     private SearchUserAdapter adapter;
     private List<User> searchResults;
     private UserRepository userRepository;
+    private NotificationRepository notificationRepository;
     private String currentUserId;
+    private String currentUserName = "Ai đó"; // Tên mặc định
+
     // Thêm biến này ở đầu Fragment cùng các biến khác
     private List<String> sentRequestIds = new ArrayList<>();
 
@@ -63,9 +68,16 @@ public class AddFriendFragment extends Fragment {
 
     private void initData() {
         userRepository = new UserRepository();
+        notificationRepository = new NotificationRepository();
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
             currentUserId = currentUser.getUid();
+            // Lấy thêm tên user hiện tại để gắn vào thông báo
+            userRepository.getUserProfile(currentUserId).addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists() && documentSnapshot.getString("userName") != null) {
+                    currentUserName = documentSnapshot.getString("userName");
+                }
+            });
         } else {
             Toast.makeText(requireContext(), "Lỗi: Chưa đăng nhập!", Toast.LENGTH_SHORT).show();
         }
@@ -154,22 +166,17 @@ public class AddFriendFragment extends Fragment {
         userRepository.sendFriendRequest(currentUserId, targetUser.getUid())
                 .addOnSuccessListener(documentReference -> {
                     Toast.makeText(requireContext(), "Đã gửi lời mời tới " + targetUser.getEmail(), Toast.LENGTH_SHORT).show();
-                    sendNotificationToUser(targetUser.getUid());
+                    // Gửi thông báo cho người nhận
+                    notificationRepository.sendNotification(
+                            targetUser.getUid(),
+                            currentUserId,
+                            NotiType.FRIEND_REQUEST,
+                            currentUserId,
+                            currentUserName + " đã gửi cho bạn một lời mời kết bạn"
+                    );
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(requireContext(), "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
-    }
-
-    private void sendNotificationToUser(String targetUid) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        Map<String, Object> notification = new HashMap<>();
-        notification.put("toUid", targetUid);
-        notification.put("title", "Lời mời kết bạn mới");
-        notification.put("body", "Bạn có một lời mời kết bạn mới.");
-        notification.put("timestamp", System.currentTimeMillis());
-        notification.put("isRead", false);
-
-        db.collection("notifications").add(notification);
     }
 }

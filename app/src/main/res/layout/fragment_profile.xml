@@ -32,7 +32,7 @@
                     android:layout_height="100dp"
                     android:src="@drawable/human_human"
                     android:background="@drawable/bg_circle_white"
-                    android:padding="15dp"/>
+                    android:padding="5dp"/>
 
                 <TextView
                     android:id="@+id/txtName"

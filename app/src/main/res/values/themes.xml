@@ -32,4 +32,8 @@
         <item name="cornerFamilyBottomRight" >rounded</item>
         <item name="cornerSizeBottomRight">0dp</item>
     </style>
+
+    <style name="CustomPopupMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@drawable/bg_rounded_menu</item>
+    </style>
 </resources>

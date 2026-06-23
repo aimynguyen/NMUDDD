@@ -16,29 +16,66 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import android.net.Uri;
+
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 public class UserRepository {
     private FirebaseFirestore db;
+    private FirebaseStorage storage;
 
     public UserRepository(){
         db = FirebaseFirestore.getInstance();
+        storage = FirebaseStorage.getInstance();
     }
 
     /**
-     * 1. Lưu thông tin User mới vào bảng "users"
+     * Lưu thông tin User mới vào bảng "users"
      * (Gọi hàm này ngay sau khi Đăng ký và Xác minh email thành công)
      */
     public Task<Void> createUserProfile(User user){
         return db.collection("users").document(user.getUid()).set(user);
     }
 
-    // 2. Lấy thông tin Profile của một User bất kỳ dựa vào UID
+    // Đẩy ảnh đại diện lên Firebase Storage
+    public UploadTask uploadImageToStorage(byte[] imageBytes) {
+        String fileName = "avatar_images/" + UUID.randomUUID().toString() + ".jpg";
+        StorageReference ref = storage.getReference().child(fileName);
+        return ref.putBytes(imageBytes);
+    }
+
+    // Lấy link Download URL cho ảnh
+    public Task<Uri> getDownloadUrl(StorageReference imageRef){
+        return imageRef.getDownloadUrl();
+    }
+
+    // Xóa ảnh cũ trên Firebase Storage
+    public Task<Void> deleteImageFromStorage(String imageUrl) {
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            try {
+                StorageReference imageRef = storage.getReferenceFromUrl(imageUrl);
+                return imageRef.delete();
+            } catch (Exception e) {
+                return Tasks.forException(e);
+            }
+        }
+        return Tasks.forResult(null);
+    }
+
+    // Lấy thông tin Profile của một User bất kỳ dựa vào UID
     public Task<DocumentSnapshot> getUserProfile(String uid){
         return db.collection("users").document(uid).get();
     }
 
-    // 3. Tìm kiếm người dùng (Tìm theo Email)
-// 3. Tìm kiếm người dùng (Tìm theo Email - Gõ đến đâu tìm đến đó)
+    // Kiểm tra xem email có tồn tại trong hệ thống hay không
+    public Task<QuerySnapshot> checkEmailExists(String email){
+        return db.collection("users").whereEqualTo("email", email).get();
+    }
+
+    // Tìm kiếm người dùng (Tìm theo Email - Gõ đến đâu tìm đến đó)
     public Task<QuerySnapshot> searchUserByEmail(String emailQuery){
         // Lưu ý: Đảm bảo field lưu email trên Firebase của bạn tên chính xác là "email"
         return db.collection("users")
@@ -98,7 +135,7 @@ public class UserRepository {
         return db.collection("users").document(uid).update(field, value);
     }
 
-    // 5. Gửi lời mời kết bạn
+    // Gửi lời mời kết bạn
     public Task<DocumentReference> sendFriendRequest(String myUid, String targetUid){
         Map<String, Object> request = new HashMap<>();
         request.put("senderId", myUid);
@@ -138,7 +175,7 @@ public class UserRepository {
         return batch.commit();
     }
 
-    // 8. Từ chối kết bạn / Hủy kết bạn
+    // Từ chối kết bạn / Hủy kết bạn
     public Task<Void> deleteFriendRequestBySender(String myUid, String senderUid) {
         return db.collection("friend_requests")
                 .whereEqualTo("senderId", senderUid)
@@ -156,5 +193,16 @@ public class UserRepository {
 
     public Task<Void> deleteFriendRequest(String requestId) {
         return db.collection("friend_requests").document(requestId).delete();
+    }
+
+    // Hủy kết bạn
+    public Task<Void> unfriendUser(String myUid, String friendUid) {
+        WriteBatch batch = db.batch();
+        DocumentReference myRef = db.collection("users").document(myUid);
+        batch.update(myRef, "friendIds", FieldValue.arrayRemove(friendUid));
+
+        DocumentReference friendRef = db.collection("users").document(friendUid);
+        batch.update(friendRef, "friendIds", FieldValue.arrayRemove(myUid));
+        return batch.commit();
     }
 }
