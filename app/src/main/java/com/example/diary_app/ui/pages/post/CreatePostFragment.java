@@ -52,8 +52,13 @@ public class CreatePostFragment extends Fragment {
     // Biến lưu trạng thái dữ liệu
     private Uri selectedImageUri = null;
     private String currentPrivacy = "public"; // Mặc định là public
-    private String currentMood = "😊"; // Có thể thay đổi khi click vào các TextView cảm xúc
+    // LƯU Ý MỚI: Không lưu icon nữa, mà lấy tên Enum ("NORMAL", "HAPPY"...) để đẩy lên Firebase
+    private String currentMood = com.example.diary_app.core.Mood.HAPPY.name();
     private com.example.diary_app.repository.UserRepository userRepository;
+
+    // --- BIẾN CAMERA ---
+    private androidx.camera.view.PreviewView viewFinder;
+    private androidx.camera.core.ImageCapture imageCapture;
     // Trình chọn ảnh từ thư viện
     private final ActivityResultLauncher<String> galleryLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
@@ -61,6 +66,15 @@ public class CreatePostFragment extends Fragment {
                     selectedImageUri = uri;
                     imgPreview.setImageURI(uri);
                     switchMode(true); // Có ảnh -> Chuyển sang màn hình Preview
+                }
+            });
+    // Bộ xin quyền Camera
+    private final androidx.activity.result.ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    startCamera();
+                } else {
+                    android.widget.Toast.makeText(getContext(), "Bạn cần cấp quyền Camera để chụp ảnh!", android.widget.Toast.LENGTH_SHORT).show();
                 }
             });
     // Trình khởi chạy Camera
@@ -94,6 +108,7 @@ public class CreatePostFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        android.util.Log.e("KIET_DEBUG", "0. ĐÃ MỞ ĐÚNG FILE CREATE POST FRAGMENT!!!!!");
         // Nhớ sử dụng file wrapper mới tạo
         return inflater.inflate(R.layout.fragment_create_post, container, false);
     }
@@ -109,12 +124,24 @@ public class CreatePostFragment extends Fragment {
 
         // Tự động điền ngày hôm nay vào txtDate
         setCurrentDate();
+        // 1. Ánh xạ khung ngắm Camera
+        viewFinder = view.findViewById(R.id.viewFinder);
+
+        // 2. Khởi động Camera ngay khi mở giao diện
+        setupCamera();
+
+        // 3. Bắt sự kiện bấm nút Chụp ảnh
+        android.view.View btnCapture = view.findViewById(R.id.btnCapture);
+        if (btnCapture != null) {
+            btnCapture.setOnClickListener(v -> takePhoto());
+        }
+        switchMode(false);
     }
 
     private void initViews(View view) {
         // 1. Ánh xạ 2 khối màn hình
-        viewCamera = view.findViewById(R.id.viewCamera);
-        viewPreview = view.findViewById(R.id.viewPreview);
+        viewCamera = view.findViewById(R.id.layoutCamera);
+        viewPreview = view.findViewById(R.id.layoutPreview);
 
         // 2. Ánh xạ nút Camera
         btnUpload = view.findViewById(R.id.btnUpload);
@@ -140,11 +167,6 @@ public class CreatePostFragment extends Fragment {
     private void setupListeners() {
         // --- CHỨC NĂNG BÊN CAMERA ---
         btnUpload.setOnClickListener(v -> galleryLauncher.launch("image/*"));
-
-        btnCapture.setOnClickListener(v -> {
-            // Mở camera chụp ảnh
-            cameraLauncher.launch(null);
-        });
 
         // --- CHỨC NĂNG BÊN PREVIEW ---
         btnRemoveImage.setOnClickListener(v -> {
@@ -262,5 +284,90 @@ public class CreatePostFragment extends Fragment {
                 Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    // =======================================================
+    // BỘ HÀM XỬ LÝ CAMERA LOCKET-STYLE
+    // =======================================================
+
+    // Hàm 1: Kiểm tra quyền
+    private void setupCamera() {
+        if (androidx.core.content.ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.CAMERA)
+                == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            startCamera();
+        } else {
+            //requestPermissionLauncher.launch(android.Manifest.permission.CAMERA);
+        }
+    }
+
+    // Hàm 2: Mở ống kính
+    private void startCamera() {
+         //1. Báo hiệu bắt đầu chạy
+        android.widget.Toast.makeText(getContext(), "Đang kích hoạt ống kính...", android.widget.Toast.LENGTH_SHORT).show();
+
+        com.google.common.util.concurrent.ListenableFuture<androidx.camera.lifecycle.ProcessCameraProvider> cameraProviderFuture =
+                androidx.camera.lifecycle.ProcessCameraProvider.getInstance(requireContext());
+
+        cameraProviderFuture.addListener(() -> {
+            try {
+                androidx.camera.lifecycle.ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+
+                androidx.camera.core.Preview preview = new androidx.camera.core.Preview.Builder().build();
+                preview.setSurfaceProvider(viewFinder.getSurfaceProvider());
+
+                imageCapture = new androidx.camera.core.ImageCapture.Builder().build();
+                androidx.camera.core.CameraSelector cameraSelector = androidx.camera.core.CameraSelector.DEFAULT_BACK_CAMERA;
+
+                cameraProvider.unbindAll();
+                cameraProvider.bindToLifecycle(getViewLifecycleOwner(), cameraSelector, preview, imageCapture);
+
+                 //2. Báo hiệu gắn ống kính thành công!
+                android.widget.Toast.makeText(getContext(), "Camera đã mở thành công!", android.widget.Toast.LENGTH_SHORT).show();
+
+            } catch (Exception exc) {
+                 //3. Nếu có lỗi ngầm, nó sẽ in thẳng ra màn hình cho bạn xem
+                android.util.Log.e("CameraX", "Lỗi khởi động camera", exc);
+                android.widget.Toast.makeText(getContext(), "Lỗi Camera: " + exc.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+            }
+        }, androidx.core.content.ContextCompat.getMainExecutor(requireContext()));
+    }
+    // Hàm 3: Bấm chụp và xử lý ảnh
+    private void takePhoto() {
+        if (imageCapture == null) return;
+
+        // Tạo một file ảnh tạm thời trong máy để lưu bức hình vừa chụp
+        java.io.File photoFile = new java.io.File(requireContext().getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES),
+                "Diary_" + System.currentTimeMillis() + ".jpg");
+
+        androidx.camera.core.ImageCapture.OutputFileOptions outputOptions =
+                new androidx.camera.core.ImageCapture.OutputFileOptions.Builder(photoFile).build();
+
+        // Ra lệnh chụp
+        imageCapture.takePicture(outputOptions, androidx.core.content.ContextCompat.getMainExecutor(requireContext()),
+                new androidx.camera.core.ImageCapture.OnImageSavedCallback() {
+                    @Override
+                    public void onImageSaved(@NonNull androidx.camera.core.ImageCapture.OutputFileResults outputFileResults) {
+
+                        // THÀNH CÔNG: Lấy Uri của ảnh vừa chụp
+                        android.net.Uri savedUri = android.net.Uri.fromFile(photoFile);
+
+                        // 1. Gán vào biến selectedImageUri (Biến cũ của bạn dùng để post bài)
+                        selectedImageUri = savedUri;
+
+                        // 2. Gán ảnh vừa chụp lên cái ImageView của màn hình Preview
+                        imgPreview.setImageURI(savedUri);
+
+                        // 3. Đóng màn hình Camera, trượt mở màn hình Preview lên (Gọi hàm cũ của bạn)
+                        switchMode(true);
+
+                        android.widget.Toast.makeText(getContext(), "Chụp thành công!", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(@NonNull androidx.camera.core.ImageCaptureException exception) {
+                        android.util.Log.e("CameraX", "Chụp ảnh thất bại: " + exception.getMessage(), exception);
+                        android.widget.Toast.makeText(getContext(), "Lỗi lưu ảnh", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }

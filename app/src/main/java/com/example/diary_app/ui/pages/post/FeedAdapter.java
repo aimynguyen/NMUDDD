@@ -54,12 +54,11 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
         // --- B. XỬ LÝ SỰ KIỆN THẢ CẢM XÚC ---
         // Khi bấm vào cảm xúc nào, Adapter sẽ dùng bộ đàm gọi về Fragment kèm theo ID bài viết
-        holder.reactHeart.setOnClickListener(v -> listener.onReactionClick(currentPost, "heart"));
+        holder.reactAngry.setOnClickListener(v -> listener.onReactionClick(currentPost, "angry"));
         holder.reactHappy.setOnClickListener(v -> listener.onReactionClick(currentPost, "happy"));
-        holder.reactShy.setOnClickListener(v -> listener.onReactionClick(currentPost, "shy"));
-        holder.reactCry.setOnClickListener(v -> listener.onReactionClick(currentPost, "cry"));
+        holder.reactNeutral.setOnClickListener(v -> listener.onReactionClick(currentPost, "neutral"));
+        holder.reactSad.setOnClickListener(v -> listener.onReactionClick(currentPost, "sad"));
         holder.reactCalm.setOnClickListener(v -> listener.onReactionClick(currentPost, "calm"));
-        holder.reactFire.setOnClickListener(v -> listener.onReactionClick(currentPost, "fire"));
         //Load ảnh
         if (currentPost.getImageUrl() != null && !currentPost.getImageUrl().isEmpty()) {
 
@@ -89,34 +88,28 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         // ==========================================
         // 2. HIỂN THỊ MOOD CỦA BÀI VIẾT
         // ==========================================
-        String mood = currentPost.getEmotion();
+        String mood = currentPost.getEmotion(); // Lấy chữ từ DB (VD: "HAPPY", "ANGRY")
 
-        if (mood != null && !mood.isEmpty()) {
-            holder.imgMood.setVisibility(View.VISIBLE); // Bật hình tròn lên
-            switch (mood) {
-                case "😊":
-                    holder.imgMood.setText("😊");
-                    break;
-                case "😳":
-                    holder.imgMood.setText("😳");
-                    break;
-                case "😭":
-                    holder.imgMood.setText("😭");
-                    break;
-                case "😌":
-                    holder.imgMood.setText("😌");
-                    break;
-                case "💗":
-                    holder.imgMood.setText("💗");
-                    break;
-                default:
-                    // Nếu là mood lạ, tạm thời ẩn đi
-                    holder.imgMood.setVisibility(View.GONE);
-                    break;
-            }
+        if (mood != null && !mood.trim().isEmpty()) {
+            holder.imgMood.setVisibility(View.VISIBLE);
+
+            // Đưa chữ vào hàm dịch để lấy icon tương ứng set lên giao diện
+            holder.imgMood.setText(getMoodIcon(mood));
         } else {
-            // Nếu bài viết không gắn Mood, giấu hình tròn góc phải đi cho đỡ trống
             holder.imgMood.setVisibility(View.GONE);
+        }
+    }
+    // Hàm hỗ trợ dịch từ chữ (lưu trên Firebase) sang Icon để hiển thị cho User
+    private String getMoodIcon(String moodName) {
+        if (moodName == null) return "😐"; // Mặc định nếu bị rỗng
+
+        switch (moodName) {
+            case "HAPPY": return "😊";
+            case "SAD": return "😭";
+            case "CALM": return "😌";
+            case "ANGRY": return "😡";
+            case "NEUTRAL": return "😳";
+            default: return "😐";
         }
     }
     @Override
@@ -129,7 +122,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
     // =========================================================
     public static class FeedViewHolder extends RecyclerView.ViewHolder {
 
-        TextView reactHeart, reactHappy, reactShy, reactCry, reactCalm, reactFire;
+        TextView reactAngry, reactHappy, reactNeutral, reactSad, reactCalm;
 
         TextView tvUsername, tvCaption;
         android.widget.ImageView imgPostContent;
@@ -138,12 +131,11 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         public FeedViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            reactHeart = itemView.findViewById(R.id.reactHeart);
+            reactAngry = itemView.findViewById(R.id.reactAngry);
             reactHappy = itemView.findViewById(R.id.reactHappy);
-            reactShy = itemView.findViewById(R.id.reactShy);
-            reactCry = itemView.findViewById(R.id.reactCry);
+            reactNeutral = itemView.findViewById(R.id.reactNeutral);
+            reactSad = itemView.findViewById(R.id.reactSad);
             reactCalm = itemView.findViewById(R.id.reactCalm);
-            reactFire = itemView.findViewById(R.id.reactFire);
 
             tvUsername = itemView.findViewById(R.id.tvUsername);
             tvCaption = itemView.findViewById(R.id.tvCaption);

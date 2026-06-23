@@ -57,13 +57,13 @@ public class HomeFragment extends Fragment {
     private EditText edtCaption;
     private AutoCompleteTextView autoLocation;
     private Button btnPost;
-    private TextView moodHeart, moodHappy, moodShy, moodCry, moodCalm;
+    private TextView moodAngry, moodHappy, moodNeutral, moodSad, moodCalm;
     private View cameraFrame;
     private RecyclerView recyclerFeed;
     private FeedAdapter feedAdapter;
     private Uri selectedImageUri = null;
     private String currentPrivacy = "public"; // Mặc định bài viết là public
-    private String currentMood = "😊"; // Mặc định cảm xúc là vui vẻ
+    private String currentMood = com.example.diary_app.core.Mood.HAPPY.name(); // Mặc định là HAPPY chuẩn Enum
     private com.example.diary_app.data.model.Location selectedLocation = null;
     // 4. TRÌNH CHỌN ẢNH VÀ CAMERA
     private final ActivityResultLauncher<String> galleryLauncher =
@@ -199,10 +199,10 @@ public class HomeFragment extends Fragment {
         edtCaption = view.findViewById(R.id.edtCaption);
         autoLocation = view.findViewById(R.id.autoLocation);
         btnPost = view.findViewById(R.id.btnPost);
-        moodHeart = view.findViewById(R.id.moodHeart);
+        moodAngry = view.findViewById(R.id.moodAngry);
         moodHappy = view.findViewById(R.id.moodHappy);
-        moodShy = view.findViewById(R.id.moodShy);
-        moodCry = view.findViewById(R.id.moodCry);
+        moodNeutral = view.findViewById(R.id.moodNeutral);
+        moodSad = view.findViewById(R.id.moodSad);
         moodCalm = view.findViewById(R.id.moodCalm);
     }
 
@@ -248,47 +248,41 @@ public class HomeFragment extends Fragment {
                 btnPublic.setAlpha(0.4f);
             });
         }
-        //Mood
+        // Mood: Sửa lại theo chuẩn Enum
         View.OnClickListener moodClickListener = v -> {
             // Làm mờ tất cả các nút đi
-            if (moodHeart != null) moodHeart.setAlpha(0.4f);
+            if (moodAngry != null) moodAngry.setAlpha(0.4f);
             if (moodHappy != null) moodHappy.setAlpha(0.4f);
-            if (moodShy != null) moodShy.setAlpha(0.4f);
-            if (moodCry != null) moodCry.setAlpha(0.4f);
+            if (moodNeutral != null) moodNeutral.setAlpha(0.4f);
+            if (moodSad != null) moodSad.setAlpha(0.4f);
             if (moodCalm != null) moodCalm.setAlpha(0.4f);
-            //Chỉ làm sáng rõ cái nút vừa được bấm
+
+            // Chỉ làm sáng rõ cái nút vừa được bấm
             v.setAlpha(1.0f);
-            //Lấy cái icon emoji bên trong nút đó gán vào biến currentMood
-            currentMood = ((TextView) v).getText().toString();
+
+            // Dựa vào ID của nút để gán tên Enum chuẩn xác đẩy lên Database
+            int viewId = v.getId();
+            if (viewId == R.id.moodHappy) {
+                currentMood = com.example.diary_app.core.Mood.HAPPY.name();
+            } else if (viewId == R.id.moodSad) {
+                currentMood = com.example.diary_app.core.Mood.SAD.name();
+            } else if (viewId == R.id.moodCalm) {
+                currentMood = com.example.diary_app.core.Mood.CALM.name();
+            } else if (viewId == R.id.moodNeutral) {
+                currentMood = com.example.diary_app.core.Mood.NEUTRAL.name();
+            } else if (viewId == R.id.moodAngry) {
+                currentMood = com.example.diary_app.core.Mood.ANGRY.name();
+            }
         };
-        if (moodHeart != null) moodHeart.setOnClickListener(moodClickListener);
+        // Gắn sự kiện
+        if (moodAngry != null) moodAngry.setOnClickListener(moodClickListener);
         if (moodHappy != null) moodHappy.setOnClickListener(moodClickListener);
-        if (moodShy != null) moodShy.setOnClickListener(moodClickListener);
-        if (moodCry != null) moodCry.setOnClickListener(moodClickListener);
+        if (moodNeutral != null) moodNeutral.setOnClickListener(moodClickListener);
+        if (moodSad != null) moodSad.setOnClickListener(moodClickListener);
         if (moodCalm != null) moodCalm.setOnClickListener(moodClickListener);
 
-        // Mặc định lúc mới vào cho nút Happy sáng lên
-        if (moodHappy != null) {
-            moodHappy.performClick();
-        }
-        if (autoLocation != null) {
-            if (autoLocation != null) {
-                autoLocation.setOnClickListener(v -> {
-
-                    // 1. Ép kiểu tường minh để chắc chắn nó là AndroidX Fragment
-                    androidx.fragment.app.Fragment mapFragment = new MapFragment();
-
-                    // 2. Tuyệt chiêu: Tự động lấy ID của cái khung đang chứa HomeFragment hiện tại
-                    int containerId = ((android.view.ViewGroup) requireView().getParent()).getId();
-
-                    // 3. Chuyển trang
-                    requireActivity().getSupportFragmentManager().beginTransaction()
-                            .add(containerId, mapFragment)
-                            .addToBackStack(null) // Cho phép bấm nút Back để quay lại
-                            .commit();
-                });
-            }
-        }
+        // Bấm sẵn nút Happy lúc mới vào
+        if (moodHappy != null) moodHappy.performClick();
     }
 
     // HÀM ĐIỀU PHỐI GIAO DIỆN QUAN TRỌNG NHẤT
@@ -330,14 +324,22 @@ public class HomeFragment extends Fragment {
                 // 2. Gọi thẳng xuống hàm addReaction của Repository
                 postRepository.addReaction(post.getPostId(), myUid, reactionType)
                         .addOnSuccessListener(aVoid -> {
+
+                            // Tự dịch từ chữ sang Icon (😊) ngay tại đây để hiện Toast
+                            String iconToast = "😐";
+                            switch (reactionType) {
+                                case "HAPPY": iconToast = "😊"; break;
+                                case "SAD": iconToast = "😭"; break;
+                                case "CALM": iconToast = "😌"; break;
+                                case "ANGRY": iconToast = "😡"; break;
+                                case "NEUTRAL": iconToast = "😳"; break;
+                            }
+
                             // Hiện thông báo thả thành công cho vui mắt
-                            Toast.makeText(getContext(), "Đã thả " + reactionType, Toast.LENGTH_SHORT).show();
+                            android.widget.Toast.makeText(getContext(), "Đã thả " + iconToast, android.widget.Toast.LENGTH_SHORT).show();
 
                             // để app tự động tải lại bảng tin nhằm cập nhật giao diện mặt cười ngay lập tức
                             fetchFeedData();
-                        })
-                        .addOnFailureListener(e -> {
-                            Toast.makeText(getContext(), "Lỗi thả cảm xúc: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         });
             }
         });
