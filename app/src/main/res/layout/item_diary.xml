@@ -2,6 +2,7 @@
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="300dp"
     android:layout_height="300dp"
@@ -43,11 +44,13 @@
             android:layout_margin="12dp"
             android:gravity="center_vertical">
 
-            <View
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/imgAvatar"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:background="@drawable/avatar_circle"/>
+                android:scaleType="centerCrop"
+                android:background="@drawable/avatar_circle"
+                app:shapeAppearanceOverlay="@style/AvatarCircleImage"/>
 
             <TextView
                 android:id="@+id/tvUsername"
