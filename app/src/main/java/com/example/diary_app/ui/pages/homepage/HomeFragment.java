@@ -106,7 +106,7 @@ public class HomeFragment extends Fragment {
         // Mặc định lúc mới vào là trạng thái Lướt tin & Chụp ảnh
         switchMode(false);
         setupCamera();
-        getParentFragmentManager().setFragmentResultListener("location_request", getViewLifecycleOwner(), (requestKey, bundle) -> {
+        requireActivity().getSupportFragmentManager().setFragmentResultListener("location_request", getViewLifecycleOwner(), (requestKey, bundle) -> {
             // Lấy dữ liệu do màn hình Map gửi về
             String addressName = bundle.getString("location_name");
             double latitude = bundle.getDouble("latitude");
@@ -132,6 +132,7 @@ public class HomeFragment extends Fragment {
             if (cityName != null) {
                 selectedLocation.setCity(cityName);
             }
+            switchMode(true);
         });
         // ==========================================
         // 1. LẮNG NGHE TÍN HIỆU ĐĂNG BÀI THÀNH CÔNG
@@ -282,6 +283,19 @@ public class HomeFragment extends Fragment {
 
         // Bấm sẵn nút Happy lúc mới vào
         if (moodHappy != null) moodHappy.performClick();
+
+        if (autoLocation != null) {
+            autoLocation.setOnClickListener(v -> {
+                // 1. Khởi tạo màn hình bản đồ
+                androidx.fragment.app.Fragment mapFragment = new MapFragment();
+
+                // 2. Phủ MapFragment lên thẳng lớp gốc của màn hình (android.R.id.content)
+                requireActivity().getSupportFragmentManager().beginTransaction()
+                        .add(android.R.id.content, mapFragment)
+                        .addToBackStack(null)
+                        .commit();
+            });
+        }
     }
 
     // HÀM ĐIỀU PHỐI GIAO DIỆN QUAN TRỌNG NHẤT

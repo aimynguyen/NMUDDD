@@ -7,6 +7,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -98,6 +99,24 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         } else {
             holder.imgMood.setVisibility(View.GONE);
         }
+        // Lấy dữ liệu Location từ bài viết
+        com.example.diary_app.data.model.Location location = currentPost.getLocation();
+
+        // Kiểm tra xem bài viết này có lưu địa điểm hay không
+        if (location != null && location.getAddress() != null && !location.getAddress().trim().isEmpty()) {
+
+            // Có địa điểm -> Bật khung hiển thị lên
+            holder.layoutLocation.setVisibility(View.VISIBLE);
+
+            // Set tên địa điểm thực tế đè lên chữ "Da Lat"
+            holder.tvLocation.setText(location.getAddress());
+
+            // (Tuỳ chọn: Nếu bạn chỉ muốn hiện tên thành phố cho ngắn, có thể dùng location.getCity() thay thế)
+
+        } else {
+            // Không có địa điểm -> Tắt hẳn cái khung nền đi cho gọn giao diện
+            holder.layoutLocation.setVisibility(View.GONE);
+        }
     }
     // Hàm hỗ trợ dịch từ chữ (lưu trên Firebase) sang Icon để hiển thị cho User
     private String getMoodIcon(String moodName) {
@@ -128,6 +147,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         android.widget.ImageView imgPostContent;
         android.widget.ImageView imgAvatar;
         android.widget.TextView imgMood;
+        LinearLayout layoutLocation;
+        TextView tvLocation;
         public FeedViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -142,6 +163,9 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             imgPostContent = itemView.findViewById(R.id.imgDiary);
             imgAvatar = itemView.findViewById(R.id.imgAvatar);
             imgMood = itemView.findViewById(R.id.imgMood);
+
+            layoutLocation = itemView.findViewById(R.id.layoutLocation);
+            tvLocation = itemView.findViewById(R.id.tvLocation);
         }
     }
 }

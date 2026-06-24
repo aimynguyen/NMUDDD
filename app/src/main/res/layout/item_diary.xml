@@ -75,6 +75,7 @@
             <!-- LOCATION -->
 
             <LinearLayout
+                android:id="@+id/layoutLocation"
                 android:layout_width="wrap_content"
                 android:layout_height="24dp"
                 android:layout_marginBottom="6dp"
