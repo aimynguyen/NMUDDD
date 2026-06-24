@@ -23,13 +23,12 @@
 
         <ImageButton
             android:id="@+id/btnRemoveImage"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:layout_gravity="top|left"
             android:layout_marginLeft="20dp"
-            android:layout_marginBottom="10dp"
             android:background="@drawable/bg_circle_white"
-            android:padding="10dp"
+            android:padding="5dp"
             android:src="@android:drawable/ic_menu_close_clear_cancel"
             android:elevation="5dp"/>
 
@@ -37,61 +36,15 @@
 
         <ImageView
             android:id="@+id/imgPreview"
-            android:layout_width="230dp"
-            android:layout_height="230dp"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:layout_marginBottom="10dp"
             android:background="@drawable/bg_camera_frame"
             android:clipToOutline="true"
             android:scaleType="centerCrop"
+            android:layout_gravity="center"
             android:src="@android:drawable/ic_menu_gallery"
             android:elevation="6dp"/>
-
-        <!-- slider -->
-
-        <FrameLayout
-            android:layout_width="80dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center"
-            android:layout_margin="10dp"
-            android:background="@drawable/bg_slider_container"
-            android:elevation="6dp">
-
-            <!--slide -->
-
-            <LinearLayout
-                android:id="@+id/btnPrivate"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_gravity="start|center_vertical"
-                android:layout_margin="5dp"
-                android:background="@drawable/bg_slider_circle_light"
-                android:gravity="center"
-                android:elevation="8dp">
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="18dp"
-                    android:src="@drawable/img_private"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/btnPublic"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_gravity="end|center_vertical"
-                android:layout_margin="5dp"
-                android:background="@drawable/bg_slider_circle_dark"
-                android:gravity="center"
-                android:elevation="8dp">
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="18dp"
-                    android:src="@drawable/img_public"/>
-
-            </LinearLayout>
-
-        </FrameLayout>
 
     </LinearLayout>
 
@@ -111,8 +64,57 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
             android:paddingBottom="120dp">
+
+            <!-- slider -->
+
+            <FrameLayout
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:background="@drawable/bg_slider_container"
+                android:elevation="6dp">
+
+                <!--slide -->
+
+                <LinearLayout
+                    android:id="@+id/btnPrivate"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="start|center_vertical"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/bg_slider_circle_light"
+                    android:gravity="center"
+                    android:elevation="8dp">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/img_private"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/btnPublic"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/bg_slider_circle_dark"
+                    android:gravity="center"
+                    android:elevation="8dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/img_public"/>
+
+                </LinearLayout>
+
+            </FrameLayout>
 
             <!-- date auto -->
 
@@ -143,6 +145,7 @@
                 android:background="@drawable/bg_input_rounded"
                 android:gravity="top"
                 android:hint="Write caption..."
+                android:textColor="@color/text_primary"
                 android:padding="18dp"
                 android:elevation="6dp"/>
 
@@ -214,6 +217,7 @@
                 android:background="@drawable/bg_input_rounded"
                 android:completionThreshold="1"
                 android:hint="Choose location"
+                android:textColor="@color/text_primary"
                 android:paddingHorizontal="18dp"
                 android:elevation="6dp"
                 android:focusable="false"
