@@ -49,14 +49,14 @@ public class PetConstants {
 
     // 3. CẤU HÌNH TRANG BỊ / CẢM XÚC MẶC ĐỊNH
     public static final String ITEM_TYPE_BACKGROUND = "background";
-    public static final String DEFAULT_BACKGROUND_ID = "bg_default";
+    public static final String DEFAULT_BACKGROUND_ID = "bg_01";
 
     // Các trạng thái cảm xúc của Pet (khớp với tên file ảnh đuôi png/webp)
-    public static final String EMOTION_HAPPY = "happy";
-    public static final String EMOTION_SAD = "sad";
-    public static final String EMOTION_NEUTRAL = "neutral";
-    public static final String EMOTION_ANGRY = "angry";
-    public static final String EMOTION_SLEEP = "sleep";
+    public static final String EMOTION_HAPPY = "HAPPY";
+    public static final String EMOTION_SAD = "SAD";
+    public static final String EMOTION_NEUTRAL = "NEUTRAL";
+    public static final String EMOTION_ANGRY = "ANGRY";
+    public static final String EMOTION_SLEEP = "SLEEP";
 
     // Kho dữ liệu câu thoại mẫu
     private static final String[] QUOTES_HAPPY = {

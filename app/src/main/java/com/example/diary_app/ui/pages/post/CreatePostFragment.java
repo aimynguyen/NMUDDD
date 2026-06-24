@@ -19,10 +19,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import com.example.diary_app.R;
 import com.example.diary_app.data.model.Location;
 import com.example.diary_app.repository.AuthRepository;
+import com.example.diary_app.viewmodel.PetViewModel;
 import com.example.diary_app.viewmodel.PostViewModel;
 
 import java.text.SimpleDateFormat;
@@ -31,6 +33,7 @@ import java.util.Date;
 import java.util.Locale;
 public class CreatePostFragment extends Fragment {
     private PostViewModel postViewModel;
+    private PetViewModel petViewModel;
     private AuthRepository authRepository;
 
     // Các khối giao diện chính
@@ -128,6 +131,7 @@ public class CreatePostFragment extends Fragment {
     private void setupDependencies() {
         authRepository = new AuthRepository();
         postViewModel = new ViewModelProvider(requireActivity()).get(PostViewModel.class);
+        petViewModel = new ViewModelProvider(requireActivity()).get(PetViewModel.class);
         userRepository = new com.example.diary_app.repository.UserRepository();
     }
 
@@ -239,10 +243,20 @@ public class CreatePostFragment extends Fragment {
             btnPost.setText(isLoading ? "Posting..." : "Post");
         });
 
-        postViewModel.getPostSuccess().observe(getViewLifecycleOwner(), isSuccess -> {
-            if (isSuccess) {
+        postViewModel.getPostSuccess().observe(getViewLifecycleOwner(), event -> {
+            if (event == null) return;
+            // getContentIfNotHandled() đảm bảo chỉ xử lý MỘT LẦN - tránh trigger lại khi Fragment mới tạo ra
+            Boolean isSuccess = event.getContentIfNotHandled();
+            if (Boolean.TRUE.equals(isSuccess)) {
                 Toast.makeText(getContext(), "Đăng bài thành công!", Toast.LENGTH_SHORT).show();
-                requireActivity().getSupportFragmentManager().popBackStack(); // Về Newsfeed
+                
+                // Tăng EXP cho Pet
+                String myUid = authRepository.getCurrentUserId();
+                if (myUid != null) {
+                    petViewModel.addExp(myUid);
+                }
+                
+                Navigation.findNavController(requireView()).popBackStack();
             }
         });
 

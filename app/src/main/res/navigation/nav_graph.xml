@@ -5,6 +5,10 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/nav_login">
 
+    <action
+        android:id="@+id/action_global_nav_pet_levelup"
+        app:destination="@id/nav_pet_levelup" />
+
     <fragment
         android:id="@+id/nav_home"
         android:name="com.example.diary_app.ui.pages.homepage.HomeFragment"
@@ -106,5 +110,10 @@
         android:id="@+id/nav_admin"
         android:name="com.example.diary_app.fragment_adminreview"
         android:label="admin"/>
+
+    <fragment
+        android:id="@+id/nav_pet_levelup"
+        android:name="com.example.diary_app.ui.pages.pet.fragment_pet_levelup"
+        android:label="Level Up" />
 
 </navigation>

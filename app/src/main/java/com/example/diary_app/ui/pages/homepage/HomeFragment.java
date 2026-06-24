@@ -31,6 +31,7 @@ import com.example.diary_app.repository.PostRepository;
 import com.example.diary_app.repository.UserRepository;
 import com.example.diary_app.ui.pages.post.FeedAdapter;
 import com.example.diary_app.ui.pages.statistics.MapFragment;
+import com.example.diary_app.viewmodel.PetViewModel;
 import com.example.diary_app.viewmodel.PostViewModel;
 
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ public class HomeFragment extends Fragment {
 
     // 1. DATA & LOGIC
     private PostViewModel postViewModel;
+    private PetViewModel petViewModel;
     private AuthRepository authRepository;
     private PostRepository postRepository;
     private UserRepository userRepository;
@@ -137,8 +139,10 @@ public class HomeFragment extends Fragment {
         // ==========================================
         // 1. LẮNG NGHE TÍN HIỆU ĐĂNG BÀI THÀNH CÔNG
         // ==========================================
-        postViewModel.getPostSuccess().observe(getViewLifecycleOwner(), isSuccess -> {
-            if (isSuccess) {
+        postViewModel.getPostSuccess().observe(getViewLifecycleOwner(), event -> {
+            if (event == null) return;
+            Boolean isSuccess = event.getContentIfNotHandled();
+            if (Boolean.TRUE.equals(isSuccess)) {
                 // 1. Mở khóa nút bấm
                 if (btnPost != null) {
                     btnPost.setEnabled(true);
@@ -147,6 +151,12 @@ public class HomeFragment extends Fragment {
 
                 // 2. Báo cáo thành công
                 Toast.makeText(getContext(), "Đăng nhật ký thành công! 🎉", Toast.LENGTH_SHORT).show();
+
+                //  Tăng EXP cho Pet
+                String myUid = authRepository.getCurrentUserId();
+                if (myUid != null) {
+                    petViewModel.addExp(myUid);
+                }
 
                 // 3. Dọn dẹp sạch sẽ form đăng bài để lần sau không bị dính chữ cũ
                 selectedImageUri = null;
@@ -211,6 +221,7 @@ public class HomeFragment extends Fragment {
         postRepository = new PostRepository();
         userRepository = new UserRepository();
         postViewModel = new ViewModelProvider(requireActivity()).get(PostViewModel.class);
+        petViewModel = new ViewModelProvider(requireActivity()).get(PetViewModel.class);
     }
 
     private void setupListeners() {

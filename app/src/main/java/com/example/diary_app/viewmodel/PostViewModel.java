@@ -12,6 +12,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.diary_app.Helpers.imageHelper;
+import com.example.diary_app.core.Event;
 import com.example.diary_app.data.model.Location;
 import com.example.diary_app.data.model.Post;
 import com.example.diary_app.repository.PostRepository;
@@ -31,7 +32,8 @@ public class PostViewModel extends AndroidViewModel {
     private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
     private MutableLiveData<String> errorMessage = new MutableLiveData<>();
     // các LiveData để theo dõi trạng thái Đăng bài
-    private MutableLiveData<Boolean> postSuccess = new MutableLiveData<>();
+    // Dùng Event wrapper để tránh sticky LiveData: Fragment mới tạo lại không bị trigger lại lần cũ
+    private MutableLiveData<Event<Boolean>> postSuccess = new MutableLiveData<>();
     private MutableLiveData<Integer> uploadProgress = new MutableLiveData<>(); // Để FE làm thanh tiến trình (Progress Bar)
 
     public PostViewModel(@NonNull Application application) {
@@ -41,7 +43,7 @@ public class PostViewModel extends AndroidViewModel {
 
     public LiveData<List<Post>> getNewsFeedList() { return newsFeedList; }
     public LiveData<List<Post>> getMyAlbumList() { return myAlbumList; }
-    public LiveData<Boolean> getPostSuccess() { return postSuccess; }
+    public LiveData<Event<Boolean>> getPostSuccess() { return postSuccess; }
     public LiveData<Integer> getUploadProgress() { return uploadProgress; }
     public LiveData<String> getErrorMessage() { return errorMessage; }
     public LiveData<Boolean> getIsLoading() { return isLoading; }
@@ -108,7 +110,8 @@ public class PostViewModel extends AndroidViewModel {
                               Uri imageUri, String caption, List<String> tags,
                               String emotion, String privacy, Location location) {
         isLoading.setValue(true);
-        postSuccess.setValue(false);
+        // Đặt lại null trước khi post để không bị re-trigger
+        postSuccess.setValue(null);
         uploadProgress.setValue(0);
 
         // --- XỬ LÝ ẢNH TRƯỚC KHI UPLOAD ---
@@ -153,7 +156,8 @@ public class PostViewModel extends AndroidViewModel {
                             postRepository.createPost(newPost)
                                     .addOnSuccessListener(documentReference -> {
                                         isLoading.setValue(false);
-                                        postSuccess.setValue(true); // Báo FE đóng màn hình đăng bài, chuyển về Feed
+                                        // Bọc trong Event wrapper - chỉ được xử lý MỘT LẦN duy nhất
+                                        postSuccess.setValue(new Event<>(true));
                                     })
                                     .addOnFailureListener(e -> {
                                         isLoading.setValue(false);
