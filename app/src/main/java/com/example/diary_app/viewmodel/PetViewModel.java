@@ -2,13 +2,20 @@ package com.example.diary_app.viewmodel;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
 import com.example.diary_app.core.PetConstants;
 import com.example.diary_app.data.model.PetInfo;
 import com.example.diary_app.repository.PetRepository;
+import com.example.diary_app.repository.PostRepository;
+import com.example.diary_app.data.model.Post;
 
-public class PetViewModel {
+import java.util.Calendar;
+import java.util.Date;
+
+public class PetViewModel extends ViewModel {
     private PetRepository petRepository;
+    private PostRepository postRepository;
 
     private MutableLiveData<PetInfo> petInfoLiveData = new MutableLiveData<>();
     private MutableLiveData<String> petEmotionLiveData = new MutableLiveData<>();
@@ -19,6 +26,7 @@ public class PetViewModel {
 
     public PetViewModel(){
         petRepository = new PetRepository();
+        postRepository = new PostRepository();
 
         petEmotionLiveData.setValue(PetConstants.EMOTION_NEUTRAL);
         petQuoteLiveData.setValue(PetConstants.getRandomQuote(PetConstants.EMOTION_NEUTRAL));
@@ -78,6 +86,38 @@ public class PetViewModel {
     public void updatePetEmotion(String newEmotion){
         petEmotionLiveData.setValue(newEmotion);
         petQuoteLiveData.setValue(PetConstants.getRandomQuote(newEmotion));
+    }
+
+    public void checkTodayEmotion(String userId) {
+        Calendar calendar = java.util.Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        Date startOfDay = calendar.getTime();
+
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        Date endOfDay = calendar.getTime();
+
+        postRepository.getPostByTimeRange(userId, startOfDay, endOfDay)
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        Post latestPost = queryDocumentSnapshots.getDocuments().get(0).toObject(Post.class);
+                        if (latestPost != null && latestPost.getEmotion() != null) {
+                            updatePetEmotion(latestPost.getEmotion());
+                        } else {
+                            updatePetEmotion(PetConstants.EMOTION_SLEEP);
+                        }
+                    } else {
+                        updatePetEmotion(PetConstants.EMOTION_SLEEP);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    updatePetEmotion(PetConstants.EMOTION_SLEEP);
+                    toastMessageLiveData.setValue("Lỗi tải thông tin pet: " + e.getMessage());
+                });
     }
 
     // tăng EXP (gọi ở viewmodel của Post)

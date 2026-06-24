@@ -4,9 +4,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.diary_app.data.model.PetInfo;
 import com.example.diary_app.data.model.User;
 import com.example.diary_app.repository.AuthRepository;
 import com.example.diary_app.repository.UserRepository;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 public class SignupViewModel extends ViewModel {
 
     private AuthRepository authRepository;
@@ -49,6 +54,10 @@ public class SignupViewModel extends ViewModel {
 
                             newUser.setBirthday(dob);
                             newUser.setRole("user");
+
+                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                            String todayDate = sdf.format(new Date());
+                            newUser.setPetInfo(new PetInfo(todayDate));
 
                             userRepository.createUserProfile(newUser)
                                     .addOnSuccessListener(aVoid -> {
