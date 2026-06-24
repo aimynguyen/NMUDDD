@@ -3,14 +3,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
-    android:padding="12dp"
+    android:padding="10dp"
     android:gravity="center_vertical">
 
     <ImageView
         android:id="@+id/imgAvatar"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:padding="5dp"
+        android:background="@drawable/bg_circle_white"
         android:src="@drawable/human_human" />
 
     <TextView
@@ -18,7 +21,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="10dp"
         android:text="Username"
         android:textSize="18sp"
         android:textStyle="bold"/>
@@ -27,13 +30,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_button_rounded"
-        android:text="Accept" />
+        app:backgroundTint="@color/blue_tertiary"
+        android:text="Accept"
+        android:textSize="13dp"/>
 
     <Button
         android:id="@+id/btnReject"
+        android:layout_marginLeft="3dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_button_rounded"
-        android:text="Reject" />
+        app:backgroundTint="@color/blue_secondary"
+        android:text="Reject"
+        android:textSize="13dp"/>
 
 </LinearLayout>

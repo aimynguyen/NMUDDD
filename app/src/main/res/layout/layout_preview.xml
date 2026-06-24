@@ -228,6 +228,7 @@
                 android:layout_height="60dp"
                 android:layout_margin ="10dp"
                 android:background="@drawable/bg_button_rounded"
+                app:backgroundTint="@color/blue_tertiary"
                 android:text="Post"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"

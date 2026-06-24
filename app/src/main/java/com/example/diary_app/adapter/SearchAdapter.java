@@ -38,7 +38,14 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
 
         // 1. Gán text dữ liệu cơ bản
         holder.tvUsername.setText(post.getUserName());
-        holder.tvCaption.setText(post.getCaption());
+        String caption = post.getCaption(); //ẩn ô caption khi caption rỗng
+
+        if (caption == null || caption.trim().isEmpty()) {
+            holder.tvCaption.setVisibility(View.GONE);
+        } else {
+            holder.tvCaption.setVisibility(View.VISIBLE);
+            holder.tvCaption.setText(caption);
+        }
 
         // 2. Xử lý hiển thị Location nếu có
         if (post.getLocation() != null && post.getLocation().getCity() != null && !post.getLocation().getCity().isEmpty()) {

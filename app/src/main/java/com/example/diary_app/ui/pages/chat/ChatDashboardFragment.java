@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.example.diary_app.repository.UserRepository;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +49,12 @@ public class ChatDashboardFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chathub, container, false);
+
+        TextView tvGreeting = view.findViewById(R.id.tvGreeting);
+        TextView tvQuestion = view.findViewById(R.id.tvQuestion);
+
+        updateGreeting(tvGreeting);
+        updateQuestion(tvQuestion);
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             currentUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -260,6 +268,70 @@ public class ChatDashboardFragment extends Fragment {
         }
     }
 
+    // Hàm update lời chào
+    private void updateGreeting(TextView tvGreeting) {
+        Calendar calendar = Calendar.getInstance();
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
 
+        String greeting;
+
+        if (hour < 12) {
+            greeting = "Chào buổi sáng ☀";
+        } else if (hour < 18) {
+            greeting = "Chào buổi chiều ⛅";
+        } else {
+            greeting = "Chào buổi tối ✨";
+        }
+
+        tvGreeting.setText(greeting);
+    }
+
+    // Hàm update câu hỏi
+    private void updateQuestion (TextView tvQuestion) {
+        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+
+        // sau 10h đêm luôn hiện câu này
+        if (hour >= 22) {
+            tvQuestion.setText("Đừng thức quá khuya nhé.");
+            return;
+        }
+
+        String[] questions;
+
+        if (hour >= 5 && hour < 11) {
+            // sáng
+            questions = new String[] {
+                    "Bạn ngủ ngon chứ?",
+                    "Bạn đã ăn sáng chưa?",
+                    "Hôm nay bạn mong chờ điều gì?",
+                    "Chúc bạn một ngày thật dễ chịu nhé!",
+                    "Bạn đã sẵn sàng cho hôm nay chưa?"
+            };
+        } else if (hour >= 11 && hour <18) {
+            // trưa - chiều
+            questions = new String[] {
+                    "Bạn đã ăn trưa chưa?",
+                    "Mọi thứ hôm nay vẫn ổn chứ?",
+                    "Có chuyện gì thứ vị xảy ra chưa?",
+                    "Bạn có đang hơi mệt không?",
+                    "Nhớ nghỉ ngơi một chút nhé.",
+                    "Nhớ uống nước nhé."
+            };
+        } else {
+            // tối
+            questions = new String[] {
+                    "Hôm nay bạn cảm thấy thế nào?",
+                    "Có điều gì làm bạn vui không?",
+                    "Bạn có tâm sự gì muốn kể không?",
+                    "Ngày hôm nay của bạn ra sao?",
+                    "Bạn có điều gì muốn chia sẻ không?",
+                    "Hôm nay có khoảnh khắc nào đáng nhớ không?"
+            };
+        }
+        // random câu
+        int index = Calendar.getInstance().get(Calendar.DAY_OF_YEAR) % questions.length;
+
+        tvQuestion.setText(questions[index]);
+    }
 
 }

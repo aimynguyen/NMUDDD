@@ -36,4 +36,10 @@
     <style name="CustomPopupMenu" parent="Widget.AppCompat.PopupMenu">
         <item name="android:popupBackground">@drawable/bg_rounded_menu</item>
     </style>
+
+    <!-- bo tron anh -->
+    <style name="AvatarCircleImage">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>
