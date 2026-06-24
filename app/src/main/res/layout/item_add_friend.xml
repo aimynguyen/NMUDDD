@@ -57,9 +57,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:background="@drawable/btn_add_gb"
-                android:backgroundTint="@null"
+                app:backgroundTint="#FEFACA"
                 style="@style/Widget.MaterialComponents.Button"
                 android:text="Add"
+                android:textColor="@color/text_primary"
                 android:textAllCaps="false"
                 app:elevation="4dp"
                 android:stateListAnimator="@null"/>

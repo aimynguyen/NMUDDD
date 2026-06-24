@@ -51,7 +51,15 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
         // --- A. HIỂN THỊ DỮ LIỆU BÀI VIẾT ---
         holder.tvUsername.setText(currentPost.getUserName());
-        holder.tvCaption.setText(currentPost.getCaption());
+           //caption rỗng thì ẩn ô caption
+        String caption = currentPost.getCaption();
+
+        if (caption == null || caption.trim().isEmpty()) {
+            holder.tvCaption.setVisibility(View.GONE);
+        } else {
+            holder.tvCaption.setVisibility(View.VISIBLE);
+            holder.tvCaption.setText(caption);
+        }
 
         // --- B. XỬ LÝ SỰ KIỆN THẢ CẢM XÚC ---
         // Khi bấm vào cảm xúc nào, Adapter sẽ dùng bộ đàm gọi về Fragment kèm theo ID bài viết
