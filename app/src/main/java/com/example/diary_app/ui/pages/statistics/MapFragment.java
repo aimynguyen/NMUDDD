@@ -32,6 +32,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap mMap;
     private Spinner spinner;
     private View rootView;
+    // Biến cho thanh tìm kiếm
+    private android.widget.EditText edtSearch;
+    private android.widget.ImageView iconSearch, iconClear;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -76,6 +79,33 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
             }
         });
+        // Thêm khối code này vào cuối hàm addEvents()
+        // 3.1. Nút X (Xóa chữ)
+        iconClear.setOnClickListener(v -> edtSearch.setText(""));
+
+        // 3.2. Ẩn/Hiện nút X khi gõ chữ
+        edtSearch.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                iconClear.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
+            }
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
+
+        // 3.3. Bắt sự kiện bấm nút "Kính lúp" trên thanh công cụ
+        iconSearch.setOnClickListener(v -> performSearch());
+
+        // 3.4. Bắt sự kiện bấm phím "Enter/Search" trên bàn phím ảo của điện thoại
+        edtSearch.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
+                performSearch();
+                return true;
+            }
+            return false;
+        });
     }
 
     private void addControls() {
@@ -88,6 +118,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, ds_Style);
         spinner.setAdapter(arrayAdapter);
+
+        edtSearch = rootView.findViewById(R.id.edtSearch);
+        iconSearch = rootView.findViewById(R.id.iconSearch);
+        iconClear = rootView.findViewById(R.id.iconClear);
     }
 
     @Override
@@ -194,6 +228,42 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     Toast.makeText(requireActivity(), "Không tìm thấy vị trí. Hãy bật GPS!", Toast.LENGTH_SHORT).show();
                 }
             });
+        }
+    }
+    private void performSearch() {
+        String query = edtSearch.getText().toString().trim();
+        if (query.isEmpty() || mMap == null) {
+            Toast.makeText(requireContext(), "Vui lòng nhập địa điểm!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Tự động thu gọn bàn phím xuống để nhìn bản đồ cho rõ
+        android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(edtSearch.getWindowToken(), 0);
+
+        try {
+            android.location.Geocoder geocoder = new android.location.Geocoder(requireContext(), java.util.Locale.getDefault());
+            // Tìm 1 kết quả khớp nhất với từ khóa
+            java.util.List<android.location.Address> addresses = geocoder.getFromLocationName(query, 1);
+
+            if (addresses != null && !addresses.isEmpty()) {
+                android.location.Address address = addresses.get(0);
+                LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+
+                // Di chuyển camera tới vị trí tìm được và cắm cờ tạm
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16f));
+                mMap.clear();
+                mMap.addMarker(new com.google.android.gms.maps.model.MarkerOptions()
+                        .position(latLng)
+                        .title(address.getAddressLine(0)));
+
+                Toast.makeText(requireContext(), "Đã tìm thấy! Chạm vào vị trí chính xác trên bản đồ để chọn.", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(requireContext(), "Không tìm thấy địa điểm này!", Toast.LENGTH_SHORT).show();
+            }
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+            Toast.makeText(requireContext(), "Lỗi mạng khi tìm kiếm, vui lòng thử lại!", Toast.LENGTH_SHORT).show();
         }
     }
 }

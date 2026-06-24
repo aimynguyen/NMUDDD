@@ -135,6 +135,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="28dp"
             android:background="@drawable/bg_button_rounded"
+            app:backgroundTint="@color/blue_tertiary"
             android:text="Finish"
             android:textAllCaps="false"
             android:textColor="@color/white"

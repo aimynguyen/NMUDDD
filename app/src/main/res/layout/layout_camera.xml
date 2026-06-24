@@ -7,13 +7,21 @@
     android:background="@color/blue_primary">
 
     <!-- frame 1:1 -->
-    <View
+    <androidx.cardview.widget.CardView
         android:id="@+id/cameraFrame"
-        android:layout_width="260dp"
-        android:layout_height="260dp"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
         android:elevation="8dp"
         android:layout_gravity="center"
-        android:background="@drawable/bg_camera_frame"/>
+        app:cardCornerRadius="30dp"
+        app:cardElevation="8dp">
+
+        <androidx.camera.view.PreviewView
+            android:id="@+id/viewFinder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </androidx.cardview.widget.CardView>
 
     <!-- capture button -->
 
@@ -23,7 +31,7 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center"
-            android:layout_marginTop="200dp"
+            android:layout_marginTop="220dp"
             android:elevation="20dp">
 
             <View
@@ -48,7 +56,7 @@
         android:layout_height="55dp"
         android:background="@drawable/bg_upload"
         android:layout_gravity="center|left"
-        android:layout_marginTop="200dp"
+        android:layout_marginTop="220dp"
         android:layout_marginLeft="60dp"
         android:elevation="8dp">
 
