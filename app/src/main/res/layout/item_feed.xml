@@ -39,11 +39,11 @@
             <!-- HEART -->
 
             <TextView
-                android:id="@+id/reactHeart"
+                android:id="@+id/reactAngry"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:gravity="center"
-                android:text="💗"
+                android:text="😡"
                 android:textSize="20sp" />
 
             <!-- HAPPY -->
@@ -60,7 +60,7 @@
             <!-- SHY -->
 
             <TextView
-                android:id="@+id/reactShy"
+                android:id="@+id/reactNeutral"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_marginStart="18dp"
@@ -71,7 +71,7 @@
             <!-- CRY -->
 
             <TextView
-                android:id="@+id/reactCry"
+                android:id="@+id/reactSad"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_marginStart="18dp"
@@ -88,17 +88,6 @@
                 android:layout_marginStart="18dp"
                 android:gravity="center"
                 android:text="😌"
-                android:textSize="20sp" />
-
-            <!-- FIRE -->
-
-            <TextView
-                android:id="@+id/reactFire"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="18dp"
-                android:gravity="center"
-                android:text="🔥"
                 android:textSize="20sp" />
 
         </LinearLayout>

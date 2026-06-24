@@ -57,14 +57,17 @@ public class HomeFragment extends Fragment {
     private EditText edtCaption;
     private AutoCompleteTextView autoLocation;
     private Button btnPost;
-    private TextView moodHeart, moodHappy, moodShy, moodCry, moodCalm;
+    private TextView moodAngry, moodHappy, moodNeutral, moodSad, moodCalm;
     private View cameraFrame;
     private RecyclerView recyclerFeed;
     private FeedAdapter feedAdapter;
     private Uri selectedImageUri = null;
     private String currentPrivacy = "public"; // Mặc định bài viết là public
-    private String currentMood = "😊"; // Mặc định cảm xúc là vui vẻ
+    private String currentMood = com.example.diary_app.core.Mood.HAPPY.name(); // Mặc định là HAPPY chuẩn Enum
     private com.example.diary_app.data.model.Location selectedLocation = null;
+    // THÊM BIẾN CAMERA X
+    private androidx.camera.view.PreviewView viewFinder;
+    private androidx.camera.core.ImageCapture imageCapture;
     // 4. TRÌNH CHỌN ẢNH VÀ CAMERA
     private final ActivityResultLauncher<String> galleryLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
@@ -76,21 +79,15 @@ public class HomeFragment extends Fragment {
                     switchMode(true); // Đổi sang chế độ Preview
                 }
             });
-    // Trình chụp ảnh từ Camera
-    private final ActivityResultLauncher<Void> cameraLauncher =
-            registerForActivityResult(new ActivityResultContracts.TakePicturePreview(), bitmap -> {
-                if (bitmap != null) {
-                    selectedImageUri = imageHelper.getBitmapToUri(requireContext(), bitmap);
-
-                    // THÊM DÒNG NÀY VÀO: Hiển thị ảnh chụp lên khung
-                    if (imgPreview != null) {
-                        imgPreview.setImageURI(selectedImageUri);
-                    }
-
-                    switchMode(true);
+    // THÊM BỘ XIN QUYỀN CAMERA
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    setupCamera();
+                } else {
+                    Toast.makeText(getContext(), "Bạn cần cấp quyền Camera!", Toast.LENGTH_SHORT).show();
                 }
             });
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -108,7 +105,8 @@ public class HomeFragment extends Fragment {
 
         // Mặc định lúc mới vào là trạng thái Lướt tin & Chụp ảnh
         switchMode(false);
-        getParentFragmentManager().setFragmentResultListener("location_request", getViewLifecycleOwner(), (requestKey, bundle) -> {
+        setupCamera();
+        requireActivity().getSupportFragmentManager().setFragmentResultListener("location_request", getViewLifecycleOwner(), (requestKey, bundle) -> {
             // Lấy dữ liệu do màn hình Map gửi về
             String addressName = bundle.getString("location_name");
             double latitude = bundle.getDouble("latitude");
@@ -134,6 +132,7 @@ public class HomeFragment extends Fragment {
             if (cityName != null) {
                 selectedLocation.setCity(cityName);
             }
+            switchMode(true);
         });
         // ==========================================
         // 1. LẮNG NGHE TÍN HIỆU ĐĂNG BÀI THÀNH CÔNG
@@ -157,7 +156,7 @@ public class HomeFragment extends Fragment {
 
                 // 4. Trượt màn hình quay về Trang chủ
                 switchMode(false);
-
+                setupCamera();
                 // 5. Kéo dữ liệu Newsfeed mới nhất về để thấy ngay bài vừa đăng
                 fetchFeedData();
             }
@@ -199,11 +198,12 @@ public class HomeFragment extends Fragment {
         edtCaption = view.findViewById(R.id.edtCaption);
         autoLocation = view.findViewById(R.id.autoLocation);
         btnPost = view.findViewById(R.id.btnPost);
-        moodHeart = view.findViewById(R.id.moodHeart);
+        moodAngry = view.findViewById(R.id.moodAngry);
         moodHappy = view.findViewById(R.id.moodHappy);
-        moodShy = view.findViewById(R.id.moodShy);
-        moodCry = view.findViewById(R.id.moodCry);
+        moodNeutral = view.findViewById(R.id.moodNeutral);
+        moodSad = view.findViewById(R.id.moodSad);
         moodCalm = view.findViewById(R.id.moodCalm);
+        viewFinder = view.findViewById(R.id.viewFinder);
     }
 
     private void setupDependencies() {
@@ -219,7 +219,7 @@ public class HomeFragment extends Fragment {
 
         if (btnCapture != null) {
             btnCapture.setOnClickListener(v -> {
-                Toast.makeText(getContext(), "Tính năng chụp ảnh đang phát triển", Toast.LENGTH_SHORT).show();
+                takePhoto();
             });
         }
         // Nút Hủy bài (Bên lớp Preview)
@@ -248,46 +248,53 @@ public class HomeFragment extends Fragment {
                 btnPublic.setAlpha(0.4f);
             });
         }
-        //Mood
+        // Mood: Sửa lại theo chuẩn Enum
         View.OnClickListener moodClickListener = v -> {
             // Làm mờ tất cả các nút đi
-            if (moodHeart != null) moodHeart.setAlpha(0.4f);
+            if (moodAngry != null) moodAngry.setAlpha(0.4f);
             if (moodHappy != null) moodHappy.setAlpha(0.4f);
-            if (moodShy != null) moodShy.setAlpha(0.4f);
-            if (moodCry != null) moodCry.setAlpha(0.4f);
+            if (moodNeutral != null) moodNeutral.setAlpha(0.4f);
+            if (moodSad != null) moodSad.setAlpha(0.4f);
             if (moodCalm != null) moodCalm.setAlpha(0.4f);
-            //Chỉ làm sáng rõ cái nút vừa được bấm
+
+            // Chỉ làm sáng rõ cái nút vừa được bấm
             v.setAlpha(1.0f);
-            //Lấy cái icon emoji bên trong nút đó gán vào biến currentMood
-            currentMood = ((TextView) v).getText().toString();
+
+            // Dựa vào ID của nút để gán tên Enum chuẩn xác đẩy lên Database
+            int viewId = v.getId();
+            if (viewId == R.id.moodHappy) {
+                currentMood = com.example.diary_app.core.Mood.HAPPY.name();
+            } else if (viewId == R.id.moodSad) {
+                currentMood = com.example.diary_app.core.Mood.SAD.name();
+            } else if (viewId == R.id.moodCalm) {
+                currentMood = com.example.diary_app.core.Mood.CALM.name();
+            } else if (viewId == R.id.moodNeutral) {
+                currentMood = com.example.diary_app.core.Mood.NEUTRAL.name();
+            } else if (viewId == R.id.moodAngry) {
+                currentMood = com.example.diary_app.core.Mood.ANGRY.name();
+            }
         };
-        if (moodHeart != null) moodHeart.setOnClickListener(moodClickListener);
+        // Gắn sự kiện
+        if (moodAngry != null) moodAngry.setOnClickListener(moodClickListener);
         if (moodHappy != null) moodHappy.setOnClickListener(moodClickListener);
-        if (moodShy != null) moodShy.setOnClickListener(moodClickListener);
-        if (moodCry != null) moodCry.setOnClickListener(moodClickListener);
+        if (moodNeutral != null) moodNeutral.setOnClickListener(moodClickListener);
+        if (moodSad != null) moodSad.setOnClickListener(moodClickListener);
         if (moodCalm != null) moodCalm.setOnClickListener(moodClickListener);
 
-        // Mặc định lúc mới vào cho nút Happy sáng lên
-        if (moodHappy != null) {
-            moodHappy.performClick();
-        }
+        // Bấm sẵn nút Happy lúc mới vào
+        if (moodHappy != null) moodHappy.performClick();
+
         if (autoLocation != null) {
-            if (autoLocation != null) {
-                autoLocation.setOnClickListener(v -> {
+            autoLocation.setOnClickListener(v -> {
+                // 1. Khởi tạo màn hình bản đồ
+                androidx.fragment.app.Fragment mapFragment = new MapFragment();
 
-                    // 1. Ép kiểu tường minh để chắc chắn nó là AndroidX Fragment
-                    androidx.fragment.app.Fragment mapFragment = new MapFragment();
-
-                    // 2. Tuyệt chiêu: Tự động lấy ID của cái khung đang chứa HomeFragment hiện tại
-                    int containerId = ((android.view.ViewGroup) requireView().getParent()).getId();
-
-                    // 3. Chuyển trang
-                    requireActivity().getSupportFragmentManager().beginTransaction()
-                            .add(containerId, mapFragment)
-                            .addToBackStack(null) // Cho phép bấm nút Back để quay lại
-                            .commit();
-                });
-            }
+                // 2. Phủ MapFragment lên thẳng lớp gốc của màn hình (android.R.id.content)
+                requireActivity().getSupportFragmentManager().beginTransaction()
+                        .add(android.R.id.content, mapFragment)
+                        .addToBackStack(null)
+                        .commit();
+            });
         }
     }
 
@@ -315,17 +322,38 @@ public class HomeFragment extends Fragment {
         // 1. Cài đặt giao diện danh sách (RecyclerView)
         recyclerFeed.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        com.example.diary_app.repository.PostRepository postRepository = new com.example.diary_app.repository.PostRepository();
+
         feedAdapter = new FeedAdapter(getContext(), new ArrayList<>(), new FeedAdapter.OnPostInteractionListener() {
             @Override
             public void onReactionClick(Post post, String reactionType) {
-                // Đi đường tắt: Gọi trực tiếp Repository để thả cảm xúc
-                String realUid = authRepository.getCurrentUserId();
-                if (realUid != null) {
-                    postRepository.addReaction(post.getPostId(), realUid, reactionType)
-                            .addOnFailureListener(e -> Toast.makeText(getContext(), "Lỗi thả tim: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                } else {
-                    Toast.makeText(getContext(), "Vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
+                // 1. Lấy ID của chính mình
+                String myUid = authRepository.getCurrentUserId();
+                if (myUid == null) {
+                    Toast.makeText(getContext(), "Lỗi: Không tìm thấy ID người dùng!", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+
+                // 2. Gọi thẳng xuống hàm addReaction của Repository
+                postRepository.addReaction(post.getPostId(), myUid, reactionType)
+                        .addOnSuccessListener(aVoid -> {
+
+                            // Tự dịch từ chữ sang Icon (😊) ngay tại đây để hiện Toast
+                            String iconToast = "😐";
+                            switch (reactionType) {
+                                case "HAPPY": iconToast = "😊"; break;
+                                case "SAD": iconToast = "😭"; break;
+                                case "CALM": iconToast = "😌"; break;
+                                case "ANGRY": iconToast = "😡"; break;
+                                case "NEUTRAL": iconToast = "😳"; break;
+                            }
+
+                            // Hiện thông báo thả thành công cho vui mắt
+                            android.widget.Toast.makeText(getContext(), "Đã thả " + iconToast, android.widget.Toast.LENGTH_SHORT).show();
+
+                            // để app tự động tải lại bảng tin nhằm cập nhật giao diện mặt cười ngay lập tức
+                            fetchFeedData();
+                        });
             }
         });
         recyclerFeed.setAdapter(feedAdapter);
@@ -422,6 +450,90 @@ public class HomeFragment extends Fragment {
                     btnPost.setEnabled(true);
                     btnPost.setText("Post");
                     Toast.makeText(getContext(), "Lỗi tải thông tin cá nhân: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+    // =======================================================
+    // BỘ HÀM XỬ LÝ CAMERA LOCKET-STYLE
+    // =======================================================
+
+    // Hàm 1: Kiểm tra quyền
+    private void setupCamera() {
+        if (androidx.core.content.ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.CAMERA)
+                == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            startCamera();
+        } else {
+            requestPermissionLauncher.launch(android.Manifest.permission.CAMERA);
+        }
+    }
+
+    // Hàm 2: Mở ống kính
+    private void startCamera() {
+        //1. Báo hiệu bắt đầu chạy
+        android.widget.Toast.makeText(getContext(), "Đang kích hoạt ống kính...", android.widget.Toast.LENGTH_SHORT).show();
+
+        com.google.common.util.concurrent.ListenableFuture<androidx.camera.lifecycle.ProcessCameraProvider> cameraProviderFuture =
+                androidx.camera.lifecycle.ProcessCameraProvider.getInstance(requireContext());
+
+        cameraProviderFuture.addListener(() -> {
+            try {
+                androidx.camera.lifecycle.ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+
+                androidx.camera.core.Preview preview = new androidx.camera.core.Preview.Builder().build();
+                preview.setSurfaceProvider(viewFinder.getSurfaceProvider());
+
+                imageCapture = new androidx.camera.core.ImageCapture.Builder().build();
+                androidx.camera.core.CameraSelector cameraSelector = androidx.camera.core.CameraSelector.DEFAULT_BACK_CAMERA;
+
+                cameraProvider.unbindAll();
+                cameraProvider.bindToLifecycle(getViewLifecycleOwner(), cameraSelector, preview, imageCapture);
+
+                //2. Báo hiệu gắn ống kính thành công!
+                //android.widget.Toast.makeText(getContext(), "Camera đã mở thành công!", android.widget.Toast.LENGTH_SHORT).show();
+
+            } catch (Exception exc) {
+                //3. Nếu có lỗi ngầm, nó sẽ in thẳng ra màn hình cho bạn xem
+                android.util.Log.e("CameraX", "Lỗi khởi động camera", exc);
+                android.widget.Toast.makeText(getContext(), "Lỗi Camera: " + exc.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+            }
+        }, androidx.core.content.ContextCompat.getMainExecutor(requireContext()));
+    }
+    // Hàm 3: Bấm chụp và xử lý ảnh
+    private void takePhoto() {
+        if (imageCapture == null) return;
+
+        // Tạo một file ảnh tạm thời trong máy để lưu bức hình vừa chụp
+        java.io.File photoFile = new java.io.File(requireContext().getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES),
+                "Diary_" + System.currentTimeMillis() + ".jpg");
+
+        androidx.camera.core.ImageCapture.OutputFileOptions outputOptions =
+                new androidx.camera.core.ImageCapture.OutputFileOptions.Builder(photoFile).build();
+
+        // Ra lệnh chụp
+        imageCapture.takePicture(outputOptions, androidx.core.content.ContextCompat.getMainExecutor(requireContext()),
+                new androidx.camera.core.ImageCapture.OnImageSavedCallback() {
+                    @Override
+                    public void onImageSaved(@NonNull androidx.camera.core.ImageCapture.OutputFileResults outputFileResults) {
+
+                        // THÀNH CÔNG: Lấy Uri của ảnh vừa chụp
+                        android.net.Uri savedUri = android.net.Uri.fromFile(photoFile);
+
+                        // 1. Gán vào biến selectedImageUri (Biến cũ của bạn dùng để post bài)
+                        selectedImageUri = savedUri;
+
+                        // 2. Gán ảnh vừa chụp lên cái ImageView của màn hình Preview
+                        imgPreview.setImageURI(savedUri);
+
+                        // 3. Đóng màn hình Camera, trượt mở màn hình Preview lên (Gọi hàm cũ của bạn)
+                        switchMode(true);
+
+                        android.widget.Toast.makeText(getContext(), "Chụp thành công!", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(@NonNull androidx.camera.core.ImageCaptureException exception) {
+                        android.util.Log.e("CameraX", "Chụp ảnh thất bại: " + exception.getMessage(), exception);
+                        android.widget.Toast.makeText(getContext(), "Lỗi lưu ảnh", android.widget.Toast.LENGTH_SHORT).show();
+                    }
                 });
     }
 }

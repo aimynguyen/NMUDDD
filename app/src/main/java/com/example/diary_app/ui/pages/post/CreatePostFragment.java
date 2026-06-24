@@ -52,8 +52,13 @@ public class CreatePostFragment extends Fragment {
     // Biến lưu trạng thái dữ liệu
     private Uri selectedImageUri = null;
     private String currentPrivacy = "public"; // Mặc định là public
-    private String currentMood = "😊"; // Có thể thay đổi khi click vào các TextView cảm xúc
+    // LƯU Ý MỚI: Không lưu icon nữa, mà lấy tên Enum ("NORMAL", "HAPPY"...) để đẩy lên Firebase
+    private String currentMood = com.example.diary_app.core.Mood.HAPPY.name();
     private com.example.diary_app.repository.UserRepository userRepository;
+
+    // --- BIẾN CAMERA ---
+    private androidx.camera.view.PreviewView viewFinder;
+    private androidx.camera.core.ImageCapture imageCapture;
     // Trình chọn ảnh từ thư viện
     private final ActivityResultLauncher<String> galleryLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
@@ -61,18 +66,6 @@ public class CreatePostFragment extends Fragment {
                     selectedImageUri = uri;
                     imgPreview.setImageURI(uri);
                     switchMode(true); // Có ảnh -> Chuyển sang màn hình Preview
-                }
-            });
-    // Trình khởi chạy Camera
-    private final ActivityResultLauncher<Void> cameraLauncher =
-            registerForActivityResult(new ActivityResultContracts.TakePicturePreview(), bitmap -> {
-                if (bitmap != null) {
-                    // 1. Chuyển Bitmap chụp được thành Uri để dùng chung luồng với thư viện
-                    selectedImageUri = getImageUriFromBitmap(bitmap);
-
-                    // 2. Hiển thị lên màn hình và chuyển sang Preview
-                    imgPreview.setImageURI(selectedImageUri);
-                    switchMode(true);
                 }
             });
 
@@ -94,6 +87,7 @@ public class CreatePostFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        android.util.Log.e("KIET_DEBUG", "0. ĐÃ MỞ ĐÚNG FILE CREATE POST FRAGMENT!!!!!");
         // Nhớ sử dụng file wrapper mới tạo
         return inflater.inflate(R.layout.fragment_create_post, container, false);
     }
@@ -113,8 +107,8 @@ public class CreatePostFragment extends Fragment {
 
     private void initViews(View view) {
         // 1. Ánh xạ 2 khối màn hình
-        viewCamera = view.findViewById(R.id.viewCamera);
-        viewPreview = view.findViewById(R.id.viewPreview);
+        viewCamera = view.findViewById(R.id.layoutCamera);
+        viewPreview = view.findViewById(R.id.layoutPreview);
 
         // 2. Ánh xạ nút Camera
         btnUpload = view.findViewById(R.id.btnUpload);
@@ -140,11 +134,6 @@ public class CreatePostFragment extends Fragment {
     private void setupListeners() {
         // --- CHỨC NĂNG BÊN CAMERA ---
         btnUpload.setOnClickListener(v -> galleryLauncher.launch("image/*"));
-
-        btnCapture.setOnClickListener(v -> {
-            // Mở camera chụp ảnh
-            cameraLauncher.launch(null);
-        });
 
         // --- CHỨC NĂNG BÊN PREVIEW ---
         btnRemoveImage.setOnClickListener(v -> {
