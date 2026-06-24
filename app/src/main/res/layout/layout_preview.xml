@@ -168,8 +168,8 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/moodHeart"
-                        android:text="💗" />
+                        android:id="@+id/moodAngry"
+                        android:text="😡" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -182,14 +182,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="30dp"
-                        android:id="@+id/moodShy"
+                        android:id="@+id/moodNeutral"
                         android:text="😳" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="30dp"
-                        android:id="@+id/moodCry"
+                        android:id="@+id/moodSad"
                         android:text="😭" />
 
                     <TextView
@@ -228,6 +228,7 @@
                 android:layout_height="60dp"
                 android:layout_margin ="10dp"
                 android:background="@drawable/bg_button_rounded"
+                app:backgroundTint="@color/blue_tertiary"
                 android:text="Post"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"

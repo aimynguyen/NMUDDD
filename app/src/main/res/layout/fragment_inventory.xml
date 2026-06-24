@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/blue_primary">
+    android:background="@drawable/bg_gradient_01">
 
     <!-- Back -->
     <ImageButton
@@ -33,13 +33,14 @@
         app:layout_constraintBottom_toBottomOf="@id/btnBack"/>
 
     <!-- Setting -->
-    <ImageButton
+    <ImageView
         android:id="@+id/btnSetting"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
-        android:background="@drawable/setting_icon"
+        android:background="@drawable/bg_circle_white"
+        android:src="@drawable/setting_icon"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -62,27 +63,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Hình nền"
-            android:textColor="@color/gray_medium"
-            android:textSize="16sp"/>
-
-        <TextView
-            android:id="@+id/tabAccessory"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:text="Phụ kiện"
-            android:textStyle="bold"
             android:textColor="@color/text_primary"
-            android:textSize="16sp"/>
-
-        <TextView
-            android:id="@+id/tabEmotion"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:text="Cảm xúc"
-            android:textColor="@color/gray_medium"
-            android:textSize="16sp"/>
+            android:textStyle="bold"
+            android:textSize="18sp"/>
 
     </LinearLayout>
 
