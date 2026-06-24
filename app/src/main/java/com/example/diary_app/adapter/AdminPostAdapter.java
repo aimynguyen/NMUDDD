@@ -46,7 +46,14 @@ public class AdminPostAdapter extends RecyclerView.Adapter<AdminPostAdapter.Admi
 
         // 1. Đổ dữ liệu chữ (Username, Caption, Location)
         holder.tvUsername.setText(post.getUserName() != null ? post.getUserName() : "Ẩn danh");
-        holder.tvCaption.setText(post.getCaption() != null ? post.getCaption() : "");
+        String caption = post.getCaption();
+
+        if (caption == null || caption.trim().isEmpty()) {
+            holder.tvCaption.setVisibility(View.GONE);
+        } else {
+            holder.tvCaption.setVisibility(View.VISIBLE);
+            holder.tvCaption.setText(caption);
+        }
 
         if (post.getLocation() != null && post.getLocation().getCity() != null) {
             holder.tvLocation.setText(post.getLocation().getCity());
