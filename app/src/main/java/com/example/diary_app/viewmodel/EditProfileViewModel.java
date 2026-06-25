@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.diary_app.data.model.User;
 import com.example.diary_app.repository.AuthRepository;
+import com.example.diary_app.repository.PostRepository;
 import com.example.diary_app.repository.UserRepository;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 
@@ -16,6 +17,7 @@ public class EditProfileViewModel extends ViewModel {
 
     private AuthRepository authRepository;
     private UserRepository userRepository;
+    private PostRepository postRepository;
 
     private MutableLiveData<User> userLiveData = new MutableLiveData<>();
 
@@ -29,6 +31,7 @@ public class EditProfileViewModel extends ViewModel {
 
         authRepository = new AuthRepository();
         userRepository = new UserRepository();
+        postRepository = new PostRepository();
 
     }
 
@@ -85,6 +88,10 @@ public class EditProfileViewModel extends ViewModel {
         if (uid == null) return;
         userRepository.updateUserField(uid, "avatarUrl", newAvatarUrl)
                 .addOnSuccessListener(unused -> {
+                    postRepository.updateUserAvatarInPosts(
+                            uid,
+                            newAvatarUrl
+                    );
                     // Xóa ảnh cũ
                     if (oldAvatarUrl != null && !oldAvatarUrl.isEmpty()) {
                         userRepository.deleteImageFromStorage(oldAvatarUrl);
