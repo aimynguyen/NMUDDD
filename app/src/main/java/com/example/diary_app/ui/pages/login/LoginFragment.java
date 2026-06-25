@@ -64,6 +64,23 @@ public class LoginFragment extends Fragment {
             loginViewModel.login(email, password);
         });
 
+        // ẩn hiện password
+        android.widget.ImageView imgTogglePassword = view.findViewById(R.id.imgTogglePassword);
+        imgTogglePassword.setOnClickListener(v -> {
+            boolean isPasswordVisible = edtPassword.getInputType() == (android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+
+            if (isPasswordVisible) {
+                edtPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                imgTogglePassword.setImageResource(R.drawable.close_eye);
+            } else {
+                edtPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                imgTogglePassword.setImageResource(R.drawable.open_eye);
+            }
+
+            // Đặt con trỏ về cuối
+            edtPassword.setSelection(edtPassword.getText().length());
+        });
+
         observeViewModel();
         return view;
     }
@@ -71,31 +88,25 @@ public class LoginFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
-        // 1. Kiểm tra trạng thái đăng nhập
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
-        if (currentUser != null) {
-            // 2. SỬA LỖI TẠI ĐÂY: Dùng Navigation để chuyển màn hình thay vì khởi chạy lại MainActivity
-            if (getView() != null) {
-                Navigation.findNavController(getView())
-                        .navigate(R.id.action_nav_login_to_nav_home);
-            }
-        }
+        // Kiểm tra xem đã có phiên đăng nhập cũ chưa
+        loginViewModel.checkExistingSession();
     }
 
     private void observeViewModel() {
         loginViewModel.getLoginSuccess().observe(getViewLifecycleOwner(), role -> {
+            String uid = FirebaseAuth.getInstance().getUid();
+            if (uid != null && getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).saveUserIdAndFetchName(uid);
+            }
+
             if (role.equals("admin")) {
                 Toast.makeText(requireContext(), "Xin chào Quản trị viên!", Toast.LENGTH_SHORT).show();
+                if (getView() != null) {
+                    Navigation.findNavController(getView())
+                            .navigate(R.id.action_nav_login_to_nav_admin);
+                }
             } else {
                 Toast.makeText(requireContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-
-                String uid = FirebaseAuth.getInstance().getUid();
-                if (uid != null && getActivity() instanceof MainActivity) {
-                    ((MainActivity) getActivity()).saveUserIdAndFetchName(uid);
-                }
-
                 if (getView() != null) {
                     Navigation.findNavController(getView())
                             .navigate(R.id.action_nav_login_to_nav_home);

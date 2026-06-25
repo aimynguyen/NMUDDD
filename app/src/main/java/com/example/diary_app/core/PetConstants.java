@@ -58,48 +58,77 @@ public class PetConstants {
     public static final String EMOTION_ANGRY = "ANGRY";
     public static final String EMOTION_SLEEP = "SLEEP";
 
-    // Kho dữ liệu câu thoại mẫu
     private static final String[] QUOTES_HAPPY = {
-            "Hôm nay là một ngày tuyệt vời đúng không!",
-            "Năng lượng tích cực tràn đầy luôn nè!",
-            "Cứ vui vẻ như thế này mỗi ngày bạn nhé!",
-            "Ngày hôm nay thật rực rỡ, giống hệt như nụ cười của bạn vậy!"
+            "Hôm nay là một ngày tuyệt vời đúng không! ✨",
+            "Năng lượng tích cực tràn đầy luôn nè! 🌟",
+            "Cứ vui vẻ như thế này mỗi ngày bạn nhé! 😊",
+            "Ngày hôm nay thật rực rỡ, giống hệt như nụ cười của bạn vậy! 🌻",
+            "Giữ vững nguồn năng lượng rạng rỡ này nhé! Bạn đang làm rất tốt. 💛",
+            "Những niềm vui nhỏ bé hôm nay sẽ làm nên một ngày thật đáng nhớ. 🎈",
+            "Tận hưởng khoảnh khắc này nhé, bạn xứng đáng với mọi điều tốt đẹp nhất. 🎉",
+            "Today is a good day to have a good day! ☀️",
+            "Keep shining. The world needs your light. 💫",
+            "Cherish these good moments, you have truly earned them. 🥂",
+            "Your smile is contagious. Keep shining bright! ✨"
     };
 
     private static final String[] QUOTES_SAD = {
-            "Đừng buồn nữa, có tớ ở đây ôm bạn nè...",
-            "Ngày mai trời lại sáng thôi, cố lên bạn ơi.",
-            "Nếu mệt mỏi quá, hãy nghỉ ngơi một chút nhé.",
-            "Bạn đã vất vả nhiều rồi. Hãy cho phép bản thân được nghỉ ngơi nhé.",
-            "Nếu thấy mệt mỏi quá, cứ khóc một chút cũng không sao đâu.",
-            "Đôi khi chúng ta cần một ngày buồn để biết trân trọng những ngày vui. Mình luôn ở đây cùng bạn.",
-            "Bạn không cô đơn đâu. Hãy trút hết những phiền muộn vào trang nhật ký này nhé..."
+            "Đừng buồn nữa, có tớ ở đây ôm bạn nè... 🫂",
+            "Ngày mai trời lại sáng thôi, cố lên bạn ơi. 🌅",
+            "Nếu mệt mỏi quá, hãy nghỉ ngơi một chút nhé. 🩹",
+            "Bạn đã vất vả nhiều rồi. Hãy cho phép bản thân được nghỉ ngơi nhé. 🛋️",
+            "Nếu thấy mệt mỏi quá, cứ khóc một chút cũng không sao đâu. 🌧️",
+            "Đôi khi chúng ta cần một ngày buồn để biết trân trọng những ngày vui. Mình luôn ở đây cùng bạn. ☂️",
+            "Bạn không cô đơn đâu. Hãy trút hết những phiền muộn vào trang nhật ký này nhé... 📝",
+            "Mọi chuyện rồi sẽ ổn thôi, từ từ giải quyết từng chút một nhé. 🌱",
+            "Mọi vết thương rồi sẽ lành, chỉ là chúng ta cần kiên nhẫn một chút. 🕊️",
+            "This too shall pass. Give yourself the time you need. 🕰️",
+            "It is perfectly fine not to be okay. Take all the time you need. 🤍",
+            "You have survived 100% of your bad days. Keep going. 💪",
+            "Healing takes time, and that is perfectly okay. 🌿"
     };
 
     private static final String[] QUOTES_NEUTRAL = {
-            "Hôm nay của bạn thế nào? Kể tớ nghe đi.",
-            "Tớ vẫn đang lắng nghe bạn đây.",
-            "Đừng quên uống đủ nước và vươn vai một chút cho đỡ mỏi nha.",
-            "Mình luôn ở đây, tĩnh lặng và sẵn sàng lắng nghe mọi câu chuyện của bạn.",
-            "Dù hôm nay có là một ngày bình thường, thì đó cũng là một ngày bình yên.",
-            "Có bức ảnh nào hay ho không? Đăng lên nhật ký cho mình xem với!",
+            "Hôm nay của bạn thế nào? Kể tớ nghe đi. 🎧",
+            "Tớ vẫn đang lắng nghe bạn đây. 👀",
+            "Đừng quên uống đủ nước và vươn vai một chút cho đỡ mỏi nha. 💧",
+            "Mình luôn ở đây và sẵn sàng lắng nghe mọi câu chuyện của bạn. 📖",
+            "Dù hôm nay có là một ngày bình thường, thì đó cũng là một ngày bình yên. ☁️",
+            "Có bức ảnh nào hay ho không? Đăng lên nhật ký cho mình xem với! 📸",
+            "Hôm nay nhịp độ có vẻ chậm rãi nhỉ. Nhớ nhâm nhi một tách trà ấm nha. 🍵",
+            "Bình yên đôi khi đơn giản chỉ là một ngày không có giông bão. 🍃",
+            "Just a gentle reminder: You are enough, exactly as you are. 🌼",
+            "Take it one step at a time. There is no need to rush. 🚶",
+            "Take a deep breath. You are doing great today. 🌬️",
+            "Quiet days are meant for resting your mind. 🧘"
     };
 
     private static final String[] QUOTES_ANGRY = {
-            "Hít một hơi thật sâu nào... Thở ra... Bạn thấy đỡ hơn chút nào chưa?",
-            "Tức giận cũng là lẽ tự nhiên thôi, nhưng đừng để nó làm đau chính bạn nhé.",
-            "Có ai làm bạn bực mình à? Cứ 'xả' hết vào nhật ký đi, mình hứa sẽ giữ bí mật tuyệt đối!",
-            "Đừng cau mày nữa sẽ mau già đó! Mau đi ăn một chút đồ ngọt cho hạ hỏa nào!",
-            "Bạn tức giận trông cũng đáng yêu lắm, nhưng hãy thư giãn một chút cho nhẹ đầu nha.",
-            "Mọi bực dọc cứ để ở trang giấy này, đóng app lại và đi ngủ một giấc thật ngon nhé!"
+            "Hít một hơi thật sâu nào... Thở ra... Bạn thấy đỡ hơn chút nào chưa? 😮‍💨",
+            "Tức giận cũng là lẽ tự nhiên thôi, nhưng đừng để nó làm đau chính bạn nhé. ❤️‍🩹",
+            "Có ai làm bạn bực mình à? Cứ 'xả' hết vào nhật ký đi, mình hứa sẽ giữ bí mật tuyệt đối! 🤐",
+            "Đừng cau mày nữa sẽ mau già đó! Mau đi ăn một chút đồ ngọt cho hạ hỏa nào! 🍰",
+            "Mọi bực dọc cứ để ở trang giấy này, đóng app lại và đi ngủ một giấc thật ngon nhé! 🛏️",
+            "Hãy để những cảm xúc tiêu cực trôi qua như một đám mây, đừng giữ nó lại nhé. ☁️",
+            "Cơn giận sẽ làm mệt mỏi trái tim bạn. Nghe một bản nhạc nhẹ nhàng nhé? 🎶",
+            "Take a step back and breathe. Your peace of mind matters most. 🧘‍♀️",
+            "Let it go. Not because they deserve forgiveness, but because you deserve peace. 🕊️",
+            "Don't let someone else's negativity ruin your peace. 🛡️",
+            "Breathe in peace, exhale the frustration. 🍃"
     };
 
     private static final String[] QUOTES_SLEEP = {
-            "Zzz... (Bé pet đang ngủ say sưa vì hôm nay bạn chưa đăng gì cả)",
-            "Khò khò... Bạn có câu chuyện gì mới để kể hôm nay không?",
-            "Zzz... Đánh thức mình bằng một bài viết mới nhé!"
+            "Zzz... (Bé pet đang ngủ say sưa vì hôm nay bạn chưa đăng gì cả) 💤",
+            "Khò khò... Bạn có câu chuyện gì mới để kể hôm nay không? 🦉",
+            "Zzz... Đánh thức mình bằng một bài viết mới nhé! ⏰",
+            "Zzz... Sạc lại năng lượng để ngày mai chúng ta cùng chiến đấu tiếp nhé. 🔋",
+            "Ngủ một giấc thật sâu để gạt bỏ mọi muộn phiền của ngày hôm nay nhé. 🌌",
+            "Zzz... Cơ thể bạn cần được sạc pin rồi, đi ngủ sớm nhé. 🥱",
+            "Rest is productive too. Close your eyes and sleep well. 🌙",
+            "Zzz... Dreaming about your next story... 💭",
+            "Tomorrow is a fresh start. Good night! 🌟",
+            "Even the brightest stars need the dark to shine. ✨"
     };
-
     /**
      * Hàm lấy ngẫu nhiên 1 câu thoại dựa trên cảm xúc đầu vào
      */

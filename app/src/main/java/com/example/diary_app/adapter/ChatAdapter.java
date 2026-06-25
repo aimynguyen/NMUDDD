@@ -53,12 +53,19 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     public void onBindViewHolder(@NonNull ChatViewHolder holder, int position) {
         ChatMessage message = messageList.get(position);
 
+        float density = holder.itemView.getContext().getResources().getDisplayMetrics().density;
+        int paddingLeftRight = (int) (16 * density + 0.5f);
+        int paddingTopBottom = (int) (8 * density + 0.5f);
+
         if (getItemViewType(position) == TYPE_SENDER) {
             // Xử lý Tin nhắn Gửi
             holder.itemView.findViewById(R.id.right_chat_layout).setVisibility(View.VISIBLE);
             holder.itemView.findViewById(R.id.left_chat_layout).setVisibility(View.GONE);
 
             holder.txtMessageRight.setText(message.getContent());
+            // Đảm bảo background và padding được set đúng
+            holder.txtMessageRight.setBackgroundResource(R.drawable.bg_message_sent);
+            holder.txtMessageRight.setPadding(paddingLeftRight, paddingTopBottom, paddingLeftRight, paddingTopBottom);
 
             // Check xem tin nhắn này có đính kèm ảnh bài viết không
             if (message.getPostImageUrl() != null && !message.getPostImageUrl().isEmpty()) {
@@ -76,6 +83,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
             holder.itemView.findViewById(R.id.right_chat_layout).setVisibility(View.GONE);
 
             holder.txtMessageLeft.setText(message.getContent());
+            holder.txtMessageLeft.setBackgroundResource(R.drawable.bg_message_recieved);
+            holder.txtMessageLeft.setPadding(paddingLeftRight, paddingTopBottom, paddingLeftRight, paddingTopBottom);
 
             if (message.getPostImageUrl() != null && !message.getPostImageUrl().isEmpty()) {
                 holder.imgMessageLeft.setVisibility(View.VISIBLE);

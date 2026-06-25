@@ -67,7 +67,7 @@ public class fragment_pet_levelup extends Fragment {
         });
 
         btnClose.setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.nav_pet);
+            Navigation.findNavController(v).navigate(R.id.nav_home);
         });
 
         return view;

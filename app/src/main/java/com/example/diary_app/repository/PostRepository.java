@@ -6,9 +6,11 @@ import com.example.diary_app.data.model.Post;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -145,6 +147,30 @@ public class PostRepository {
     // KHÔNG SỬA ẢNH
     public Task<Void> updatePost(String postId, Map<String, Object> updates){
         return db.collection("posts").document(postId).update(updates);
+    }
+
+    // 12. Cập nhật avatar mới cho các post
+    public Task<Void> updateUserAvatarInPosts(
+            String userId,
+            String newAvatarUrl
+    ) {
+        return db.collection("posts")
+                .whereEqualTo("userId", userId)
+                .get()
+                .continueWithTask(task -> {
+
+                    WriteBatch batch = db.batch();
+
+                    for (DocumentSnapshot doc : task.getResult().getDocuments()) {
+                        batch.update(
+                                doc.getReference(),
+                                "userAvatar",
+                                newAvatarUrl
+                        );
+                    }
+
+                    return batch.commit();
+                });
     }
 
     /**

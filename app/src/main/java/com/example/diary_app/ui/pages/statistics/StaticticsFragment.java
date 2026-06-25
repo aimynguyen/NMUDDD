@@ -130,6 +130,13 @@ public class StaticticsFragment extends Fragment {
                 Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
+        
+        // Lắng nghe cảm xúc theo ngày để cập nhật Lịch
+        viewModel.getDailyEmotions().observe(getViewLifecycleOwner(), (Map<Integer, String> dailyEmotions) -> {
+            if (isAdded() && getContext() != null) {
+                updateCalendarUIWithEmotions(dailyEmotions);
+            }
+        });
 
         calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_MONTH, 1);
@@ -299,31 +306,46 @@ public class StaticticsFragment extends Fragment {
 
         gridCalendar.removeAllViews();
 
-        int totalCells = 42;
+        // Tính tổng số ô cần thiết để không bị dư khoảng trắng phía dưới
+        int emptyCells = dayOfWeek - 1; 
+        int requiredCells = emptyCells + daysInMonth;
+        int totalCells = (int) Math.ceil(requiredCells / 7.0) * 7;
+        
         int dayCounter = 1;
 
+        // Kích thước cố định cho mỗi ô ngày (40dp) để hình tròn không bị méo
+        int sizeInPx = (int) (30 * requireContext().getResources().getDisplayMetrics().density + 0.5f);
+
         for (int cell = 1; cell <= totalCells; cell++) {
+            android.widget.FrameLayout cellLayout = new android.widget.FrameLayout(requireContext());
+            GridLayout.LayoutParams cellParams = new GridLayout.LayoutParams();
+            cellParams.width = 0; // Để chia đều 7 cột
+            cellParams.height = GridLayout.LayoutParams.WRAP_CONTENT;
+            cellParams.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
+            cellParams.rowSpec = GridLayout.spec(GridLayout.UNDEFINED);
+            cellLayout.setLayoutParams(cellParams);
+
             TextView dayView = new TextView(requireContext());
             dayView.setGravity(Gravity.CENTER);
             dayView.setTextSize(14);
 
-            GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-            params.width = 0;
-            params.height = GridLayout.LayoutParams.WRAP_CONTENT;
-            params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
-            params.rowSpec = GridLayout.spec(GridLayout.UNDEFINED);
-            params.setMargins(4, 12, 4, 12);
-            dayView.setLayoutParams(params);
+            android.widget.FrameLayout.LayoutParams dayParams = new android.widget.FrameLayout.LayoutParams(sizeInPx, sizeInPx);
+            dayParams.gravity = Gravity.CENTER; // Căn giữa TextView trong ô lưới
+            dayParams.setMargins(0, 8, 0, 8);
+            dayView.setLayoutParams(dayParams);
 
             if (cell >= dayOfWeek && dayCounter <= daysInMonth) {
                 dayView.setText(String.valueOf(dayCounter));
                 dayView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black));
+                dayView.setTag(dayCounter);
                 dayCounter++;
             } else {
                 dayView.setText("");
+                dayView.setTag(null);
             }
 
-            gridCalendar.addView(dayView);
+            cellLayout.addView(dayView);
+            gridCalendar.addView(cellLayout);
         }
 
         Calendar startCal = (Calendar) calendar.clone();
@@ -357,6 +379,29 @@ public class StaticticsFragment extends Fragment {
             counts.put(r, counts.getOrDefault(r, 0) + 1);
         }
         return counts;
+    }
+    
+    private void updateCalendarUIWithEmotions(Map<Integer, String> dailyEmotions) {
+        if (gridCalendar == null || dailyEmotions == null) return;
+        for (int i = 0; i < gridCalendar.getChildCount(); i++) {
+            View child = gridCalendar.getChildAt(i);
+            if (child instanceof android.widget.FrameLayout) {
+                android.widget.FrameLayout cellLayout = (android.widget.FrameLayout) child;
+                if (cellLayout.getChildCount() > 0 && cellLayout.getChildAt(0) instanceof TextView) {
+                    TextView dayView = (TextView) cellLayout.getChildAt(0);
+                    Object tag = dayView.getTag();
+                    if (tag instanceof Integer) {
+                        int day = (Integer) tag;
+                        if (dailyEmotions.containsKey(day)) {
+                            String emotion = dailyEmotions.get(day);
+                            dayView.setBackgroundResource(getEmotionDrawable(emotion));
+                        } else {
+                            dayView.setBackgroundResource(0);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override
