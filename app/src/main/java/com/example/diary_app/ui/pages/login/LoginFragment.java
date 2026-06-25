@@ -64,6 +64,23 @@ public class LoginFragment extends Fragment {
             loginViewModel.login(email, password);
         });
 
+        // ẩn hiện password
+        android.widget.ImageView imgTogglePassword = view.findViewById(R.id.imgTogglePassword);
+        imgTogglePassword.setOnClickListener(v -> {
+            boolean isPasswordVisible = edtPassword.getInputType() == (android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+
+            if (isPasswordVisible) {
+                edtPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                imgTogglePassword.setImageResource(R.drawable.close_eye);
+            } else {
+                edtPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                imgTogglePassword.setImageResource(R.drawable.open_eye);
+            }
+
+            // Đặt con trỏ về cuối
+            edtPassword.setSelection(edtPassword.getText().length());
+        });
+
         observeViewModel();
         return view;
     }
