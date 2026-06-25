@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="24dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="10dp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:background="@drawable/bg_form_card"
@@ -72,20 +72,7 @@
                 android:hint="Email"
                 android:layout_marginBottom="12dp"/>
 
-            <!-- DOB -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Date of birth"/>
 
-            <EditText
-                android:id="@+id/edtDob"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@drawable/bg_input_pink"
-                android:padding="10dp"
-                android:hint="Date of birth"
-                android:layout_marginBottom="12dp"/>
 
             <!-- Password -->
             <TextView
@@ -98,9 +85,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="@drawable/bg_input_pink"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="12dp"
                 android:padding="10dp"
                 android:hint="Password"
+                android:inputType="textPassword"/>
+
+            <!-- Confirm Password -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Confirm Password"/>
+
+            <EditText
+                android:id="@+id/edtConfirmPassword"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_input_pink"
+                android:layout_marginBottom="20dp"
+                android:padding="10dp"
+                android:hint="Confirm Password"
                 android:inputType="textPassword"/>
 
             <!-- Button -->

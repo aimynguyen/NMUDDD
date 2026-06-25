@@ -71,7 +71,6 @@ public class NotificationFragment extends Fragment {
 
     private void initViews(View view) {
         btnBack = view.findViewById(R.id.btnBack);
-        btnSetting = view.findViewById(R.id.btnSetting);
         rvNewest = view.findViewById(R.id.rvNewest);
         rvPrevious = view.findViewById(R.id.rvPrevious);
         txtNewest = view.findViewById(R.id.txtNewest);
@@ -168,9 +167,9 @@ public class NotificationFragment extends Fragment {
                         .navigate(R.id.action_nav_notification_to_nav_profile);
                 break;
             case PET_FEED:
-                // TODO: Chuyển sang Fragment nuôi Pet
             case PET_LEVEL_UP:
-                // TODO: Chuyển sang Fragment nuôi Pet
+                NavHostFragment.findNavController(NotificationFragment.this)
+                        .navigate(R.id.nav_pet);
                 break;
         }
     }

@@ -24,7 +24,7 @@ public class PetRepository {
         return sdf.format(new Date());
     }
 
-    public void addExpForPet(String userId, PetInfo petInfo, OnExpUpdateListener listener){
+    public void addExpForPet(String userId, PetInfo petInfo, int expAmount, OnExpUpdateListener listener){
         String today = getTodayDateString();
 
         int newDailyExp = petInfo.getDailyExp();
@@ -45,8 +45,13 @@ public class PetRepository {
         }
 
         // 3. Tính toán EXP mới
-        newDailyExp += PetConstants.EXP_PER_POST;
-        newCurrentExp += PetConstants.EXP_PER_POST;
+        int actualExpAdded = expAmount;
+        if (newDailyExp + expAmount > PetConstants.MAX_DAILY_EXP) {
+            actualExpAdded = PetConstants.MAX_DAILY_EXP - newDailyExp;
+        }
+
+        newDailyExp += actualExpAdded;
+        newCurrentExp += actualExpAdded;
 
         // kiểm tra lên Level
         int newLevel = PetConstants.calculateLevel(newCurrentExp);
@@ -72,11 +77,13 @@ public class PetRepository {
         // tạo biến final để truyền vào lambda
         final int finalCurrentExp = newCurrentExp;
 
+        final int finalActualExpAdded = actualExpAdded;
+
         // 4. Update lên Firestore
         DocumentReference userRef = db.collection("users").document(userId);
         userRef.update(updates)
           .addOnSuccessListener(aVoid ->{
-            listener.onSuccess(finalCurrentExp, isLevelUp, newLevel);
+            listener.onSuccess(finalCurrentExp, isLevelUp, newLevel, finalActualExpAdded);
         }).addOnFailureListener(e -> {
             listener.onError("Lỗi cập nhật EXP: " + e.getMessage());
         });
@@ -84,7 +91,7 @@ public class PetRepository {
 
     // Interface Callbacks
     public interface OnExpUpdateListener {
-        void onSuccess(int newTotalExp, boolean isLevelUp, int newLevel);
+        void onSuccess(int newTotalExp, boolean isLevelUp, int newLevel, int actualExpAdded);
         void onDailyCapReached(String message);
         void onError(String error);
     }
