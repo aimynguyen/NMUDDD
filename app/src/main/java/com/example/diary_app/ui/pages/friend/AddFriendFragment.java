@@ -35,7 +35,7 @@ import java.util.Map;
 public class AddFriendFragment extends Fragment {
 
     private EditText edtSearch;
-    private ImageView iconClear, iconSearch;
+    private ImageView iconClear, iconSearch, btnBack;
     private RecyclerView recyclerView;
 
     private SearchUserAdapter adapter;
@@ -88,6 +88,17 @@ public class AddFriendFragment extends Fragment {
         edtSearch = view.findViewById(R.id.edtSearch);
         iconClear = view.findViewById(R.id.iconClear);
         iconSearch = view.findViewById(R.id.iconSearch);
+        btnBack = view.findViewById(R.id.btnBack);
+
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> {
+                try {
+                    androidx.navigation.Navigation.findNavController(v).popBackStack();
+                } catch (Exception e) {
+                    requireActivity().getOnBackPressedDispatcher().onBackPressed();
+                }
+            });
+        }
 
         // Nhớ đổi id trong file XML của bạn thành recyclerViewSuggestFriend
         recyclerView = view.findViewById(R.id.recyclerViewSuggestFriend);
