@@ -45,6 +45,31 @@ public class LoginViewModel extends ViewModel {
         return isForgotPasswordLoading;
     }
 
+    public void checkExistingSession() {
+        String uid = authRepository.getCurrentUserId();
+        if (uid != null) {
+            isLoading.setValue(true);
+            userRepository.getUserProfile(uid)
+                    .addOnSuccessListener(documentSnapshot -> {
+                        isLoading.setValue(false);
+                        if (documentSnapshot.exists()) {
+                            User user = documentSnapshot.toObject(User.class);
+                            if (user != null && "admin".equals(user.getRole())) {
+                                loginSuccess.setValue("admin");
+                            } else {
+                                loginSuccess.setValue("user");
+                            }
+                        } else {
+                            loginSuccess.setValue("user");
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        isLoading.setValue(false);
+                        // Optional: clear session or handle error
+                    });
+        }
+    }
+
     public void forgotPassword(String email) {
         isForgotPasswordLoading.setValue(true);
 
