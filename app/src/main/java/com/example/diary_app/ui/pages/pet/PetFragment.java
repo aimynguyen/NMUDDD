@@ -25,6 +25,7 @@ public class PetFragment extends Fragment {
 
     private ImageView imgBackground, btnSetting, imgPet, btnInventory;
     private TextView txtPetName, txtPetLevel, txtXP, txtEnergy, txtStreak, txtQuote;
+    private android.widget.ProgressBar pbXP;
     
     private PetViewModel petViewModel;
     private AuthRepository authRepository;
@@ -44,6 +45,7 @@ public class PetFragment extends Fragment {
         txtPetName = view.findViewById(R.id.txtPetName);
         txtPetLevel = view.findViewById(R.id.txtPetLevel);
         txtXP = view.findViewById(R.id.txtXP);
+        pbXP = view.findViewById(R.id.pbXP);
         txtEnergy = view.findViewById(R.id.txtEnergy);
         txtStreak = view.findViewById(R.id.txtStreak);
         txtQuote = view.findViewById(R.id.txtQuote);
@@ -62,6 +64,10 @@ public class PetFragment extends Fragment {
                         ? PetConstants.EXP_THRESHOLDS[petInfo.getLevel() + 1] 
                         : petInfo.getCurrentExp();
                 txtXP.setText(petInfo.getCurrentExp() + " / " + nextLevelExp + " XP");
+                if (pbXP != null) {
+                    pbXP.setMax(nextLevelExp);
+                    pbXP.setProgress(petInfo.getCurrentExp());
+                }
                 txtStreak.setText("🔥" + petInfo.getStreakDays());
                 
                 int energyPercent = (int) ((petInfo.getDailyExp() / (float) PetConstants.MAX_DAILY_EXP) * 100);
@@ -113,9 +119,12 @@ public class PetFragment extends Fragment {
             txtQuote.setText(quote);
         });
 
-        petViewModel.getToastMessage().observe(getViewLifecycleOwner(), message -> {
-            if (message != null && !message.isEmpty()) {
-                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+        petViewModel.getToastMessage().observe(getViewLifecycleOwner(), event -> {
+            if (event != null) {
+                String message = event.getContentIfNotHandled();
+                if (message != null && !message.isEmpty()) {
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                }
             }
         });
 

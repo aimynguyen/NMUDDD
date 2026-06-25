@@ -32,7 +32,7 @@ public class PetViewModel extends ViewModel {
     private MutableLiveData<String> petQuoteLiveData = new MutableLiveData<>();
     private MutableLiveData<Boolean> isLoadingLiveData = new MutableLiveData<>();
     // gửi thông báo ra màn hình
-    private MutableLiveData<String> toastMessageLiveData = new MutableLiveData<>();
+    private MutableLiveData<Event<String>> toastMessageLiveData = new MutableLiveData<>();
     // Sự kiện lên cấp - dùng Event wrapper để đảm bảo chỉ xử lý MÓT LẦN, tránh Sticky LiveData
     private MutableLiveData<Event<Integer>> levelUpEvent = new MutableLiveData<>();
 
@@ -48,7 +48,7 @@ public class PetViewModel extends ViewModel {
     public LiveData<String> getPetEmotion() {return petEmotionLiveData; }
     public LiveData<String> getPetQuote() {return petQuoteLiveData; }
     public LiveData<Boolean> getIsLoading() {return isLoadingLiveData; }
-    public LiveData<String> getToastMessage() {return toastMessageLiveData; }
+    public LiveData<Event<String>> getToastMessage() {return toastMessageLiveData; }
     public LiveData<Event<Integer>> getLevelUpEvent() {return levelUpEvent; }
     public void resetLevelUpEvent() { levelUpEvent.setValue(null); }
 
@@ -66,7 +66,7 @@ public class PetViewModel extends ViewModel {
 
             @Override
             public void onError(String error) {
-                toastMessageLiveData.setValue(error);
+                toastMessageLiveData.setValue(new Event<>(error));
                 isLoadingLiveData.setValue(false);
             }
         });
@@ -84,13 +84,13 @@ public class PetViewModel extends ViewModel {
                     currentPet.getEquippedItems().put(PetConstants.ITEM_TYPE_BACKGROUND, backgroundId);
                     petInfoLiveData.setValue(currentPet); // Kích hoạt UI vẽ lại ảnh nền
                 }
-                toastMessageLiveData.setValue("Đã đổi hình nền thành công!");
+                toastMessageLiveData.setValue(new Event<>("Đã đổi hình nền thành công!"));
                 isLoadingLiveData.setValue(false);
             }
 
             @Override
             public void onError(String error) {
-                toastMessageLiveData.setValue(error);
+                toastMessageLiveData.setValue(new Event<>(error));
                 isLoadingLiveData.setValue(false);
             }
         });
@@ -138,7 +138,7 @@ public class PetViewModel extends ViewModel {
                 })
                 .addOnFailureListener(e -> {
                     updatePetEmotion(PetConstants.EMOTION_SLEEP);
-                    toastMessageLiveData.setValue("Lỗi tải thông tin pet: " + e.getMessage());
+                    toastMessageLiveData.setValue(new Event<>("Lỗi tải thông tin pet: " + e.getMessage()));
                 });
     }
 
@@ -161,7 +161,7 @@ public class PetViewModel extends ViewModel {
                 public void onError(String error) {
                     // Log debug và hiển thị toast
                     Log.e("PetViewModel", "addExp - Lỗi fetch petInfo: " + error);
-                    toastMessageLiveData.setValue("Lỗi tải Pet: " + error);
+                    toastMessageLiveData.setValue(new Event<>("Lỗi tải Pet: " + error));
                 }
             });
         }
@@ -182,7 +182,7 @@ public class PetViewModel extends ViewModel {
                     // Event wrapper - đảm bảo màn hình Level Up chỉ hiện đúng 1 lần
                     levelUpEvent.setValue(new Event<>(newLevel));
                 } else {
-                    toastMessageLiveData.setValue("Nhận EXP thành công!");
+                    toastMessageLiveData.setValue(new Event<>("Nhận EXP thành công!"));
                 }
                 
                 // Gọi lại hàm lấy dữ liệu để UI cập nhật thanh Progress Bar và Level mới nhất
@@ -192,14 +192,14 @@ public class PetViewModel extends ViewModel {
             @Override
             public void onDailyCapReached(String message) {
                 android.util.Log.d("PetViewModel", "doAddExp - dailyCap reached: " + message);
-                toastMessageLiveData.setValue(message);
+                toastMessageLiveData.setValue(new Event<>(message));
                 isLoadingLiveData.setValue(false);
             }
 
             @Override
             public void onError(String error) {
                 android.util.Log.e("PetViewModel", "doAddExp onError: " + error);
-                toastMessageLiveData.setValue(error);
+                toastMessageLiveData.setValue(new Event<>(error));
                 isLoadingLiveData.setValue(false);
             }
         });

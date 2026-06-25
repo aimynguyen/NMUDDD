@@ -52,7 +52,8 @@ public class InventoryFragment extends Fragment {
         adapter = new InventoryAdapter(new ArrayList<>(), "", item -> {
             if (item.isUnlocked()) {
                 petViewModel.changeBackground(userId, item.getId());
-                Toast.makeText(getContext(), "Đã trang bị", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getContext(), "Đã trang bị", Toast.LENGTH_SHORT).show();
+                Navigation.findNavController(requireView()).navigateUp();
             } else {
                 Toast.makeText(getContext(), "Cần đạt " + item.getName() + " để mở khóa!", Toast.LENGTH_SHORT).show();
             }

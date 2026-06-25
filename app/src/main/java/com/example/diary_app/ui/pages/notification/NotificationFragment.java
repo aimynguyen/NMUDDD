@@ -168,9 +168,9 @@ public class NotificationFragment extends Fragment {
                         .navigate(R.id.action_nav_notification_to_nav_profile);
                 break;
             case PET_FEED:
-                // TODO: Chuyển sang Fragment nuôi Pet
             case PET_LEVEL_UP:
-                // TODO: Chuyển sang Fragment nuôi Pet
+                NavHostFragment.findNavController(NotificationFragment.this)
+                        .navigate(R.id.nav_pet);
                 break;
         }
     }

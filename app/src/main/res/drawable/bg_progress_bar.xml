@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Nền của ProgressBar (phần chưa đạt được) -->
+    <item android:id="@android:id/background">
+        <shape>
+            <corners android:radius="8dp"/>
+            <solid android:color="@color/gray_light"/>
+        </shape>
+    </item>
+
+    <!-- Thanh tiến trình (phần đã đạt được) -->
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape>
+                <corners android:radius="8dp"/>
+                <gradient 
+                    android:startColor="@color/aura_pink" 
+                    android:endColor="@color/aura_purple" 
+                    android:angle="0"/>
+            </shape>
+        </clip>
+    </item>
+</layer-list>

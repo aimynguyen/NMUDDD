@@ -187,6 +187,15 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
             }
         });
+
+        petViewModel.getToastMessage().observe(getViewLifecycleOwner(), event -> {
+            if (event != null) {
+                String message = event.getContentIfNotHandled();
+                if (message != null && !message.isEmpty()) {
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void initViews(View view) {
