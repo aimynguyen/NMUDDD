@@ -149,42 +149,59 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
         mMap.setOnMapClickListener(latLng -> {
-            // Bước A: Xóa các dấu ghim cũ và cắm một cái ghim mới vào vị trí vừa chạm
+            // Bước A: Cắm cờ tại nơi user vừa chạm
             mMap.clear();
             mMap.addMarker(new com.google.android.gms.maps.model.MarkerOptions()
                     .position(latLng)
                     .title("Vị trí được chọn"));
 
-            // Bước B: Dùng Geocoder để dịch Tọa độ (Kinh/Vĩ độ) thành địa chỉ chữ (Tên đường, phường, quận...)
+            // Bước B: Dùng Geocoder dịch Tọa độ thành Tên đường
             String addressName = "Vị trí chọn từ bản đồ";
             String cityName = "";
 
             try {
                 android.location.Geocoder geocoder = new android.location.Geocoder(requireContext(), java.util.Locale.getDefault());
-                // Lấy tối đa 1 kết quả chính xác nhất
                 java.util.List<android.location.Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
 
                 if (addresses != null && !addresses.isEmpty()) {
                     android.location.Address address = addresses.get(0);
-                    addressName = address.getAddressLine(0); // Trích xuất địa chỉ đầy đủ (Ví dụ: 123 Đường ABC, Quận 9...)
-                    cityName = address.getAdminArea(); // Lấy tên tỉnh/thành phố (Ví dụ: TP. Hồ Chí Minh)
+                    addressName = address.getAddressLine(0);
+                    cityName = address.getAdminArea();
                 }
             } catch (java.io.IOException e) {
                 e.printStackTrace();
             }
 
-            // Bước C: Đóng gói dữ liệu vào Bundle để gửi ngược về HomeFragment
-            android.os.Bundle result = new android.os.Bundle();
-            result.putString("location_name", addressName);
-            result.putString("city_name", cityName);
-            result.putDouble("latitude", latLng.latitude);
-            result.putDouble("longitude", latLng.longitude);
+            // Gắn final để dùng an toàn bên trong sự kiện click của Hộp thoại
+            final String finalAddressName = addressName;
+            final String finalCityName = cityName;
 
-            // Bắn dữ liệu về qua Request Key đã hẹn trước ở HomeFragment
-            getParentFragmentManager().setFragmentResult("location_request", result);
+            // Bước C: HIỆN HỘP THOẠI XÁC NHẬN TRƯỚC KHI QUAY VỀ
+            new android.app.AlertDialog.Builder(requireContext())
+                    .setTitle("Xác nhận địa điểm")
+                    .setMessage("Bạn có muốn chọn địa điểm này không?\n\n📍 " + finalAddressName)
+                    .setPositiveButton("Chọn", (dialog, which) -> {
 
-            // Bước D: Lệnh "thần thánh" để tự động đóng màn hình Map, quay về màn hình Preview
-            getParentFragmentManager().popBackStack();
+                        // 1. Đóng gói dữ liệu
+                        android.os.Bundle result = new android.os.Bundle();
+                        result.putString("location_name", finalAddressName);
+                        result.putString("city_name", finalCityName);
+                        result.putDouble("latitude", latLng.latitude);
+                        result.putDouble("longitude", latLng.longitude);
+
+                        // 2. Bắn dữ liệu về HomeFragment (Dùng chung kênh requireActivity như đã sửa)
+                        requireActivity().getSupportFragmentManager().setFragmentResult("location_request", result);
+
+                        // 3. Đóng màn hình Map, quay về Preview
+                        requireActivity().getSupportFragmentManager().popBackStack();
+
+                    })
+                    .setNegativeButton("Hủy", (dialog, which) -> {
+                        // Nếu bấm Hủy: Đóng hộp thoại và xóa cái cờ vừa cắm đi cho sạch
+                        dialog.dismiss();
+                        mMap.clear();
+                    })
+                    .show();
         });
     }
 
@@ -237,27 +254,43 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             return;
         }
 
-        // Tự động thu gọn bàn phím xuống để nhìn bản đồ cho rõ
+        // Tự động thu gọn bàn phím xuống
         android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(edtSearch.getWindowToken(), 0);
 
         try {
             android.location.Geocoder geocoder = new android.location.Geocoder(requireContext(), java.util.Locale.getDefault());
-            // Tìm 1 kết quả khớp nhất với từ khóa
-            java.util.List<android.location.Address> addresses = geocoder.getFromLocationName(query, 1);
+
+            // SỬA TẠI ĐÂY: Thay vì lấy 1, chúng ta lấy tối đa 5 kết quả (có thể chỉnh lên 10 nếu muốn)
+            java.util.List<android.location.Address> addresses = geocoder.getFromLocationName(query, 5);
 
             if (addresses != null && !addresses.isEmpty()) {
-                android.location.Address address = addresses.get(0);
-                LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                mMap.clear(); // Xóa các cờ cũ đi
+                com.google.android.gms.maps.model.LatLngBounds.Builder builder = new com.google.android.gms.maps.model.LatLngBounds.Builder();
 
-                // Di chuyển camera tới vị trí tìm được và cắm cờ tạm
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16f));
-                mMap.clear();
-                mMap.addMarker(new com.google.android.gms.maps.model.MarkerOptions()
-                        .position(latLng)
-                        .title(address.getAddressLine(0)));
+                // Dùng vòng lặp để cắm cờ cho TẤT CẢ các địa điểm tìm được
+                for (android.location.Address address : addresses) {
+                    LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                    mMap.addMarker(new com.google.android.gms.maps.model.MarkerOptions()
+                            .position(latLng)
+                            .title(address.getAddressLine(0))); // Hiện tên đường khi bấm vào cờ
+                    builder.include(latLng); // Đưa tọa độ này vào khung ngắm camera
+                }
 
-                Toast.makeText(requireContext(), "Đã tìm thấy! Chạm vào vị trí chính xác trên bản đồ để chọn.", Toast.LENGTH_LONG).show();
+                // Di chuyển camera sao cho nhìn thấy tất cả các cờ
+                try {
+                    if (addresses.size() == 1) {
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(addresses.get(0).getLatitude(), addresses.get(0).getLongitude()), 16f));
+                    } else {
+                        // padding 150px để cờ không bị sát mép màn hình
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 150));
+                    }
+                } catch (Exception e) {
+                    // Phòng hờ lỗi nếu API trả về 2 điểm trùng nhau 100% tọa độ
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(addresses.get(0).getLatitude(), addresses.get(0).getLongitude()), 16f));
+                }
+
+                Toast.makeText(requireContext(), "Đã tìm thấy " + addresses.size() + " vị trí! Chạm vào một vị trí để chọn.", Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(requireContext(), "Không tìm thấy địa điểm này!", Toast.LENGTH_SHORT).show();
             }
