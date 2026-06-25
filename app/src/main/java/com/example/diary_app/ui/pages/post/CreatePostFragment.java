@@ -22,6 +22,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.example.diary_app.R;
+import com.example.diary_app.core.PetConstants;
 import com.example.diary_app.data.model.Location;
 import com.example.diary_app.repository.AuthRepository;
 import com.example.diary_app.viewmodel.PetViewModel;
@@ -253,7 +254,7 @@ public class CreatePostFragment extends Fragment {
                 // Tăng EXP cho Pet
                 String myUid = authRepository.getCurrentUserId();
                 if (myUid != null) {
-                    petViewModel.addExp(myUid);
+                    petViewModel.addExp(myUid, PetConstants.EXP_PER_POST);
                 }
                 
                 Navigation.findNavController(requireView()).popBackStack();

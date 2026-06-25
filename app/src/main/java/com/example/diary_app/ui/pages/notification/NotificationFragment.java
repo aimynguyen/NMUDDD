@@ -71,7 +71,6 @@ public class NotificationFragment extends Fragment {
 
     private void initViews(View view) {
         btnBack = view.findViewById(R.id.btnBack);
-        btnSetting = view.findViewById(R.id.btnSetting);
         rvNewest = view.findViewById(R.id.rvNewest);
         rvPrevious = view.findViewById(R.id.rvPrevious);
         txtNewest = view.findViewById(R.id.txtNewest);

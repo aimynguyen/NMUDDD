@@ -143,18 +143,18 @@ public class PetViewModel extends ViewModel {
     }
 
     // tăng EXP (gọi ở viewmodel của Post)
-    public void addExp(String userId){
+    public void addExp(String userId, int expAmount){
         PetInfo currentPet = petInfoLiveData.getValue();
         if (currentPet != null) {
             // Đã có data sẵn trong bộ nhớ
-            doAddExp(userId, currentPet);
+            doAddExp(userId, currentPet, expAmount);
         } else {
             // Chưa có data, fetch từ Firebase trước rồi mới cộng EXP
             petRepository.getPetInfo(userId, new PetRepository.OnPetInfoFetchedListener() {
                 @Override
                 public void onSuccess(PetInfo petInfo) {
                     petInfoLiveData.setValue(petInfo);
-                    doAddExp(userId, petInfo);
+                    doAddExp(userId, petInfo, expAmount);
                 }
 
                 @Override
@@ -167,22 +167,22 @@ public class PetViewModel extends ViewModel {
         }
     }
 
-    private void doAddExp(String userId, PetInfo currentPet) {
+    private void doAddExp(String userId, PetInfo currentPet, int expAmount) {
         Log.d("PetViewModel", "doAddExp called - dailyExp=" + currentPet.getDailyExp() + ", currentExp=" + currentPet.getCurrentExp() + ", level=" + currentPet.getLevel());
         isLoadingLiveData.setValue(true);
-        petRepository.addExpForPet(userId, currentPet, new PetRepository.OnExpUpdateListener(){
+        petRepository.addExpForPet(userId, currentPet, expAmount, new PetRepository.OnExpUpdateListener(){
             @Override
-            public void onSuccess(int newTotalExp, boolean isLevelUp, int newLevel) {
+            public void onSuccess(int newTotalExp, boolean isLevelUp, int newLevel, int actualExpAdded) {
                 Log.d("PetViewModel", "doAddExp onSuccess - newTotalExp=" + newTotalExp + ", isLevelUp=" + isLevelUp);
                 NotificationRepository notiRepo = new NotificationRepository();
-                notiRepo.sendNotification(userId, "system", NotiType.PET_FEED, "pet", "Mochi + " + PetConstants.EXP_PER_POST + " EXP");
+                notiRepo.sendNotification(userId, "system", NotiType.PET_FEED, "pet", "Mochi + " + actualExpAdded + " EXP");
 
                 if (isLevelUp) {
                     notiRepo.sendNotification(userId, "system", NotiType.PET_LEVEL_UP, "pet", "Mochi đã đạt Level " + newLevel);
                     // Event wrapper - đảm bảo màn hình Level Up chỉ hiện đúng 1 lần
                     levelUpEvent.setValue(new Event<>(newLevel));
                 } else {
-                    toastMessageLiveData.setValue(new Event<>("Nhận EXP thành công!"));
+                    toastMessageLiveData.setValue(new Event<>("Đã nhận EXP thành công!"));
                 }
                 
                 // Gọi lại hàm lấy dữ liệu để UI cập nhật thanh Progress Bar và Level mới nhất

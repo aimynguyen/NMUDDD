@@ -25,8 +25,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.diary_app.Helpers.imageHelper;
 import com.example.diary_app.R;
+import com.example.diary_app.core.PetConstants;
 import com.example.diary_app.data.model.Post;
 import com.example.diary_app.repository.AuthRepository;
+import com.example.diary_app.repository.NotificationRepository;
 import com.example.diary_app.repository.PostRepository;
 import com.example.diary_app.repository.UserRepository;
 import com.example.diary_app.ui.pages.post.FeedAdapter;
@@ -155,7 +157,7 @@ public class HomeFragment extends Fragment {
                 //  Tăng EXP cho Pet
                 String myUid = authRepository.getCurrentUserId();
                 if (myUid != null) {
-                    petViewModel.addExp(myUid);
+                    petViewModel.addExp(myUid, PetConstants.EXP_PER_POST);
                 }
 
                 // 3. Dọn dẹp sạch sẽ form đăng bài để lần sau không bị dính chữ cũ
@@ -370,6 +372,30 @@ public class HomeFragment extends Fragment {
 
                             // Hiện thông báo thả thành công cho vui mắt
                             android.widget.Toast.makeText(getContext(), "Đã thả " + iconToast, android.widget.Toast.LENGTH_SHORT).show();
+
+                            // Tăng EXP cho Pet khi thả reaction
+                            petViewModel.addExp(myUid, PetConstants.EXP_PER_REACT);
+
+                            // Gửi thông báo cho chủ bài viết
+                            if (!myUid.equals(post.getUserId())) {
+                                userRepository.getUserProfile(myUid).addOnSuccessListener(documentSnapshot -> {
+                                    String myName = "Ai đó";
+                                    if (documentSnapshot.exists()) {
+                                        User currentUser = documentSnapshot.toObject(User.class);
+                                        if (currentUser != null && currentUser.getUserName() != null) {
+                                            myName = currentUser.getUserName();
+                                        }
+                                    }
+                                    NotificationRepository notiRepo = new NotificationRepository();
+                                    notiRepo.sendNotification(
+                                            post.getUserId(),
+                                            myUid,
+                                            com.example.diary_app.core.NotiType.REACT_POST,
+                                            post.getPostId(),
+                                            myName + " đã bày tỏ cảm xúc về bài viết của bạn"
+                                    );
+                                });
+                            }
 
                             // để app tự động tải lại bảng tin nhằm cập nhật giao diện mặt cười ngay lập tức
                             fetchFeedData();

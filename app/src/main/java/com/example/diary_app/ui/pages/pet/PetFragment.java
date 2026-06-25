@@ -39,7 +39,6 @@ public class PetFragment extends Fragment {
 
         // Ánh xạ UI
         imgBackground = view.findViewById(R.id.imgBackground);
-        btnSetting = view.findViewById(R.id.btnSetting);
         imgPet = view.findViewById(R.id.imgPet);
         btnInventory = view.findViewById(R.id.btnInventory);
         txtPetName = view.findViewById(R.id.txtPetName);
