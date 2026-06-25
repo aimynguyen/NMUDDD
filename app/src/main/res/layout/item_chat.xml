@@ -4,22 +4,31 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingHorizontal="8dp"
-    android:paddingVertical="2dp">
+    android:paddingVertical="4dp">
+
     <LinearLayout
         android:id="@+id/left_chat_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
         android:layout_marginEnd="60dp"
-        android:orientation="horizontal"
-        android:padding="16dp">
+        android:orientation="vertical"
+        android:background="@drawable/bg_message_recieved"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/left_chat_image"
+            android:layout_width="150dp"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:layout_marginBottom="4dp"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/left_chat_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Receeive"
-            android:layout_margin="16dp"
+            android:text="Receive"
             android:textColor="#000000"
             android:textSize="16sp"/>
 
@@ -31,15 +40,23 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_marginStart="60dp"
-        android:orientation="horizontal"
+        android:orientation="vertical"
+        android:background="@drawable/bg_message_sent"
         android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/right_chat_image"
+            android:layout_width="150dp"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:layout_marginBottom="4dp"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/right_chat_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Send"
-            android:layout_margin="16dp"
             android:textColor="#FFFFFF"
             android:textSize="16sp"/>
     </LinearLayout>

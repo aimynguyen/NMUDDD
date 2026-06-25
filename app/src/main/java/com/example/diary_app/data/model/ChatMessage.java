@@ -6,6 +6,7 @@ public class ChatMessage {
     private String senderId;
     private String content;
     private Timestamp createdAt;
+    private String postImageUrl;
 
     public ChatMessage() {}
 
@@ -14,6 +15,14 @@ public class ChatMessage {
         this.senderId = senderId;
         this.content = content;
         this.createdAt = createdAt;
+        this.postImageUrl = "";
+    }
+    public ChatMessage(String messageId, String senderId, String content, Timestamp createdAt, String postImageUrl){
+        this.messageId = messageId;
+        this.senderId = senderId;
+        this.content = content;
+        this.createdAt = createdAt;
+        this.postImageUrl = postImageUrl;
     }
 
     public String getMessageId() {
@@ -46,5 +55,12 @@ public class ChatMessage {
 
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
+    }
+    public String getPostImageUrl() {
+        return postImageUrl;
+    }
+
+    public void setPostImageUrl(String postImageUrl) {
+        this.postImageUrl = postImageUrl;
     }
 }
