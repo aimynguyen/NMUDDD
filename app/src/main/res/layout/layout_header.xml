@@ -27,13 +27,15 @@
             android:textColor="@color/blue_secondary"
             android:textSize="12sp"/>
 
-        <View
+        <ImageView
             android:id="@+id/header_avatar"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_gravity="top|end"
             android:layout_marginTop="18dp"
             android:layout_marginEnd="20dp"
+            android:src="@drawable/human_human"
+            android:scaleType="centerCrop"
             android:background="@drawable/bg_circle_gray" />
     </FrameLayout>
 

@@ -76,26 +76,31 @@ public class LoginFragment extends Fragment {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         if (currentUser != null) {
-            // 2. SỬA LỖI TẠI ĐÂY: Dùng Navigation để chuyển màn hình thay vì khởi chạy lại MainActivity
+            // Khi đã đăng nhập, thông thường ta sẽ muốn kiểm tra Role trước khi điều hướng.
+            // Ở đây tạm thời để LoginViewModel xử lý hoặc để user tự chuyển.
+            // Để đơn giản và sửa lỗi nhanh, ta có thể gọi login profile check nếu cần, 
+            // nhưng hiện tại onStart đang mặc định về Home.
             if (getView() != null) {
-                Navigation.findNavController(getView())
-                        .navigate(R.id.action_nav_login_to_nav_home);
+                 // Navigation.findNavController(getView()).navigate(R.id.action_nav_login_to_nav_home);
             }
         }
     }
 
     private void observeViewModel() {
         loginViewModel.getLoginSuccess().observe(getViewLifecycleOwner(), role -> {
+            String uid = FirebaseAuth.getInstance().getUid();
+            if (uid != null && getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).saveUserIdAndFetchName(uid);
+            }
+
             if (role.equals("admin")) {
                 Toast.makeText(requireContext(), "Xin chào Quản trị viên!", Toast.LENGTH_SHORT).show();
+                if (getView() != null) {
+                    Navigation.findNavController(getView())
+                            .navigate(R.id.action_nav_login_to_nav_admin);
+                }
             } else {
                 Toast.makeText(requireContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-
-                String uid = FirebaseAuth.getInstance().getUid();
-                if (uid != null && getActivity() instanceof MainActivity) {
-                    ((MainActivity) getActivity()).saveUserIdAndFetchName(uid);
-                }
-
                 if (getView() != null) {
                     Navigation.findNavController(getView())
                             .navigate(R.id.action_nav_login_to_nav_home);

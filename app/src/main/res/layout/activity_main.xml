@@ -9,18 +9,16 @@
     tools:context=".MainActivity">
 
     <!-- Header -->
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="start"
         android:background="@drawable/bg_header_card"
         android:outlineProvider="background"
         android:clipToOutline="true"
         android:elevation="8dp"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Ảnh nền bo góc -->
         <ImageView
             android:id="@+id/header_background"
             android:layout_width="match_parent"
@@ -29,40 +27,51 @@
             android:scaleType="centerCrop"
             android:clipToOutline="true"
             android:outlineProvider="background"
-            android:background="@drawable/bg_header_card"/>
+            android:background="@drawable/bg_header_card"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
 
-        <!-- Tên người dùng -->
+        <ImageView
+            android:id="@+id/header_noti"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="20dp"
+            android:src="@drawable/ic_noti"
+            app:layout_constraintTop_toTopOf="@id/header_background"
+            app:layout_constraintBottom_toBottomOf="@id/header_background"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <ImageView
+            android:id="@+id/header_avatar"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="11dp"
+            android:src="@drawable/human_human"
+            android:scaleType="centerCrop"
+            android:background="@drawable/bg_circle_gray"
+            app:layout_constraintTop_toTopOf="@id/header_background"
+            app:layout_constraintBottom_toBottomOf="@id/header_background"
+            app:layout_constraintEnd_toStartOf="@id/header_noti"/>
+
         <TextView
             android:id="@+id/header_user_name"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="220dp"
-            android:layout_marginTop="25dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="16dp"
             android:text="Your name"
             android:textColor="@color/blue_secondary"
             android:textSize="16sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:gravity="end"
+            android:ellipsize="end"
+            android:maxLines="1"
+            app:layout_constraintTop_toTopOf="@id/header_background"
+            app:layout_constraintBottom_toBottomOf="@id/header_background"
+            app:layout_constraintEnd_toStartOf="@id/header_avatar"
+            app:layout_constraintStart_toStartOf="parent"/>
 
-        <!-- Avatar -->
-        <View
-            android:id="@+id/header_avatar"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
-            android:layout_gravity="top|end"
-            android:layout_marginTop="18dp"
-            android:layout_marginEnd="65dp"
-            android:background="@drawable/bg_circle_gray"/>
-
-        <!-- Nút thông báo -->
-        <ImageView
-            android:id="@+id/header_noti"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="top|end"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="20dp"
-            android:src="@drawable/ic_noti"/>
-    </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Nội dung chính -->
     <androidx.fragment.app.FragmentContainerView
