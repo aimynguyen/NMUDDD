@@ -98,7 +98,16 @@ public class AdminPostAdapter extends RecyclerView.Adapter<AdminPostAdapter.Admi
             holder.imgDiary.setImageResource(android.R.drawable.ic_menu_gallery);
         }
 
-        // 4. XỬ LÝ SỰ KIỆN CLICK NÚT REMOVE (Đã sửa lỗi cảnh báo vị trí an toàn)
+        // 4. HIỂN THỊ CẢM XÚC (MOOD) CỦA BÀI VIẾT
+        String mood = post.getEmotion();
+        if (mood != null && !mood.trim().isEmpty()) {
+            holder.imgMood.setVisibility(View.VISIBLE);
+            holder.imgMood.setText(getMoodIcon(mood));
+        } else {
+            holder.imgMood.setVisibility(View.GONE);
+        }
+
+        // 5. XỬ LÝ SỰ KIỆN CLICK NÚT REMOVE (Đã sửa lỗi cảnh báo vị trí an toàn)
         holder.btnRemove.setOnClickListener(v -> {
             int currentPosition = holder.getBindingAdapterPosition();
             if (currentPosition != RecyclerView.NO_POSITION) {
@@ -106,6 +115,19 @@ public class AdminPostAdapter extends RecyclerView.Adapter<AdminPostAdapter.Admi
                 showConfirmationDialog(context, currentPost, currentPosition);
             }
         });
+    }
+
+    // Hàm hỗ trợ dịch từ chữ sang Icon để hiển thị (Giống FeedAdapter)
+    private String getMoodIcon(String moodName) {
+        if (moodName == null) return "😐";
+        switch (moodName.toUpperCase()) {
+            case "HAPPY": return "😊";
+            case "SAD": return "😭";
+            case "CALM": return "😌";
+            case "ANGRY": return "😡";
+            case "NEUTRAL": return "😳";
+            default: return "😐";
+        }
     }
 
     @Override
@@ -131,7 +153,7 @@ public class AdminPostAdapter extends RecyclerView.Adapter<AdminPostAdapter.Admi
         Button btnRemove;
         View imgAvatar;
         ImageView imgDiary;
-        TextView tvUsername, tvLocation, tvCaption;
+        TextView tvUsername, tvLocation, tvCaption, imgMood;
 
         public AdminPostViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -141,6 +163,7 @@ public class AdminPostAdapter extends RecyclerView.Adapter<AdminPostAdapter.Admi
             tvUsername = itemView.findViewById(R.id.tvUsername);
             tvLocation = itemView.findViewById(R.id.tvLocation);
             tvCaption = itemView.findViewById(R.id.tvCaption);
+            imgMood = itemView.findViewById(R.id.imgMood);
         }
     }
 }

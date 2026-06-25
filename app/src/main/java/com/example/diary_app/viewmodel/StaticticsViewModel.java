@@ -12,6 +12,7 @@ import com.example.diary_app.repository.PostRepository;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -38,6 +39,12 @@ public class StaticticsViewModel extends AndroidViewModel {
         return _errorMessage;
     }
 
+    // LiveData lưu cảm xúc trung bình theo ngày (Dùng cho Calendar)
+    private MutableLiveData<Map<Integer, String>> _dailyEmotions = new MutableLiveData<>();
+    public LiveData<Map<Integer, String>> getDailyEmotions() {
+        return _dailyEmotions;
+    }
+
     public StaticticsViewModel(@NonNull Application application) {
         super(application);
         this.repo = new PostRepository();
@@ -56,6 +63,7 @@ public class StaticticsViewModel extends AndroidViewModel {
                 .addOnSuccessListener(querySnapshot -> {
                     List<String> allMoods = new ArrayList<>();
                     Map<String, Integer> emotionCountMap = new HashMap<>();
+                    Map<Integer, List<String>> dailyEmotionsRaw = new HashMap<>();
 
                     for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
                         Post post = doc.toObject(Post.class);
@@ -67,12 +75,32 @@ public class StaticticsViewModel extends AndroidViewModel {
                                 allMoods.add(emotion);
                                 // Đếm số lần xuất hiện để làm Top 3
                                 emotionCountMap.put(emotion, emotionCountMap.getOrDefault(emotion, 0) + 1);
+                                
+                                // Tính ngày để hiển thị lên lịch
+                                if (post.getCreateAt() != null) {
+                                    Date date = post.getCreateAt().toDate();
+                                    Calendar cal = Calendar.getInstance();
+                                    cal.setTime(date);
+                                    int day = cal.get(Calendar.DAY_OF_MONTH);
+                                    
+                                    if (!dailyEmotionsRaw.containsKey(day)) {
+                                        dailyEmotionsRaw.put(day, new ArrayList<>());
+                                    }
+                                    dailyEmotionsRaw.get(day).add(emotion);
+                                }
                             }
                         }
                     }
 
                     // 1. Cập nhật danh sách thô cho Biểu đồ ở Fragment
                     _reactionList.setValue(allMoods);
+                    
+                    // Tính cảm xúc chủ đạo mỗi ngày
+                    Map<Integer, String> dailyEmotions = new HashMap<>();
+                    for (Map.Entry<Integer, List<String>> entry : dailyEmotionsRaw.entrySet()) {
+                        dailyEmotions.put(entry.getKey(), calculateDominantEmotion(entry.getValue()));
+                    }
+                    _dailyEmotions.setValue(dailyEmotions);
 
                     // 2. Xử lý tính toán Top 3 cảm xúc nhiều nhất
                     List<Pair<String, Integer>> emotionList = new ArrayList<>();
@@ -92,5 +120,33 @@ public class StaticticsViewModel extends AndroidViewModel {
 
                 })
                 .addOnFailureListener(e -> _errorMessage.setValue(e.getMessage()));
+    }
+
+    private String calculateDominantEmotion(List<String> emotions) {
+        if (emotions == null || emotions.isEmpty()) return "neutral";
+        
+        Map<String, Integer> counts = new HashMap<>();
+        for (String emotion : emotions) {
+            String e = emotion.toLowerCase();
+            String mapped = "neutral";
+            if (e.contains("happy") || e.contains("😁") || e.contains("😀")) mapped = "happy";
+            else if (e.contains("calm") || e.contains("😌") || e.contains("😊")) mapped = "calm";
+            else if (e.contains("neutral") || e.contains("😳") || e.contains("😐")) mapped = "neutral";
+            else if (e.contains("sad") || e.contains("😭") || e.contains("😢")) mapped = "sad";
+            else if (e.contains("angry") || e.contains("😡") || e.contains("❤️")) mapped = "angry";
+            
+            counts.put(mapped, counts.getOrDefault(mapped, 0) + 1);
+        }
+        
+        String dominant = "neutral";
+        int max = 0;
+        for (Map.Entry<String, Integer> entry : counts.entrySet()) {
+            if (entry.getValue() > max) {
+                max = entry.getValue();
+                dominant = entry.getKey();
+            }
+        }
+        
+        return dominant;
     }
 }

@@ -53,17 +53,23 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     public void onBindViewHolder(@NonNull ChatViewHolder holder, int position) {
         ChatMessage message = messageList.get(position);
         
+        float density = holder.itemView.getContext().getResources().getDisplayMetrics().density;
+        int paddingLeftRight = (int) (16 * density + 0.5f);
+        int paddingTopBottom = (int) (8 * density + 0.5f);
+
         if (getItemViewType(position) == TYPE_SENDER) {
             holder.txtMessageRight.setVisibility(View.VISIBLE);
             holder.txtMessageLeft.setVisibility(View.GONE);
             holder.txtMessageRight.setText(message.getContent());
             // Đảm bảo background và padding được set đúng
             holder.txtMessageRight.setBackgroundResource(R.drawable.bg_message_sent);
+            holder.txtMessageRight.setPadding(paddingLeftRight, paddingTopBottom, paddingLeftRight, paddingTopBottom);
         } else {
             holder.txtMessageLeft.setVisibility(View.VISIBLE);
             holder.txtMessageRight.setVisibility(View.GONE);
             holder.txtMessageLeft.setText(message.getContent());
             holder.txtMessageLeft.setBackgroundResource(R.drawable.bg_message_recieved);
+            holder.txtMessageLeft.setPadding(paddingLeftRight, paddingTopBottom, paddingLeftRight, paddingTopBottom);
         }
     }
 

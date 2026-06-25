@@ -6,9 +6,11 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
+import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,18 +22,29 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.diary_app.R;
 import com.example.diary_app.adapter.SearchAdapter;
-import com.example.diary_app.ui.pages.friend.AddFriendFragment;
+import com.example.diary_app.data.model.Post;
+import com.example.diary_app.model.UserModel;
+import com.example.diary_app.viewmodel.FriendViewModel;
 import com.example.diary_app.viewmodel.SearchViewModel;
+import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SearchFragment extends Fragment {
 
     private SearchViewModel viewModel;
+    private FriendViewModel friendViewModel;
     private SearchAdapter adapter;
 
     private EditText edtSearch;
     private ImageButton iconClear;
     private ImageButton iconAddFriend;
     private RecyclerView rvPosts;
+    private Spinner spinnerFilter;
+
+    private String selectedUserId = "";
+    private List<Post> currentPosts = new ArrayList<>();
 
     @Nullable
     @Override
@@ -43,23 +56,29 @@ public class SearchFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Ánh xạ các UI từ code XML của bạn
+        // Ánh xạ các UI
         edtSearch = view.findViewById(R.id.edtSearch);
         iconClear = view.findViewById(R.id.iconClear);
         iconAddFriend = view.findViewById(R.id.iconAddFriend);
         rvPosts = view.findViewById(R.id.rvPosts);
+        spinnerFilter = view.findViewById(R.id.spinnerFilter);
 
-        // Khởi tạo Adapter và gán Grid Layout 2 cột cho RecyclerView
+        // Khởi tạo Adapter
         adapter = new SearchAdapter();
         rvPosts.setLayoutManager(new GridLayoutManager(requireContext(), 2));
         rvPosts.setAdapter(adapter);
 
-        // Khởi tạo ViewModel
+        // Khởi tạo ViewModels
         viewModel = new ViewModelProvider(this).get(SearchViewModel.class);
+        friendViewModel = new ViewModelProvider(this).get(FriendViewModel.class);
+
+        // Setup Friend Filter Spinner
+        setupFriendFilter();
 
         // Theo dõi LiveData danh sách bài viết từ Firebase đổ về
         viewModel.getSearchResults().observe(getViewLifecycleOwner(), posts -> {
-            adapter.setData(posts);
+            currentPosts = posts;
+            filterPosts();
         });
 
         // Bắt sự kiện gõ chữ trên Search Bar
@@ -71,27 +90,114 @@ public class SearchFragment extends Fragment {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String query = s.toString();
 
-                // Ẩn/Hiện nút Xóa nhanh chữ
                 if (query.length() > 0) {
                     iconClear.setVisibility(View.VISIBLE);
+                    viewModel.setSearchQuery(query);
                 } else {
                     iconClear.setVisibility(View.GONE);
+                    // Query is empty, load all posts for the selected user
+                    loadAllPostsForUser(selectedUserId);
                 }
-
-                // Gửi từ khóa sang ViewModel giải quyết Debounce chặn spam request
-                viewModel.setSearchQuery(query);
             }
 
             @Override
             public void afterTextChanged(Editable s) {}
         });
 
-        // Xử lý sự kiện khi ấn nút Clear (Xóa hết chữ trong ô tìm kiếm)
         iconClear.setOnClickListener(v -> edtSearch.setText(""));
 
-        // Click nút Add Friend
         iconAddFriend.setOnClickListener(v -> {
             Navigation.findNavController(v).navigate(R.id.nav_addfriend);
         });
+    }
+
+    private void setupFriendFilter() {
+        friendViewModel.loadFriends();
+        
+        List<String> spinnerNames = new ArrayList<>();
+        List<String> spinnerIds = new ArrayList<>();
+
+        String currentUid = FirebaseAuth.getInstance().getCurrentUser() != null ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
+
+        friendViewModel.getFriendList().observe(getViewLifecycleOwner(), friends -> {
+            spinnerNames.clear();
+            spinnerIds.clear();
+
+            spinnerNames.add("Tất cả bài viết của tôi"); // Default my posts
+            spinnerIds.add(currentUid);
+
+            for (UserModel friend : friends) {
+                spinnerNames.add(friend.getUserName() != null ? friend.getUserName() : "Unknown");
+                spinnerIds.add(friend.getUid());
+            }
+
+            ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, spinnerNames);
+            spinnerFilter.setAdapter(spinnerAdapter);
+        });
+
+        spinnerFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position >= 0 && position < spinnerIds.size()) {
+                    selectedUserId = spinnerIds.get(position);
+                    
+                    // If search query is empty, load all posts of the selected user directly
+                    if (edtSearch.getText().toString().trim().isEmpty()) {
+                        loadAllPostsForUser(selectedUserId);
+                    } else {
+                        // Otherwise, re-filter the current search results
+                        filterPosts();
+                    }
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    private void loadAllPostsForUser(String userId) {
+        if (userId == null || userId.isEmpty()) return;
+        
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+            .collection("posts")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                List<Post> list = new ArrayList<>();
+                for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots) {
+                    try {
+                        Post post = doc.toObject(Post.class);
+                        if (post != null) {
+                            post.setPostId(doc.getId());
+                            list.add(post);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                // Update currentPosts and display them
+                currentPosts = list;
+                adapter.setData(currentPosts);
+            })
+            .addOnFailureListener(e -> {
+                e.printStackTrace();
+                adapter.setData(new ArrayList<>());
+            });
+    }
+
+    private void filterPosts() {
+        if (selectedUserId == null || selectedUserId.isEmpty()) {
+            adapter.setData(currentPosts);
+            return;
+        }
+
+        List<Post> filtered = new ArrayList<>();
+        for (Post p : currentPosts) {
+            if (p.getUserId() != null && p.getUserId().equals(selectedUserId)) {
+                filtered.add(p);
+            }
+        }
+        adapter.setData(filtered);
     }
 }
