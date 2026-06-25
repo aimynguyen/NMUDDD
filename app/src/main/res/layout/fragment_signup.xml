@@ -72,20 +72,7 @@
                 android:hint="Email"
                 android:layout_marginBottom="12dp"/>
 
-            <!-- DOB -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Date of birth"/>
 
-            <EditText
-                android:id="@+id/edtDob"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@drawable/bg_input_pink"
-                android:padding="10dp"
-                android:hint="Date of birth"
-                android:layout_marginBottom="12dp"/>
 
             <!-- Password -->
             <TextView

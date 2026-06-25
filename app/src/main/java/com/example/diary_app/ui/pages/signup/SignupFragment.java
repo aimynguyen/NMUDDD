@@ -18,7 +18,7 @@ import com.example.diary_app.viewmodel.SignupViewModel;
 
 public class SignupFragment extends Fragment {
 
-    private EditText edtUsername, edtEmail, edtDob, edtPassword, edtConfirmPassword;
+    private EditText edtUsername, edtEmail, edtPassword, edtConfirmPassword;
     private Button btnSignup;
     private SignupViewModel signupViewModel;
 
@@ -35,7 +35,7 @@ public class SignupFragment extends Fragment {
         // 2. Ánh xạ các View từ đối tượng 'view'
         edtUsername = view.findViewById(R.id.edtUsername);
         edtEmail = view.findViewById(R.id.edtEmail);
-        edtDob = view.findViewById(R.id.edtDob);
+
         edtPassword = view.findViewById(R.id.edtPassword);
         edtConfirmPassword = view.findViewById(R.id.edtConfirmPassword);
         btnSignup = view.findViewById(R.id.btnSignup);
@@ -48,10 +48,10 @@ public class SignupFragment extends Fragment {
             String email = edtEmail.getText().toString().trim();
             String password = edtPassword.getText().toString().trim();
             String confirmPassword = edtConfirmPassword.getText().toString().trim();
-            String dob = edtDob.getText().toString().trim();
+            String dob = "";
             String username = edtUsername.getText().toString().trim();
 
-            if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || dob.isEmpty() || username.isEmpty()) {
+            if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || username.isEmpty()) {
                 Toast.makeText(requireContext(), "Vui lòng nhập đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
                 return;
             }
