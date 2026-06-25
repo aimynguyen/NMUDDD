@@ -275,12 +275,14 @@ public class ChatDashboardFragment extends Fragment {
 
         String greeting;
 
-        if (hour < 12) {
-            greeting = "Chào buổi sáng ☀";
-        } else if (hour < 18) {
-            greeting = "Chào buổi chiều ⛅";
+        if (hour >= 4 && hour < 12) {
+            greeting = "Chào buổi sáng " + new String(Character.toChars(0x2600));
+        } else if (hour >= 12 && hour < 18) {
+            greeting = "Chào buổi chiều " + new String(Character.toChars(0x26C5));
+        } else if (hour >= 18 && hour < 23) {
+            greeting = "Chào buổi tối " + new String(Character.toChars(0x1F319));
         } else {
-            greeting = "Chào buổi tối ✨";
+            greeting = "Khuya rồi đó " + new String(Character.toChars(0x1F634));
         }
 
         tvGreeting.setText(greeting);
@@ -290,15 +292,10 @@ public class ChatDashboardFragment extends Fragment {
     private void updateQuestion (TextView tvQuestion) {
         int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
 
-        // sau 10h đêm luôn hiện câu này
-        if (hour >= 22) {
-            tvQuestion.setText("Đừng thức quá khuya nhé.");
-            return;
-        }
 
         String[] questions;
 
-        if (hour >= 5 && hour < 11) {
+        if (hour >= 4 && hour < 11) {
             // sáng
             questions = new String[] {
                     "Bạn ngủ ngon chứ?",
@@ -317,7 +314,7 @@ public class ChatDashboardFragment extends Fragment {
                     "Nhớ nghỉ ngơi một chút nhé.",
                     "Nhớ uống nước nhé."
             };
-        } else {
+        } else if (hour >= 18 && hour < 23) {
             // tối
             questions = new String[] {
                     "Hôm nay bạn cảm thấy thế nào?",
@@ -326,6 +323,13 @@ public class ChatDashboardFragment extends Fragment {
                     "Ngày hôm nay của bạn ra sao?",
                     "Bạn có điều gì muốn chia sẻ không?",
                     "Hôm nay có khoảnh khắc nào đáng nhớ không?"
+            };
+        } else {
+            questions = new String[] {
+                    "Có chuyện gì làm bạn chưa ngủ sao?",
+                    "Đừng quên nghỉ ngơi nha.",
+                    "Bạn có tâm sự gì chăng?",
+                    "Chúc bạn có một giấc ngủ thật ngon."
             };
         }
         // random câu
