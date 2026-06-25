@@ -6,7 +6,7 @@ public class PetConstants {
     // 1. CẤU HÌNH KINH NGHIỆM (EXP) & HOẠT ĐỘNG
     public static final int MAX_DAILY_EXP = 100; // Giới hạn EXP tối đa nhận trong 1 ngày
     public static final int EXP_PER_POST = 20;   // Nhận 20 EXP khi đăng bài
-    public static final int EXP_PER_FEELING = 5; // Nhận 5 EXP khi chỉ cập nhật cảm xúc (nếu có)
+    public static final int EXP_PER_REACT = 10; // Nhận 10 EXP khi th react
 
 
     // 2. CẤU HÌNH CẤP ĐỘ (LEVEL)
@@ -49,30 +49,55 @@ public class PetConstants {
 
     // 3. CẤU HÌNH TRANG BỊ / CẢM XÚC MẶC ĐỊNH
     public static final String ITEM_TYPE_BACKGROUND = "background";
-    public static final String DEFAULT_BACKGROUND_ID = "bg_default";
+    public static final String DEFAULT_BACKGROUND_ID = "bg_01";
 
     // Các trạng thái cảm xúc của Pet (khớp với tên file ảnh đuôi png/webp)
-    public static final String EMOTION_HAPPY = "happy";
-    public static final String EMOTION_SAD = "sad";
-    public static final String EMOTION_NEUTRAL = "neutral";
+    public static final String EMOTION_HAPPY = "HAPPY";
+    public static final String EMOTION_SAD = "SAD";
+    public static final String EMOTION_NEUTRAL = "NEUTRAL";
+    public static final String EMOTION_ANGRY = "ANGRY";
+    public static final String EMOTION_SLEEP = "SLEEP";
 
     // Kho dữ liệu câu thoại mẫu
     private static final String[] QUOTES_HAPPY = {
             "Hôm nay là một ngày tuyệt vời đúng không!",
             "Năng lượng tích cực tràn đầy luôn nè!",
-            "Cứ vui vẻ như thế này mỗi ngày bạn nhé!"
+            "Cứ vui vẻ như thế này mỗi ngày bạn nhé!",
+            "Ngày hôm nay thật rực rỡ, giống hệt như nụ cười của bạn vậy!"
     };
 
     private static final String[] QUOTES_SAD = {
             "Đừng buồn nữa, có tớ ở đây ôm bạn nè...",
             "Ngày mai trời lại sáng thôi, cố lên bạn ơi.",
-            "Nếu mệt mỏi quá, hãy nghỉ ngơi một chút nhé."
+            "Nếu mệt mỏi quá, hãy nghỉ ngơi một chút nhé.",
+            "Bạn đã vất vả nhiều rồi. Hãy cho phép bản thân được nghỉ ngơi nhé.",
+            "Nếu thấy mệt mỏi quá, cứ khóc một chút cũng không sao đâu.",
+            "Đôi khi chúng ta cần một ngày buồn để biết trân trọng những ngày vui. Mình luôn ở đây cùng bạn.",
+            "Bạn không cô đơn đâu. Hãy trút hết những phiền muộn vào trang nhật ký này nhé..."
     };
 
     private static final String[] QUOTES_NEUTRAL = {
             "Hôm nay của bạn thế nào? Kể tớ nghe đi.",
             "Tớ vẫn đang lắng nghe bạn đây.",
-            "Viết một chút nhật ký cho nhẹ lòng nào."
+            "Đừng quên uống đủ nước và vươn vai một chút cho đỡ mỏi nha.",
+            "Mình luôn ở đây, tĩnh lặng và sẵn sàng lắng nghe mọi câu chuyện của bạn.",
+            "Dù hôm nay có là một ngày bình thường, thì đó cũng là một ngày bình yên.",
+            "Có bức ảnh nào hay ho không? Đăng lên nhật ký cho mình xem với!",
+    };
+
+    private static final String[] QUOTES_ANGRY = {
+            "Hít một hơi thật sâu nào... Thở ra... Bạn thấy đỡ hơn chút nào chưa?",
+            "Tức giận cũng là lẽ tự nhiên thôi, nhưng đừng để nó làm đau chính bạn nhé.",
+            "Có ai làm bạn bực mình à? Cứ 'xả' hết vào nhật ký đi, mình hứa sẽ giữ bí mật tuyệt đối!",
+            "Đừng cau mày nữa sẽ mau già đó! Mau đi ăn một chút đồ ngọt cho hạ hỏa nào!",
+            "Bạn tức giận trông cũng đáng yêu lắm, nhưng hãy thư giãn một chút cho nhẹ đầu nha.",
+            "Mọi bực dọc cứ để ở trang giấy này, đóng app lại và đi ngủ một giấc thật ngon nhé!"
+    };
+
+    private static final String[] QUOTES_SLEEP = {
+            "Zzz... (Bé pet đang ngủ say sưa vì hôm nay bạn chưa đăng gì cả)",
+            "Khò khò... Bạn có câu chuyện gì mới để kể hôm nay không?",
+            "Zzz... Đánh thức mình bằng một bài viết mới nhé!"
     };
 
     /**
@@ -85,6 +110,10 @@ public class PetConstants {
                 return QUOTES_HAPPY[random.nextInt(QUOTES_HAPPY.length)];
             case EMOTION_SAD:
                 return QUOTES_SAD[random.nextInt(QUOTES_SAD.length)];
+            case EMOTION_ANGRY:
+                return QUOTES_ANGRY[random.nextInt(QUOTES_ANGRY.length)];
+            case EMOTION_SLEEP:
+                return QUOTES_SLEEP[random.nextInt(QUOTES_SLEEP.length)];
             default:
                 return QUOTES_NEUTRAL[random.nextInt(QUOTES_NEUTRAL.length)];
         }

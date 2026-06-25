@@ -11,9 +11,12 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ContextThemeWrapper; // Nhớ thêm import này
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
+
+import com.example.diary_app.viewmodel.PetViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -66,6 +69,15 @@ public class MainActivity extends AppCompatActivity {
             if (bottomNavigationView != null) {
                 NavigationUI.setupWithNavController(bottomNavigationView, navController);
             }
+
+            PetViewModel petViewModel = new ViewModelProvider(this).get(PetViewModel.class);
+            petViewModel.getLevelUpEvent().observe(this, event -> {
+                if (event == null) return;
+                Integer newLevel = event.getContentIfNotHandled();
+                if (newLevel != null) {
+                    navController.navigate(R.id.action_global_nav_pet_levelup);
+                }
+            });
 
             // 3. TỰ ĐỘNG ẨN/HIỆN THEO ID FRAGMENT
             navController.addOnDestinationChangedListener((controller, destination, arguments) -> {

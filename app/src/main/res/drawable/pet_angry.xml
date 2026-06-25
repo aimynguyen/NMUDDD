@@ -4,10 +4,10 @@
 
     <item
         android:drawable="@drawable/panda_angry01"
-        android:duration="500"/>
+        android:duration="800"/>
 
     <item
         android:drawable="@drawable/panda_angry02"
-        android:duration="500"/>
+        android:duration="800"/>
 
 </animation-list>

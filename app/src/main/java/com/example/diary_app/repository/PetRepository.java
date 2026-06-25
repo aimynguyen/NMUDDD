@@ -60,10 +60,10 @@ public class PetRepository {
         updates.put("petInfo.lastExpDate", today);
 
         // Nếu cấp độ mới lớn hơn cấp độ cũ trong petInfo
-        if (newLevel > petInfo.getLevel()) {
-            // Giả sử cứ lên cấp tặng 1 item có ID tương ứng
-            // (Ví dụ: Level 2 tặng "bg_level_2")
-            String rewardItemId = "bg_level_" + newLevel;
+        boolean isLevelUp = newLevel > petInfo.getLevel();
+        if (isLevelUp) {
+            // Cứ lên cấp tặng 1 item có ID tương ứng
+            String rewardItemId = String.format(Locale.getDefault(), "bg_%02d", newLevel);
 
             // Dùng FieldValue.arrayUnion để thêm phần thưởng vào mảng unlockedItems trên Firebase
             updates.put("petInfo.unlockedItems", com.google.firebase.firestore.FieldValue.arrayUnion(rewardItemId));
@@ -76,7 +76,7 @@ public class PetRepository {
         DocumentReference userRef = db.collection("users").document(userId);
         userRef.update(updates)
           .addOnSuccessListener(aVoid ->{
-            listener.onSuccess(finalCurrentExp);
+            listener.onSuccess(finalCurrentExp, isLevelUp, newLevel);
         }).addOnFailureListener(e -> {
             listener.onError("Lỗi cập nhật EXP: " + e.getMessage());
         });
@@ -84,25 +84,34 @@ public class PetRepository {
 
     // Interface Callbacks
     public interface OnExpUpdateListener {
-        void onSuccess(int newTotalExp);
+        void onSuccess(int newTotalExp, boolean isLevelUp, int newLevel);
         void onDailyCapReached(String message);
         void onError(String error);
     }
 
     // HÀM LẤY THÔNG TIN PET CỦA USER
     public void getPetInfo(String userId, OnPetInfoFetchedListener listener){
+        android.util.Log.d("PetRepository", "getPetInfo called for userId: " + userId);
         db.collection("users").document(userId).get()
                 .addOnSuccessListener(documentSnapshot -> {
+                    android.util.Log.d("PetRepository", "getPetInfo document exists: " + documentSnapshot.exists());
+                    
                     // Lấy riêng trường "petInfo" và ép kiểu thẳng về class PetInfo
                     PetInfo petInfo = documentSnapshot.get("petInfo", PetInfo.class);
+                    android.util.Log.d("PetRepository", "getPetInfo deserialized petInfo: " + (petInfo != null ? "OK level=" + petInfo.getLevel() : "NULL"));
 
                     if(petInfo != null){
                         listener.onSuccess(petInfo);
                     } else {
-                        listener.onError("Không tìm thấy dữ liệu về Pet!");
+                        // Tạo PetInfo mặc định nếu chưa có
+                        android.util.Log.w("PetRepository", "getPetInfo is null, creating default PetInfo");
+                        String today = getTodayDateString();
+                        PetInfo defaultPetInfo = new PetInfo(today);
+                        listener.onSuccess(defaultPetInfo);
                     }
                 })
                 .addOnFailureListener(e -> {
+                    android.util.Log.e("PetRepository", "getPetInfo failure: " + e.getMessage());
                     listener.onError("Lỗi kết nối: " + e.getMessage());
                 });
     }
