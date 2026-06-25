@@ -55,6 +55,12 @@
             app:popUpTo="@id/nav_login"
             app:popUpToInclusive="true" />
 
+        <action
+            android:id="@+id/action_nav_login_to_nav_admin"
+            app:destination="@id/nav_admin"
+            app:popUpTo="@id/nav_login"
+            app:popUpToInclusive="true" />
+
     </fragment>
 
     <fragment
