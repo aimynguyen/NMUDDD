@@ -18,7 +18,7 @@ import com.example.diary_app.viewmodel.SignupViewModel;
 
 public class SignupFragment extends Fragment {
 
-    private EditText edtUsername, edtEmail, edtDob, edtPassword;
+    private EditText edtUsername, edtEmail, edtDob, edtPassword, edtConfirmPassword;
     private Button btnSignup;
     private SignupViewModel signupViewModel;
 
@@ -37,6 +37,7 @@ public class SignupFragment extends Fragment {
         edtEmail = view.findViewById(R.id.edtEmail);
         edtDob = view.findViewById(R.id.edtDob);
         edtPassword = view.findViewById(R.id.edtPassword);
+        edtConfirmPassword = view.findViewById(R.id.edtConfirmPassword);
         btnSignup = view.findViewById(R.id.btnSignup);
 
         // 3. Khởi tạo ViewModel gắn với vòng đời của Fragment
@@ -46,11 +47,17 @@ public class SignupFragment extends Fragment {
         btnSignup.setOnClickListener(v -> {
             String email = edtEmail.getText().toString().trim();
             String password = edtPassword.getText().toString().trim();
+            String confirmPassword = edtConfirmPassword.getText().toString().trim();
             String dob = edtDob.getText().toString().trim();
             String username = edtUsername.getText().toString().trim();
 
-            if (email.isEmpty() || password.isEmpty()) {
+            if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || dob.isEmpty() || username.isEmpty()) {
                 Toast.makeText(requireContext(), "Vui lòng nhập đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!password.equals(confirmPassword)) {
+                Toast.makeText(requireContext(), "Mật khẩu xác nhận không khớp!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
