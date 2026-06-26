@@ -22,6 +22,9 @@ import java.util.Map;
 public class StaticticsViewModel extends AndroidViewModel {
     private PostRepository repo;
 
+    // Dùng để chống race condition: chỉ xử lý kết quả của request mới nhất
+    private int currentRequestId = 0;
+
     // LiveData lưu danh sách cảm xúc thô (Dùng cho Biểu đồ ở Fragment)
     private MutableLiveData<List<String>> _reactionList = new MutableLiveData<>();
     public LiveData<List<String>> getReactionList() {
@@ -59,8 +62,14 @@ public class StaticticsViewModel extends AndroidViewModel {
             return;
         }
 
+        // Tăng requestId mỗi lần load để chống race condition
+        final int thisRequestId = ++currentRequestId;
+
         repo.getPostByTimeRange(UId, startDate, endDate)
                 .addOnSuccessListener(querySnapshot -> {
+                    // Bỏ qua kết quả nếu đây không phải request mới nhất (race condition)
+                    if (thisRequestId != currentRequestId) return;
+
                     List<String> allMoods = new ArrayList<>();
                     Map<String, Integer> emotionCountMap = new HashMap<>();
                     Map<Integer, List<String>> dailyEmotionsRaw = new HashMap<>();
@@ -75,14 +84,14 @@ public class StaticticsViewModel extends AndroidViewModel {
                                 allMoods.add(emotion);
                                 // Đếm số lần xuất hiện để làm Top 3
                                 emotionCountMap.put(emotion, emotionCountMap.getOrDefault(emotion, 0) + 1);
-                                
+
                                 // Tính ngày để hiển thị lên lịch
                                 if (post.getCreateAt() != null) {
                                     Date date = post.getCreateAt().toDate();
                                     Calendar cal = Calendar.getInstance();
                                     cal.setTime(date);
                                     int day = cal.get(Calendar.DAY_OF_MONTH);
-                                    
+
                                     if (!dailyEmotionsRaw.containsKey(day)) {
                                         dailyEmotionsRaw.put(day, new ArrayList<>());
                                     }
@@ -94,7 +103,7 @@ public class StaticticsViewModel extends AndroidViewModel {
 
                     // 1. Cập nhật danh sách thô cho Biểu đồ ở Fragment
                     _reactionList.setValue(allMoods);
-                    
+
                     // Tính cảm xúc chủ đạo mỗi ngày
                     Map<Integer, String> dailyEmotions = new HashMap<>();
                     for (Map.Entry<Integer, List<String>> entry : dailyEmotionsRaw.entrySet()) {
@@ -119,7 +128,11 @@ public class StaticticsViewModel extends AndroidViewModel {
                     _topEmotions.setValue(top3);
 
                 })
-                .addOnFailureListener(e -> _errorMessage.setValue(e.getMessage()));
+                .addOnFailureListener(e -> {
+                    if (thisRequestId == currentRequestId) {
+                        _errorMessage.setValue(e.getMessage());
+                    }
+                });
     }
 
     private String calculateDominantEmotion(List<String> emotions) {
