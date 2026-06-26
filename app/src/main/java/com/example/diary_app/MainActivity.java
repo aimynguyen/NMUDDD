@@ -3,6 +3,8 @@ package com.example.diary_app;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,6 +16,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ContextThemeWrapper;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
@@ -43,6 +47,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+
         // 1. Ánh xạ View
         View headerView = findViewById(R.id.header_view);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
@@ -65,9 +75,14 @@ public class MainActivity extends AppCompatActivity {
 
         updateHeaderFromStorage();
 
-        // KÍCH HOẠT LẮNG NGHE THÔNG BÁO
+        // KÍCH HOẠT LẮNG NGHE THÔNG BÁO VÀ ĐỒNG BỘ TOKEN
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             listenForNotifications();
+            
+            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            com.example.diary_app.viewmodel.NotificationViewModel notiViewModel = 
+                    new ViewModelProvider(this).get(com.example.diary_app.viewmodel.NotificationViewModel.class);
+            notiViewModel.syncFcmToken(uid);
         }
 
         // 2. Lấy NavController
@@ -220,14 +235,13 @@ public class MainActivity extends AppCompatActivity {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         FirebaseFirestore.getInstance().collection("notifications")
-                .whereEqualTo("toUid", currentUserId)
+                .whereEqualTo("receiverId", currentUserId)
                 .whereEqualTo("isRead", false)
                 .addSnapshotListener((snapshots, e) -> {
                     if (e != null || snapshots == null || snapshots.isEmpty()) return;
                     for (QueryDocumentSnapshot doc : snapshots) {
-                        String title = doc.getString("title");
-                        String body = doc.getString("body");
-                        Toast.makeText(MainActivity.this, title + ": " + body, Toast.LENGTH_LONG).show();
+                        String title = "AuraLog";
+                        String body = doc.getString("message");
                         doc.getReference().update("isRead", true);
                     }
                 });
