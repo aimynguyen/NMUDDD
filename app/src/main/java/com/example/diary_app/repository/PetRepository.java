@@ -24,6 +24,18 @@ public class PetRepository {
         return sdf.format(new Date());
     }
 
+    private long getDaysDifference(String date1Str, String date2Str) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        try {
+            Date date1 = sdf.parse(date1Str);
+            Date date2 = sdf.parse(date2Str);
+            long diffInMillis = date2.getTime() - date1.getTime();
+            return diffInMillis / (1000 * 60 * 60 * 24);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
     public void addExpForPet(String userId, PetInfo petInfo, int expAmount, OnExpUpdateListener listener){
         String today = getTodayDateString();
 
@@ -34,8 +46,20 @@ public class PetRepository {
         // 1. Kiểm tra qua ngày mới chưa
         if (!today.equals(petInfo.getLastExpDate())) {
             newDailyExp = 0; // Reset EXP ngày
+            
+            long daysDiff = getDaysDifference(petInfo.getLastExpDate(), today);
+            if (daysDiff == 1) {
+                newStreak += 1; // Hoạt động ở ngày tiếp theo
+            } else if (daysDiff > 1) {
+                newStreak = 1; // Bỏ lỡ ngày, reset streak
+            }
+            
             petInfo.setLastExpDate(today);
-            newStreak += 1; // Tăng streak
+        }
+
+        // Cập nhật streak = 1 nếu là lần đầu hoạt động (account mới tạo có streak = 0)
+        if (newStreak == 0) {
+            newStreak = 1;
         }
 
         // 2. Kiểm tra giới hạn EXP
@@ -108,6 +132,15 @@ public class PetRepository {
                     android.util.Log.d("PetRepository", "getPetInfo deserialized petInfo: " + (petInfo != null ? "OK level=" + petInfo.getLevel() : "NULL"));
 
                     if(petInfo != null){
+                        // Kiểm tra nếu đứt streak (cách >= 2 ngày)
+                        String today = getTodayDateString();
+                        long daysDiff = getDaysDifference(petInfo.getLastExpDate(), today);
+                        if (daysDiff >= 2 && petInfo.getStreakDays() > 0) {
+                            petInfo.setStreakDays(0);
+                            // Cập nhật DB ngầm
+                            db.collection("users").document(userId).update("petInfo.streakDays", 0);
+                        }
+                        
                         listener.onSuccess(petInfo);
                     } else {
                         // Tạo PetInfo mặc định nếu chưa có
