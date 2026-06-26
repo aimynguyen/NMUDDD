@@ -110,9 +110,32 @@ public class HomeFragment extends Fragment {
         setupListeners();
         setupFeed();
 
-        // Mặc định lúc mới vào là trạng thái Lướt tin & Chụp ảnh
-        switchMode(false);
-        setupCamera();
+        // ==========================================
+        // PHỤC SINH DỮ LIỆU TỪ CÕI CHẾT (PROCESS DEATH)
+        // ==========================================
+        if (savedInstanceState != null) {
+            // 1. Cứu lại đường dẫn ảnh
+            String savedUriStr = savedInstanceState.getString("SAVED_IMAGE_URI");
+            if (savedUriStr != null) {
+                selectedImageUri = android.net.Uri.parse(savedUriStr);
+                if (imgPreview != null) {
+                    imgPreview.setImageURI(selectedImageUri); // Gắn lại ảnh lên màn hình
+                }
+                switchMode(true); // Bật chế độ Preview ngay lập tức
+            } else {
+                switchMode(false);
+                setupCamera();
+            }
+
+            // 2. Cứu lại Mood và Privacy
+            currentMood = savedInstanceState.getString("SAVED_MOOD", com.example.diary_app.core.Mood.HAPPY.name());
+            currentPrivacy = savedInstanceState.getString("SAVED_PRIVACY", "public");
+
+        } else {
+            // Nếu khởi động app bình thường (không bị kill)
+            switchMode(false);
+            setupCamera();
+        }
         requireActivity().getSupportFragmentManager().setFragmentResultListener("location_request", getViewLifecycleOwner(), (requestKey, bundle) -> {
             // Lấy dữ liệu do màn hình Map gửi về
             String addressName = bundle.getString("location_name");
@@ -634,5 +657,21 @@ public class HomeFragment extends Fragment {
                         android.widget.Toast.makeText(getContext(), "Lỗi lưu ảnh", android.widget.Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+    // ==========================================
+    // BÍ KÍP KHÁNG TỬ: LƯU ĐƯỜNG DẪN ẢNH TRƯỚC KHI BỊ KILL
+    // ==========================================
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // Nếu đang có ảnh, lưu đường dẫn của nó lại thành chuỗi (String)
+        if (selectedImageUri != null) {
+            outState.putString("SAVED_IMAGE_URI", selectedImageUri.toString());
+        }
+
+        // Tiện tay lưu luôn trạng thái cảm xúc và quyền riêng tư đang chọn
+        outState.putString("SAVED_MOOD", currentMood);
+        outState.putString("SAVED_PRIVACY", currentPrivacy);
     }
 }

@@ -30,7 +30,6 @@ import java.util.ArrayList;
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private Spinner spinner;
     private View rootView;
     // Biến cho thanh tìm kiếm
     private android.widget.EditText edtSearch;
@@ -55,31 +54,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void addEvents() {
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                switch (position){
-                    case 0:
-                        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                        break;
-                    case 1:
-                        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-                        break;
-                    case 2:
-                        mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-                        break;
-                    case 3:
-                        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-                        break;
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-        // Thêm khối code này vào cuối hàm addEvents()
         // 3.1. Nút X (Xóa chữ)
         iconClear.setOnClickListener(v -> edtSearch.setText(""));
 
@@ -109,16 +83,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void addControls() {
-        spinner = rootView.findViewById(R.id.spinner);
-        ArrayList<String> ds_Style = new ArrayList<>();
-        ds_Style.add("Style 1");
-        ds_Style.add("Style 2");
-        ds_Style.add("Style 3");
-        ds_Style.add("Style 4");
-
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, ds_Style);
-        spinner.setAdapter(arrayAdapter);
-
         edtSearch = rootView.findViewById(R.id.edtSearch);
         iconSearch = rootView.findViewById(R.id.iconSearch);
         iconClear = rootView.findViewById(R.id.iconClear);
