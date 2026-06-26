@@ -1,5 +1,6 @@
 package com.example.diary_app.ui.pages.pet;
 
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -23,6 +24,7 @@ public class fragment_pet_levelup extends Fragment {
 
     private TextView txtLevel;
     private ImageView imgReward1;
+    private ImageView imgPet;
     private Button btnEquip;
     private ImageButton btnClose;
     private PetViewModel petViewModel;
@@ -39,6 +41,7 @@ public class fragment_pet_levelup extends Fragment {
         
         txtLevel = view.findViewById(R.id.txtLevel);
         imgReward1 = view.findViewById(R.id.imgReward1);
+        imgPet = view.findViewById(R.id.imgPet);
         btnEquip = view.findViewById(R.id.btnEquip);
         btnClose = view.findViewById(R.id.btnClose);
 
@@ -69,6 +72,13 @@ public class fragment_pet_levelup extends Fragment {
         btnClose.setOnClickListener(v -> {
             Navigation.findNavController(v).navigate(R.id.nav_home);
         });
+
+        imgPet.setBackgroundResource(R.drawable.pet_levelup);
+
+        AnimationDrawable animation =
+                (AnimationDrawable) imgPet.getBackground();
+
+        animation.start();
 
         return view;
     }
