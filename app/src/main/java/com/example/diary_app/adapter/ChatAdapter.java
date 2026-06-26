@@ -40,7 +40,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     @Override
     public ChatViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // Sử dụng item_chat_ai chứa cả 2 phía trái/phải
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_ai, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat, parent, false);
         return new ChatViewHolder(view);
     }
 
@@ -52,18 +52,48 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     @Override
     public void onBindViewHolder(@NonNull ChatViewHolder holder, int position) {
         ChatMessage message = messageList.get(position);
-        
+
+        float density = holder.itemView.getContext().getResources().getDisplayMetrics().density;
+        int paddingLeftRight = (int) (16 * density + 0.5f);
+        int paddingTopBottom = (int) (8 * density + 0.5f);
+
         if (getItemViewType(position) == TYPE_SENDER) {
-            holder.txtMessageRight.setVisibility(View.VISIBLE);
-            holder.txtMessageLeft.setVisibility(View.GONE);
+            // Xử lý Tin nhắn Gửi
+            holder.itemView.findViewById(R.id.right_chat_layout).setVisibility(View.VISIBLE);
+            holder.itemView.findViewById(R.id.left_chat_layout).setVisibility(View.GONE);
+
             holder.txtMessageRight.setText(message.getContent());
             // Đảm bảo background và padding được set đúng
             holder.txtMessageRight.setBackgroundResource(R.drawable.bg_message_sent);
+            holder.txtMessageRight.setPadding(paddingLeftRight, paddingTopBottom, paddingLeftRight, paddingTopBottom);
+
+            // Check xem tin nhắn này có đính kèm ảnh bài viết không
+            if (message.getPostImageUrl() != null && !message.getPostImageUrl().isEmpty()) {
+                holder.imgMessageRight.setVisibility(View.VISIBLE);
+                com.bumptech.glide.Glide.with(holder.itemView.getContext())
+                        .load(message.getPostImageUrl())
+                        .into(holder.imgMessageRight);
+            } else {
+                holder.imgMessageRight.setVisibility(View.GONE); // Nếu không có ảnh thì giấu khung đi
+            }
+
         } else {
-            holder.txtMessageLeft.setVisibility(View.VISIBLE);
-            holder.txtMessageRight.setVisibility(View.GONE);
+            // Xử lý Tin nhắn Nhận
+            holder.itemView.findViewById(R.id.left_chat_layout).setVisibility(View.VISIBLE);
+            holder.itemView.findViewById(R.id.right_chat_layout).setVisibility(View.GONE);
+
             holder.txtMessageLeft.setText(message.getContent());
             holder.txtMessageLeft.setBackgroundResource(R.drawable.bg_message_recieved);
+            holder.txtMessageLeft.setPadding(paddingLeftRight, paddingTopBottom, paddingLeftRight, paddingTopBottom);
+
+            if (message.getPostImageUrl() != null && !message.getPostImageUrl().isEmpty()) {
+                holder.imgMessageLeft.setVisibility(View.VISIBLE);
+                com.bumptech.glide.Glide.with(holder.itemView.getContext())
+                        .load(message.getPostImageUrl())
+                        .into(holder.imgMessageLeft);
+            } else {
+                holder.imgMessageLeft.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -75,11 +105,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     public static class ChatViewHolder extends RecyclerView.ViewHolder {
         TextView txtMessageLeft;
         TextView txtMessageRight;
-
+        android.widget.ImageView imgMessageLeft, imgMessageRight;
         public ChatViewHolder(@NonNull View itemView) {
             super(itemView);
             txtMessageLeft = itemView.findViewById(R.id.left_chat_textview);
             txtMessageRight = itemView.findViewById(R.id.right_chat_textview);
+            imgMessageLeft = itemView.findViewById(R.id.left_chat_image);
+            imgMessageRight = itemView.findViewById(R.id.right_chat_image);
         }
     }
 }

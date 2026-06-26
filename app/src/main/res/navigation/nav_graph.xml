@@ -52,7 +52,18 @@
     <fragment
         android:id="@+id/nav_dashboard"
         android:name="com.example.diary_app.ui.pages.statistics.StaticticsFragment"
-        android:label="Dashboard"/>
+        android:label="Dashboard">
+
+        <action
+            android:id="@+id/action_nav_dashboard_to_nav_video"
+            app:destination="@id/nav_video" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_video"
+        android:name="com.example.diary_app.ui.pages.statistics.VideoFragment"
+        android:label="Video Slideshow" />
 
     <fragment
         android:id="@+id/nav_login"
