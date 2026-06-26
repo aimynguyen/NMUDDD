@@ -119,6 +119,10 @@ public class LoginViewModel extends ViewModel {
 
                                     if(documentSnapshot.exists()){
                                         User user = documentSnapshot.toObject(User.class);
+                                        
+                                        // Lưu FCM Token
+                                        userRepository.updateFcmToken(uid);
+
                                         // Kiểm tra xem có phải Admin không
                                         if (user != null && "admin".equals(user.getRole())) {
                                             loginSuccess.setValue("admin");
@@ -126,6 +130,9 @@ public class LoginViewModel extends ViewModel {
                                             loginSuccess.setValue("user");
                                         }
                                     } else{
+                                        // Lưu FCM Token
+                                        userRepository.updateFcmToken(uid);
+                                        
                                         loginSuccess.setValue("user");
                                     }
                                 })

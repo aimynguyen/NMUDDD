@@ -15,6 +15,7 @@ public class User {
     private Timestamp createAt;
     private String role;
     private PetInfo petInfo;
+    private String fcmToken;
 
     public User(){}
 
@@ -68,4 +69,7 @@ public class User {
 
     public PetInfo getPetInfo() { return petInfo; }
     public void setPetInfo(PetInfo petInfo) { this.petInfo = petInfo; }
+
+    public String getFcmToken() { return fcmToken; }
+    public void setFcmToken(String fcmToken) { this.fcmToken = fcmToken; }
 }
