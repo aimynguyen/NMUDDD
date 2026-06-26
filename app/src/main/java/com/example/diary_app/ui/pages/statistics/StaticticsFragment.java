@@ -16,9 +16,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import com.anychart.AnyChart;
 import com.anychart.AnyChartView;
@@ -53,6 +55,7 @@ public class StaticticsFragment extends Fragment {
     private ImageButton btnDropDown;
     private ImageButton btnPre;
     private ImageButton btnNext;
+    private AppCompatButton btnVideo;
     private Calendar calendar;
     private Date startDate;
     private Date endDate;
@@ -85,6 +88,7 @@ public class StaticticsFragment extends Fragment {
         btnDropDown = view.findViewById(R.id.btnDropDown);
         btnPre = view.findViewById(R.id.btnPre);
         btnNext = view.findViewById(R.id.btnNext);
+        btnVideo = view.findViewById(R.id.btnVideo);
         startDate = new Date();
         endDate = new Date();
 
@@ -154,6 +158,21 @@ public class StaticticsFragment extends Fragment {
         btnNext.setOnClickListener(v -> {
             calendar.add(Calendar.MONTH, 1);
             updateCalendar();
+        });
+
+        btnVideo.setOnClickListener(v -> {
+            String uid = "";
+            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            }
+
+            Bundle args = new Bundle();
+            args.putLong("startDate", startDate.getTime());
+            args.putLong("endDate", endDate.getTime());
+            args.putString("userId", uid);
+
+            Navigation.findNavController(v)
+                    .navigate(R.id.action_nav_dashboard_to_nav_video, args);
         });
     }
     private void showMonthYearPickerDialog() {

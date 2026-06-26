@@ -48,6 +48,12 @@ public class StaticticsViewModel extends AndroidViewModel {
         return _dailyEmotions;
     }
 
+    // LiveData lưu danh sách URL ảnh của các bài viết trong tháng (Dùng cho VideoFragment)
+    private MutableLiveData<List<String>> _postImageUrls = new MutableLiveData<>();
+    public LiveData<List<String>> getPostImageUrls() {
+        return _postImageUrls;
+    }
+
     public StaticticsViewModel(@NonNull Application application) {
         super(application);
         this.repo = new PostRepository();
@@ -71,6 +77,7 @@ public class StaticticsViewModel extends AndroidViewModel {
                     if (thisRequestId != currentRequestId) return;
 
                     List<String> allMoods = new ArrayList<>();
+                    List<String> imageUrls = new ArrayList<>();
                     Map<String, Integer> emotionCountMap = new HashMap<>();
                     Map<Integer, List<String>> dailyEmotionsRaw = new HashMap<>();
 
@@ -79,6 +86,12 @@ public class StaticticsViewModel extends AndroidViewModel {
                         if (post != null) {
                             // Lấy cảm xúc lúc đăng bài của chính User
                             String emotion = post.getEmotion();
+
+                            // Thu thập URL ảnh (chỉ lấy bài có ảnh)
+                            String imgUrl = post.getImageUrl();
+                            if (imgUrl != null && !imgUrl.isEmpty()) {
+                                imageUrls.add(imgUrl);
+                            }
 
                             if (emotion != null && !emotion.isEmpty()) {
                                 allMoods.add(emotion);
@@ -103,6 +116,9 @@ public class StaticticsViewModel extends AndroidViewModel {
 
                     // 1. Cập nhật danh sách thô cho Biểu đồ ở Fragment
                     _reactionList.setValue(allMoods);
+
+                    // 1b. Cập nhật danh sách URL ảnh cho VideoFragment
+                    _postImageUrls.setValue(imageUrls);
 
                     // Tính cảm xúc chủ đạo mỗi ngày
                     Map<Integer, String> dailyEmotions = new HashMap<>();
