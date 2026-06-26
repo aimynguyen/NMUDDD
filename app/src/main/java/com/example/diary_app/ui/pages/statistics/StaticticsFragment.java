@@ -1,5 +1,6 @@
 package com.example.diary_app.ui.pages.statistics;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.Gravity;
@@ -9,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,8 +44,8 @@ public class StaticticsFragment extends Fragment {
 
     //region khai báo biến
     private StaticticsViewModel viewModel;
-    private AnyChartView pieChartView;
-    private AnyChartView barChartView;
+    private android.widget.FrameLayout pieChartContainer;
+    private android.widget.FrameLayout barChartContainer;
 
     private GridLayout gridCalendar;
     private TextView month;
@@ -75,8 +77,8 @@ public class StaticticsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         //region khởi tạo (Tìm ID qua view)
-        pieChartView = view.findViewById(R.id.pieChart);
-        barChartView = view.findViewById(R.id.barChart);
+        pieChartContainer = view.findViewById(R.id.pieChartContainer);
+        barChartContainer = view.findViewById(R.id.barChartContainer);
         gridCalendar = view.findViewById(R.id.gridCalendar);
         month = view.findViewById(R.id.month);
         year = view.findViewById(R.id.year);
@@ -142,6 +144,8 @@ public class StaticticsFragment extends Fragment {
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         updateCalendar();
 
+        btnDropDown.setOnClickListener(v -> showMonthYearPickerDialog());
+
         btnPre.setOnClickListener(v -> {
             calendar.add(Calendar.MONTH, -1);
             updateCalendar();
@@ -152,8 +156,69 @@ public class StaticticsFragment extends Fragment {
             updateCalendar();
         });
     }
+    private void showMonthYearPickerDialog() {
+        if (!isAdded() || getContext() == null) return;
+
+        // Tạo container layout chứa 2 NumberPicker
+        LinearLayout container = new LinearLayout(requireContext());
+        container.setOrientation(LinearLayout.HORIZONTAL);
+        container.setGravity(Gravity.CENTER);
+        container.setPadding(48, 32, 48, 16);
+
+        // NumberPicker chọn Tháng (1 - 12)
+        NumberPicker monthPicker = new NumberPicker(requireContext());
+        monthPicker.setMinValue(1);
+        monthPicker.setMaxValue(12);
+        monthPicker.setValue(calendar.get(Calendar.MONTH) + 1);
+        monthPicker.setDisplayedValues(new String[]{
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        });
+
+        // Spacer giữa 2 picker
+        TextView spacer = new TextView(requireContext());
+        spacer.setText("/");
+        spacer.setTextSize(20);
+        LinearLayout.LayoutParams spacerParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        spacerParams.setMargins(16, 0, 16, 0);
+        spacer.setLayoutParams(spacerParams);
+
+        // NumberPicker chọn Năm (5 năm về trước đến 5 năm sau)
+        NumberPicker yearPicker = new NumberPicker(requireContext());
+        int currentYear = calendar.get(Calendar.YEAR);
+        yearPicker.setMinValue(currentYear - 5);
+        yearPicker.setMaxValue(currentYear + 5);
+        yearPicker.setValue(currentYear);
+
+        container.addView(monthPicker);
+        container.addView(spacer);
+        container.addView(yearPicker);
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Chọn tháng / năm")
+                .setView(container)
+                .setPositiveButton("OK", (dialog, which) -> {
+                    calendar.set(Calendar.MONTH, monthPicker.getValue() - 1);
+                    calendar.set(Calendar.YEAR, yearPicker.getValue());
+                    calendar.set(Calendar.DAY_OF_MONTH, 1);
+                    updateCalendar();
+                })
+                .setNegativeButton("Huỷ", null)
+                .show();
+    }
+
     private void showPieChart(Map<String, Integer> emotionDatas) {
-        if (pieChartView == null) return;
+        if (pieChartContainer == null || !isAdded() || getContext() == null) return;
+
+        // Xóa chart cũ và tạo mới AnyChartView để tránh lỗi re-render của WebView
+        pieChartContainer.removeAllViews();
+        AnyChartView pieChartView = new AnyChartView(requireContext());
+        pieChartView.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+        pieChartContainer.addView(pieChartView);
 
         APIlib.getInstance().setActiveAnyChartView(pieChartView);
         Pie pie = AnyChart.pie();
@@ -182,29 +247,40 @@ public class StaticticsFragment extends Fragment {
     }
 
     private void showBarChart(Map<String, Integer> emotionDatas) {
-        if (barChartView == null) return;
+        if (barChartContainer == null || !isAdded() || getContext() == null) return;
+
+        // Xóa chart cũ và tạo mới AnyChartView để tránh lỗi re-render của WebView
+        barChartContainer.removeAllViews();
+        AnyChartView barChartView = new AnyChartView(requireContext());
+        barChartView.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+        barChartContainer.addView(barChartView);
 
         APIlib.getInstance().setActiveAnyChartView(barChartView);
         Cartesian bar = AnyChart.cartesian();
 
+        // Dùng anonymous subclass của ValueDataEntry (kế thừa setValue() từ DataEntry)
+        // để truyền thuộc tính 'fill' và 'stroke' trực tiếp vào từng điểm dữ liệu
         List<DataEntry> datas = new ArrayList<>();
-        List<String> colorPalette = new ArrayList<>();
-
         for (Map.Entry<String, Integer> item : emotionDatas.entrySet()) {
-            datas.add(new ValueDataEntry(item.getKey(), item.getValue()));
-            colorPalette.add(getEmotionHexColor(item.getKey()));
+            final String color = getEmotionHexColor(item.getKey());
+            final String label = item.getKey();
+            final int value = item.getValue();
+            ValueDataEntry entry = new ValueDataEntry(label, value) {{
+                setValue("fill", color);
+                setValue("stroke", color);
+            }};
+            datas.add(entry);
         }
 
-        // Đổi sang cột dọc chuẩn (column) thay vì thanh ngang (bar) để khớp tiêu đề trends
         com.anychart.core.cartesian.series.Column column = bar.column(datas);
+        // Cho phép mỗi điểm trong series tự xác định màu từ trường 'fill'
+        column.fill("function() { return this.getData('fill'); }");
+        column.stroke("function() { return this.getData('stroke'); }");
 
         bar.title("Emotion trends");
         bar.title().fontSize("14");
-
-        // Khóa cứng bảng màu chuẩn cho các cột dữ liệu
-        if (!colorPalette.isEmpty()) {
-            bar.palette(colorPalette.toArray(new String[0]));
-        }
 
         barChartView.setChart(bar);
     }
@@ -407,13 +483,13 @@ public class StaticticsFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (pieChartView != null) {
-            pieChartView.removeAllViews();
-            pieChartView = null;
+        if (pieChartContainer != null) {
+            pieChartContainer.removeAllViews();
+            pieChartContainer = null;
         }
-        if (barChartView != null) {
-            barChartView.removeAllViews();
-            barChartView = null;
+        if (barChartContainer != null) {
+            barChartContainer.removeAllViews();
+            barChartContainer = null;
         }
     }
 }

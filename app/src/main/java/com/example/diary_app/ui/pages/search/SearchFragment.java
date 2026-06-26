@@ -43,6 +43,7 @@ public class SearchFragment extends Fragment {
     private RecyclerView rvPosts;
     private Spinner spinnerFilter;
 
+    private static final String FILTER_ALL = "__ALL__";
     private String selectedUserId = "";
     private List<Post> currentPosts = new ArrayList<>();
 
@@ -123,7 +124,10 @@ public class SearchFragment extends Fragment {
             spinnerNames.clear();
             spinnerIds.clear();
 
-            spinnerNames.add("Tất cả bài viết của tôi"); // Default my posts
+            spinnerNames.add("Tất cả"); // Show posts from everyone
+            spinnerIds.add(FILTER_ALL);
+
+            spinnerNames.add("Bài viết của tôi"); // My posts only
             spinnerIds.add(currentUid);
 
             for (UserModel friend : friends) {
@@ -157,37 +161,65 @@ public class SearchFragment extends Fragment {
     }
 
     private void loadAllPostsForUser(String userId) {
-        if (userId == null || userId.isEmpty()) return;
-        
-        com.google.firebase.firestore.FirebaseFirestore.getInstance()
-            .collection("posts")
-            .whereEqualTo("userId", userId)
-            .get()
-            .addOnSuccessListener(queryDocumentSnapshots -> {
-                List<Post> list = new ArrayList<>();
-                for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots) {
-                    try {
-                        Post post = doc.toObject(Post.class);
-                        if (post != null) {
-                            post.setPostId(doc.getId());
-                            list.add(post);
+        com.google.firebase.firestore.FirebaseFirestore db = com.google.firebase.firestore.FirebaseFirestore.getInstance();
+
+        if (FILTER_ALL.equals(userId)) {
+            // Load tất cả bài viết (không lọc theo userId)
+            db.collection("posts")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Post> list = new ArrayList<>();
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots) {
+                        try {
+                            Post post = doc.toObject(Post.class);
+                            if (post != null) {
+                                post.setPostId(doc.getId());
+                                list.add(post);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
-                }
-                // Update currentPosts and display them
-                currentPosts = list;
-                adapter.setData(currentPosts);
-            })
-            .addOnFailureListener(e -> {
-                e.printStackTrace();
-                adapter.setData(new ArrayList<>());
-            });
+                    currentPosts = list;
+                    adapter.setData(currentPosts);
+                })
+                .addOnFailureListener(e -> {
+                    e.printStackTrace();
+                    adapter.setData(new ArrayList<>());
+                });
+        } else {
+            if (userId == null || userId.isEmpty()) return;
+
+            // Load bài viết của một user cụ thể
+            db.collection("posts")
+                .whereEqualTo("userId", userId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Post> list = new ArrayList<>();
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots) {
+                        try {
+                            Post post = doc.toObject(Post.class);
+                            if (post != null) {
+                                post.setPostId(doc.getId());
+                                list.add(post);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    currentPosts = list;
+                    adapter.setData(currentPosts);
+                })
+                .addOnFailureListener(e -> {
+                    e.printStackTrace();
+                    adapter.setData(new ArrayList<>());
+                });
+        }
     }
 
     private void filterPosts() {
-        if (selectedUserId == null || selectedUserId.isEmpty()) {
+        // Nếu chọn "Tất cả" hoặc không có filter, hiển thị tất cả
+        if (FILTER_ALL.equals(selectedUserId) || selectedUserId == null || selectedUserId.isEmpty()) {
             adapter.setData(currentPosts);
             return;
         }
