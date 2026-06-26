@@ -48,6 +48,20 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
     @Override
     public void onBindViewHolder(@NonNull FeedViewHolder holder, int position) {
         Post currentPost = postList.get(position);
+        // Khởi tạo Repo để lấy ID của người đang lướt App
+        com.example.diary_app.repository.AuthRepository authRepo = new com.example.diary_app.repository.AuthRepository();
+        String myUid = authRepo.getCurrentUserId();
+
+        // Kiểm tra xem bài viết này có phải của chính mình không
+        if (myUid != null && myUid.equals(currentPost.getUserId())) {
+            // LÀ BÀI CỦA MÌNH -> Xóa sổ thanh React và Comment
+            holder.layoutReactionBar.setVisibility(View.GONE);
+            holder.layoutCommentBar.setVisibility(View.GONE);
+        } else {
+            // LÀ BÀI NGƯỜI KHÁC -> Hiện lên bình thường
+            holder.layoutReactionBar.setVisibility(View.VISIBLE);
+            holder.layoutCommentBar.setVisibility(View.VISIBLE);
+        }
 
         // --- A. HIỂN THỊ DỮ LIỆU BÀI VIẾT ---
         holder.tvUsername.setText(currentPost.getUserName());
@@ -135,8 +149,6 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                 if (commentText.isEmpty()) return;
 
                 // Khởi tạo AuthRepository ngay tại đây để lấy ID người đang lướt Feed
-                com.example.diary_app.repository.AuthRepository authRepo = new com.example.diary_app.repository.AuthRepository();
-                String myUid = authRepo.getCurrentUserId();
                 String postOwnerId = currentPost.getUserId();
                 String postImageUrl = currentPost.getImageUrl();
 
@@ -213,6 +225,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         TextView tvLocation;
         android.widget.EditText edtComment;
         android.widget.ImageView btnSendComment;
+        android.widget.HorizontalScrollView layoutReactionBar;
+        LinearLayout layoutCommentBar;
         public FeedViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -232,6 +246,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             tvLocation = itemView.findViewById(R.id.tvLocation);
             edtComment = itemView.findViewById(R.id.etMessage);
             btnSendComment = itemView.findViewById(R.id.btnSend);
+            layoutReactionBar = itemView.findViewById(R.id.layoutReactionBar);
+            layoutCommentBar = itemView.findViewById(R.id.layoutCommentBar);
         }
     }
 }
