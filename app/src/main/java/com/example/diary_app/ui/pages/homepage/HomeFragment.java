@@ -72,6 +72,9 @@ public class HomeFragment extends Fragment {
     // THÊM BIẾN CAMERA X
     private androidx.camera.view.PreviewView viewFinder;
     private androidx.camera.core.ImageCapture imageCapture;
+    // THÊM BIẾN LƯU TRẠNG THÁI CAMERA & THỜI GIAN CHẠM
+    private int currentLensFacing = androidx.camera.core.CameraSelector.LENS_FACING_BACK; // Mặc định mở cam sau
+    private long lastClickTime = 0; // Dùng để đo khoảng cách giữa 2 lần bấm
     // 4. TRÌNH CHỌN ẢNH VÀ CAMERA
     private final ActivityResultLauncher<String> galleryLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
@@ -107,9 +110,32 @@ public class HomeFragment extends Fragment {
         setupListeners();
         setupFeed();
 
-        // Mặc định lúc mới vào là trạng thái Lướt tin & Chụp ảnh
-        switchMode(false);
-        setupCamera();
+        // ==========================================
+        // PHỤC SINH DỮ LIỆU TỪ CÕI CHẾT (PROCESS DEATH)
+        // ==========================================
+        if (savedInstanceState != null) {
+            // 1. Cứu lại đường dẫn ảnh
+            String savedUriStr = savedInstanceState.getString("SAVED_IMAGE_URI");
+            if (savedUriStr != null) {
+                selectedImageUri = android.net.Uri.parse(savedUriStr);
+                if (imgPreview != null) {
+                    imgPreview.setImageURI(selectedImageUri); // Gắn lại ảnh lên màn hình
+                }
+                switchMode(true); // Bật chế độ Preview ngay lập tức
+            } else {
+                switchMode(false);
+                setupCamera();
+            }
+
+            // 2. Cứu lại Mood và Privacy
+            currentMood = savedInstanceState.getString("SAVED_MOOD", com.example.diary_app.core.Mood.HAPPY.name());
+            currentPrivacy = savedInstanceState.getString("SAVED_PRIVACY", "public");
+
+        } else {
+            // Nếu khởi động app bình thường (không bị kill)
+            switchMode(false);
+            setupCamera();
+        }
         requireActivity().getSupportFragmentManager().setFragmentResultListener("location_request", getViewLifecycleOwner(), (requestKey, bundle) -> {
             // Lấy dữ liệu do màn hình Map gửi về
             String addressName = bundle.getString("location_name");
@@ -318,20 +344,47 @@ public class HomeFragment extends Fragment {
                         .commit();
             });
         }
+        // ==========================================
+        // TÍNH NĂNG CHẠM 2 LẦN LẬT CAMERA
+        // ==========================================
+        if (viewFinder != null) {
+            viewFinder.setOnClickListener(v -> {
+                long clickTime = System.currentTimeMillis();
+                // Nếu khoảng cách giữa 2 lần chạm nhỏ hơn 400 mili-giây -> Double Click!
+                if (clickTime - lastClickTime < 400) {
+                    flipCamera(); // Gọi hàm lật ống kính
+                    lastClickTime = 0; // Reset lại bộ đếm
+                } else {
+                    lastClickTime = clickTime; // Lưu lại thời gian chạm lần 1
+                }
+            });
+        }
     }
 
     // HÀM ĐIỀU PHỐI GIAO DIỆN QUAN TRỌNG NHẤT
     private void switchMode(boolean isPreviewing) {
         if (isPreviewing) {
-            // Mở màn hình chỉnh sửa bài viết, che lấp Camera và Feed đi
+            // 1. Mở màn hình chỉnh sửa bài viết, che lấp Camera và Feed đi
             layoutPreview.setVisibility(View.VISIBLE);
             layoutCamera.setVisibility(View.GONE);
             layoutFeed.setVisibility(View.GONE);
+
+            // ==========================================
+            // 2. CẬP NHẬT NGÀY THÁNG HIỆN TẠI VÀO TEXTVIEW
+            // ==========================================
+            if (txtDate != null) {
+                // Định dạng ngày theo chuẩn Việt Nam
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
+                String currentDate = sdf.format(new java.util.Date()); // Lấy thời gian thực của hệ thống
+                txtDate.setText(currentDate);
+            }
+
         } else {
             // Trở về trang chủ
             layoutPreview.setVisibility(View.GONE);
             layoutCamera.setVisibility(View.VISIBLE);
             layoutFeed.setVisibility(View.VISIBLE);
+
             // Tự động cuộn ngược mượt mà lên đầu trang camera khi hủy ảnh
             View scrollHome = getView().findViewById(R.id.scrollHome);
             if (scrollHome != null) {
@@ -355,19 +408,31 @@ public class HomeFragment extends Fragment {
                     Toast.makeText(getContext(), "Lỗi: Không tìm thấy ID người dùng!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
+                // ==========================================
+                // CHỐT CHẶN: KHÔNG CHO TỰ THẢ CẢM XÚC BÀI CỦA MÌNH
+                // ==========================================
+                if (myUid.equals(post.getUserId())) {
+                    Toast.makeText(getContext(), "Bạn không thể thả cảm xúc cho bài viết của chính mình!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 // 2. Gọi thẳng xuống hàm addReaction của Repository
                 postRepository.addReaction(post.getPostId(), myUid, reactionType)
                         .addOnSuccessListener(aVoid -> {
-
-                            // Tự dịch từ chữ sang Icon (😊) ngay tại đây để hiện Toast
+                            String key = (reactionType != null) ? reactionType.trim() : "";
                             String iconToast = "😐";
-                            switch (reactionType) {
-                                case "HAPPY": iconToast = "😊"; break;
-                                case "SAD": iconToast = "😭"; break;
-                                case "CALM": iconToast = "😌"; break;
-                                case "ANGRY": iconToast = "😡"; break;
-                                case "NEUTRAL": iconToast = "😳"; break;
+                            if (key.equalsIgnoreCase("HAPPY")) {
+                                iconToast = "😊";
+                            } else if (key.equalsIgnoreCase("SAD")) {
+                                iconToast = "😭";
+                            } else if (key.equalsIgnoreCase("CALM")) {
+                                iconToast = "😌";
+                            } else if (key.equalsIgnoreCase("ANGRY")) {
+                                iconToast = "😡";
+                            } else if (key.equalsIgnoreCase("NEUTRAL")) {
+                                iconToast = "😳";
+                            } else {
+                                // Nếu vẫn lọt vào đây thì nghĩa là giá trị cực kỳ lạ, in ra để kiểm tra
+                                android.util.Log.e("DEBUG_LOG", "Giá trị lạ không khớp: '" + key + "'");
                             }
 
                             // Hiện thông báo thả thành công cho vui mắt
@@ -512,11 +577,8 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    // Hàm 2: Mở ống kính
+    // Hàm 2: Mở ống kính (Đã nâng cấp để nhận diện cam trước/sau)
     private void startCamera() {
-        //1. Báo hiệu bắt đầu chạy
-        android.widget.Toast.makeText(getContext(), "Đang kích hoạt ống kính...", android.widget.Toast.LENGTH_SHORT).show();
-
         com.google.common.util.concurrent.ListenableFuture<androidx.camera.lifecycle.ProcessCameraProvider> cameraProviderFuture =
                 androidx.camera.lifecycle.ProcessCameraProvider.getInstance(requireContext());
 
@@ -528,20 +590,34 @@ public class HomeFragment extends Fragment {
                 preview.setSurfaceProvider(viewFinder.getSurfaceProvider());
 
                 imageCapture = new androidx.camera.core.ImageCapture.Builder().build();
-                androidx.camera.core.CameraSelector cameraSelector = androidx.camera.core.CameraSelector.DEFAULT_BACK_CAMERA;
 
+                // THAY ĐỔI Ở ĐÂY: Sử dụng biến currentLensFacing thay vì fix cứng Cam sau
+                androidx.camera.core.CameraSelector cameraSelector = new androidx.camera.core.CameraSelector.Builder()
+                        .requireLensFacing(currentLensFacing)
+                        .build();
+
+                // Gỡ các ống kính đang chạy ngầm và gắn ống kính mới vào
                 cameraProvider.unbindAll();
                 cameraProvider.bindToLifecycle(getViewLifecycleOwner(), cameraSelector, preview, imageCapture);
 
-                //2. Báo hiệu gắn ống kính thành công!
-                //android.widget.Toast.makeText(getContext(), "Camera đã mở thành công!", android.widget.Toast.LENGTH_SHORT).show();
-
             } catch (Exception exc) {
-                //3. Nếu có lỗi ngầm, nó sẽ in thẳng ra màn hình cho bạn xem
                 android.util.Log.e("CameraX", "Lỗi khởi động camera", exc);
-                android.widget.Toast.makeText(getContext(), "Lỗi Camera: " + exc.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                android.widget.Toast.makeText(getContext(), "Lỗi lật Camera: " + exc.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
             }
         }, androidx.core.content.ContextCompat.getMainExecutor(requireContext()));
+    }
+
+    // Hàm bổ sung: Lật Camera
+    private void flipCamera() {
+        // Nếu đang là cam sau -> đổi thành cam trước, và ngược lại
+        if (currentLensFacing == androidx.camera.core.CameraSelector.LENS_FACING_BACK) {
+            currentLensFacing = androidx.camera.core.CameraSelector.LENS_FACING_FRONT;
+        } else {
+            currentLensFacing = androidx.camera.core.CameraSelector.LENS_FACING_BACK;
+        }
+
+        // Gọi lại lệnh mở ống kính để áp dụng thay đổi ngay lập tức
+        startCamera();
     }
     // Hàm 3: Bấm chụp và xử lý ảnh
     private void takePhoto() {
@@ -581,5 +657,21 @@ public class HomeFragment extends Fragment {
                         android.widget.Toast.makeText(getContext(), "Lỗi lưu ảnh", android.widget.Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+    // ==========================================
+    // BÍ KÍP KHÁNG TỬ: LƯU ĐƯỜNG DẪN ẢNH TRƯỚC KHI BỊ KILL
+    // ==========================================
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // Nếu đang có ảnh, lưu đường dẫn của nó lại thành chuỗi (String)
+        if (selectedImageUri != null) {
+            outState.putString("SAVED_IMAGE_URI", selectedImageUri.toString());
+        }
+
+        // Tiện tay lưu luôn trạng thái cảm xúc và quyền riêng tư đang chọn
+        outState.putString("SAVED_MOOD", currentMood);
+        outState.putString("SAVED_PRIVACY", currentPrivacy);
     }
 }
