@@ -1,9 +1,12 @@
 package com.example.diary_app.ui.pages.post;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -80,6 +83,12 @@ public class FeedFragment extends Fragment {
                     Toast.makeText(getContext(), "Vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
                 }
             }
+
+            // nhấn giữ post
+            @Override
+            public void onPostLongClick(Post post, View anchor) {
+                showPopup(post, anchor);
+            }
         });
 
         recyclerFeed.setAdapter(feedAdapter);
@@ -134,5 +143,36 @@ public class FeedFragment extends Fragment {
         } else {
             Toast.makeText(getContext(), "Không tìm thấy thông tin tài khoản!", Toast.LENGTH_SHORT).show();
         }
+    }
+    private void showPopup(Post post, View anchor) {
+
+        String myUid = authRepository.getCurrentUserId();
+
+        if (!post.getUserId().equals(myUid)) {
+            return;
+        }
+
+        PopupMenu popup = new PopupMenu(requireContext(), anchor);
+
+        popup.getMenu().add("Xóa bài viết");
+
+
+        popup.setOnMenuItemClickListener(item -> {
+
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Xóa bài viết")
+                    .setMessage("Bạn có chắc muốn xóa bài viết?")
+                    .setPositiveButton("Xóa", (dialog, which) -> {
+
+                        postViewModel.deletePost(post);
+
+                    })
+                    .setNegativeButton("Hủy", null)
+                    .show();
+
+            return true;
+        });
+
+        popup.show();
     }
 }

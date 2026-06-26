@@ -48,7 +48,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Username"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/text_primary"
                 android:textSize="10sp"
                 android:layout_marginStart="6dp"
                 android:background="@drawable/username_chip"
@@ -98,6 +98,7 @@
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="4dp"
                 android:text="Caption content"
+                android:textColor="@color/text_primary"
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:textSize="11sp" />

@@ -1,7 +1,9 @@
 package com.example.diary_app.ui.pages.homepage;
 
+import android.app.AlertDialog;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +13,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -401,6 +404,11 @@ public class HomeFragment extends Fragment {
                             fetchFeedData();
                         });
             }
+
+            @Override
+            public void onPostLongClick(Post post, View anchor) {
+                showPopup(post, anchor);
+            }
         });
         recyclerFeed.setAdapter(feedAdapter);
 
@@ -497,6 +505,38 @@ public class HomeFragment extends Fragment {
                     btnPost.setText("Post");
                     Toast.makeText(getContext(), "Lỗi tải thông tin cá nhân: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    // pop up xóa post khi longclick
+    private void showPopup(Post post, View anchor) {
+
+        String myUid = authRepository.getCurrentUserId();
+
+        if (myUid == null || !post.getUserId().equals(myUid)) {
+            return;
+        }
+
+        PopupMenu popup = new PopupMenu(requireContext(), anchor);
+
+        popup.getMenu().add("Xóa bài viết");
+
+        popup.setOnMenuItemClickListener(item -> {
+
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Xóa bài viết")
+                    .setMessage("Bạn có chắc muốn xóa bài viết?")
+                    .setPositiveButton("Xóa", (dialog, which) -> {
+
+                        postViewModel.deletePost(post);
+
+                    })
+                    .setNegativeButton("Hủy", null)
+                    .show();
+
+            return true;
+        });
+
+        popup.show();
     }
     // =======================================================
     // BỘ HÀM XỬ LÝ CAMERA LOCKET-STYLE
