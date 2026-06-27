@@ -34,6 +34,7 @@
             android:layout_gravity="top|end"
             android:layout_marginTop="18dp"
             android:layout_marginEnd="20dp"
+            android:padding="3dp"
             android:src="@drawable/human_human"
             android:scaleType="centerCrop"
             android:background="@drawable/bg_circle_gray" />
