@@ -32,6 +32,7 @@
         android:background="@drawable/bg_button_rounded"
         app:backgroundTint="@color/blue_tertiary"
         android:text="Accept"
+        android:textColor="@color/white"
         android:textSize="13dp"/>
 
     <Button
@@ -42,6 +43,7 @@
         android:background="@drawable/bg_button_rounded"
         app:backgroundTint="@color/blue_secondary"
         android:text="Reject"
+        android:textColor="@color/white"
         android:textSize="13dp"/>
 
 </LinearLayout>
