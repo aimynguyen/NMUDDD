@@ -139,17 +139,15 @@ public class ChatAIFragment extends Fragment {
         // SỬA LẠI ĐÚNG TÊN MODEL TRÊN DASHBOARD CỦA BẠN ĐỂ HẾT LỖI 404
         String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=" + API_KEY;
 
-        String systemInstructionText = "Role: Act as an empathetic psychologist or a close, supportive friend.\n" +
-                "Task: Your task is to comfort, encourage, and motivate the user.\n" +
-                "Context: Providing emotional support and a safe space to vent.\n" +
-                "Database Context (Dữ liệu nhật ký hôm nay của người dùng lấy từ Firebase): [" + cachedTodayMood + "]. " +
-                "Hãy ưu tiên sử dụng dữ liệu này nếu người dùng hỏi về cảm xúc, tâm trạng của họ ngày hôm nay.\n" +
-                "Constraints:\n" +
-                "- Tone of voice: Gentle, warm, empathetic, and slightly humorous to cheer them up.\n" +
-                "- Length: Under 100 words.\n" +
-                "- Do NOT: Do not judge, do not sound overly clinical, and strictly do NOT create any pressure.\n" +
-                "Format: Output the result as a cohesive paragraph.\n" +
-                "Language: Please output the final result in Vietnamese.";
+        String userName = "bạn";
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            String name = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+            if (name != null && !name.trim().isEmpty()) {
+                userName = name;
+            }
+        }
+
+        String systemInstructionText = "Act as a loving friend. Comfort " + userName + " warmly by name. Reply in Vietnamese, very short like a text message (1-3 sentences). Today's diary: [" + cachedTodayMood + "].";
 
         String jsonString = "";
         try {
@@ -214,13 +212,16 @@ public class ChatAIFragment extends Fragment {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                // ĐỌC NỘI DUNG PHẢN HỒI NGAY TỪ ĐẦU (Chỉ được đọc 1 lần duy nhất)
+                String rawResponse = response.body() != null ? response.body().string() : "";
+                
+                android.util.Log.e("GEMINI_ERROR", "HTTP Code: " + response.code() + " | Body: " + rawResponse);
+
                 if (response.code() == 429) {
                     resetSendingStatus();
-                    showToast("Bạn gửi quá nhanh! Hãy đợi khoảng 1 phút.");
+                    showToast("Lỗi 429! Xem Logcat (GEMINI_ERROR) để biết lý do.");
                     return;
                 }
-
-                String rawResponse = response.body() != null ? response.body().string() : "";
 
                 if (response.isSuccessful()) {
                     try {
@@ -246,11 +247,11 @@ public class ChatAIFragment extends Fragment {
                         }
                     } catch (Exception e) {
                         resetSendingStatus();
+                        android.util.Log.e("GEMINI_ERROR", "Lỗi Parse JSON: " + e.getMessage());
                         showToast("AI phản hồi không đúng định dạng.");
                     }
                 } else {
                     resetSendingStatus();
-                    android.util.Log.e("GEMINI_ERROR", "Code: " + response.code() + " | Body: " + rawResponse);
                     showToast("Lỗi: " + response.code());
                 }
             }
