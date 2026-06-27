@@ -431,6 +431,20 @@ public class HomeFragment extends Fragment {
             @Override
             public void onMyPostDoubleTap(Post post) {
 
+                String myUid = authRepository.getCurrentUserId();
+                if(myUid==null) return;
+
+                // chỉ được sửa post của bản thân
+                if (!post.getUserId().equals(myUid)) {
+                    Toast.makeText(
+                            getContext(),
+                            "Bạn chỉ có thể sửa bài của mình",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                    return;
+                }
+
                 EditPostBottomSheet sheet =
                         EditPostBottomSheet.newInstance(post.getPostId());
 
