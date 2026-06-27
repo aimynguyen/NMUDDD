@@ -1,5 +1,6 @@
 package com.example.diary_app.ui.pages.search;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -10,7 +11,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+
+import android.widget.PopupMenu;
+import android.widget.ProgressBar;
+
 import android.widget.Spinner;
+
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,8 +29,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.diary_app.R;
 import com.example.diary_app.adapter.SearchAdapter;
 import com.example.diary_app.data.model.Post;
+
+import com.example.diary_app.repository.AuthRepository;
+import com.example.diary_app.ui.pages.friend.AddFriendFragment;
+import com.example.diary_app.viewmodel.PostViewModel;
+
 import com.example.diary_app.model.UserModel;
 import com.example.diary_app.viewmodel.FriendViewModel;
+
 import com.example.diary_app.viewmodel.SearchViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -34,7 +46,12 @@ import java.util.List;
 public class SearchFragment extends Fragment {
 
     private SearchViewModel viewModel;
+
+    private PostViewModel postViewModel;
+    private AuthRepository authRepository;
+
     private FriendViewModel friendViewModel;
+
     private SearchAdapter adapter;
 
     private EditText edtSearch;
@@ -50,6 +67,10 @@ public class SearchFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        postViewModel = new ViewModelProvider(requireActivity())
+                .get(PostViewModel.class);
+
+        authRepository = new AuthRepository();
         return inflater.inflate(R.layout.fragment_search, container, false);
     }
 
@@ -64,8 +85,12 @@ public class SearchFragment extends Fragment {
         rvPosts = view.findViewById(R.id.rvPosts);
         spinnerFilter = view.findViewById(R.id.spinnerFilter);
 
-        // Khởi tạo Adapter
-        adapter = new SearchAdapter();
+
+        // Khởi tạo Adapter và gán Grid Layout 2 cột cho RecyclerView
+        adapter = new SearchAdapter((post, anchor) -> {
+            showPopup(post,anchor);
+        });
+
         rvPosts.setLayoutManager(new GridLayoutManager(requireContext(), 2));
         rvPosts.setAdapter(adapter);
 
@@ -110,6 +135,40 @@ public class SearchFragment extends Fragment {
         iconAddFriend.setOnClickListener(v -> {
             Navigation.findNavController(v).navigate(R.id.nav_addfriend);
         });
+    }
+
+
+    // long click hiện pop-up lựa chọn xóa post
+    private void showPopup(Post post, View anchor) {
+
+        String myUid = authRepository.getCurrentUserId();
+
+        if (post.getUserId() == null || !post.getUserId().equals(myUid)) {
+            return;
+        }
+
+        PopupMenu popup = new PopupMenu(requireContext(), anchor);
+
+        popup.getMenu().add("Xóa bài viết");
+
+        popup.setOnMenuItemClickListener(item -> {
+
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Xóa bài viết")
+                    .setMessage("Bạn có chắc muốn xóa bài viết?")
+                    .setPositiveButton("Xóa", (dialog, which) -> {
+
+                        postViewModel.deletePost(post);
+                        adapter.removePost(post.getPostId());
+
+                    })
+                    .setNegativeButton("Hủy", null)
+                    .show();
+
+            return true;
+        });
+
+        popup.show();
     }
 
     private void setupFriendFilter() {
@@ -231,5 +290,6 @@ public class SearchFragment extends Fragment {
             }
         }
         adapter.setData(filtered);
+
     }
 }

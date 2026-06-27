@@ -1,7 +1,10 @@
 package com.example.diary_app.ui.pages.homepage;
 
+import android.app.AlertDialog;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +35,7 @@ import com.example.diary_app.repository.AuthRepository;
 import com.example.diary_app.repository.NotificationRepository;
 import com.example.diary_app.repository.PostRepository;
 import com.example.diary_app.repository.UserRepository;
+import com.example.diary_app.ui.pages.edit.EditPostBottomSheet;
 import com.example.diary_app.ui.pages.post.FeedAdapter;
 import com.example.diary_app.ui.pages.statistics.MapFragment;
 import com.example.diary_app.viewmodel.PetViewModel;
@@ -110,6 +115,22 @@ public class HomeFragment extends Fragment {
         setupListeners();
         setupFeed();
 
+        // edit lại post thì trên feed cũng được đổi luôn
+        getParentFragmentManager()
+                .setFragmentResultListener(
+                        "post_updated",
+                        getViewLifecycleOwner(),
+                        (requestKey, bundle) -> {
+
+
+                            if(bundle.getBoolean("refresh")){
+
+                                fetchFeedData();
+
+                            }
+
+                        });
+
         // ==========================================
         // PHỤC SINH DỮ LIỆU TỪ CÕI CHẾT (PROCESS DEATH)
         // ==========================================
@@ -136,6 +157,7 @@ public class HomeFragment extends Fragment {
             switchMode(false);
             setupCamera();
         }
+
         requireActivity().getSupportFragmentManager().setFragmentResultListener("location_request", getViewLifecycleOwner(), (requestKey, bundle) -> {
             // Lấy dữ liệu do màn hình Map gửi về
             String addressName = bundle.getString("location_name");
@@ -466,6 +488,37 @@ public class HomeFragment extends Fragment {
                             fetchFeedData();
                         });
             }
+
+            @Override
+            public void onPostLongClick(Post post, View anchor) {
+                showPopup(post, anchor);
+            }
+
+            @Override
+            public void onMyPostDoubleTap(Post post) {
+
+                String myUid = authRepository.getCurrentUserId();
+                if(myUid==null) return;
+
+                // chỉ được sửa post của bản thân
+                if (!post.getUserId().equals(myUid)) {
+                    Toast.makeText(
+                            getContext(),
+                            "Bạn chỉ có thể sửa bài của mình",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                    return;
+                }
+
+                EditPostBottomSheet sheet =
+                        EditPostBottomSheet.newInstance(post.getPostId());
+
+                sheet.show(
+                        getParentFragmentManager(),
+                        "edit_post"
+                );
+            }
         });
         recyclerFeed.setAdapter(feedAdapter);
 
@@ -563,6 +616,42 @@ public class HomeFragment extends Fragment {
                     Toast.makeText(getContext(), "Lỗi tải thông tin cá nhân: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
+
+    // pop up xóa post khi longclick
+    private void showPopup(Post post, View anchor) {
+
+        String myUid = authRepository.getCurrentUserId();
+
+        if (myUid == null || !post.getUserId().equals(myUid)) {
+            return;
+        }
+
+        PopupMenu popup = new PopupMenu(requireContext(), anchor);
+
+        popup.getMenu().add("Xóa bài viết");
+
+        popup.setOnMenuItemClickListener(item -> {
+
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Xóa bài viết")
+                    .setMessage("Bạn có chắc muốn xóa bài viết?")
+                    .setPositiveButton("Xóa", (dialog, which) -> {
+
+                        postViewModel.deletePost(post);
+
+                    })
+                    .setNegativeButton("Hủy", null)
+                    .show();
+
+            return true;
+        });
+
+        popup.show();
+    }
+
+    // bottomsheetdialog xuất hiện khi double tap post của bản thân
+
+
     // =======================================================
     // BỘ HÀM XỬ LÝ CAMERA LOCKET-STYLE
     // =======================================================

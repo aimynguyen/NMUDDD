@@ -14,8 +14,7 @@
         android:layout_height="55dp"
         android:layout_marginStart="5dp"
         android:padding="5dp"
-        android:background="@drawable/bg_circle_white"
-        android:src="@drawable/human_human" />
+        android:background="@drawable/bg_circle_white" />
 
     <TextView
         android:id="@+id/txtName"
@@ -28,13 +27,10 @@
         android:textColor="@color/text_primary"
         android:textStyle="bold"/>
 
-    <ImageView
-        android:id="@+id/btnDeleteFriend"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="7dp"
-        android:background="@android:drawable/ic_menu_close_clear_cancel"
-        />
+    <!-- Emoji -->
+    <FrameLayout
+        android:id="@+id/layoutEmoji"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
 </LinearLayout>

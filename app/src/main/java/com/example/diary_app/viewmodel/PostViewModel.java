@@ -15,6 +15,8 @@ import com.example.diary_app.Helpers.imageHelper;
 import com.example.diary_app.core.Event;
 import com.example.diary_app.data.model.Location;
 import com.example.diary_app.data.model.Post;
+import com.example.diary_app.data.repository;
+import com.example.diary_app.repository.AuthRepository;
 import com.example.diary_app.repository.PostRepository;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -25,6 +27,7 @@ import java.util.List;
 
 public class PostViewModel extends AndroidViewModel {
     private PostRepository postRepository;
+    private AuthRepository authRepository;
 
     // Các LiveData để UI lắng nghe
     private MutableLiveData<List<Post>> newsFeedList = new MutableLiveData<>();
@@ -39,6 +42,7 @@ public class PostViewModel extends AndroidViewModel {
     public PostViewModel(@NonNull Application application) {
         super(application);
         postRepository = new PostRepository();
+        authRepository = new AuthRepository();
     }
 
     public LiveData<List<Post>> getNewsFeedList() { return newsFeedList; }
@@ -177,4 +181,28 @@ public class PostViewModel extends AndroidViewModel {
         }
     }
 
+    // xóa post
+    public void deletePost(Post post){
+
+        postRepository.deletePost(
+                        post.getPostId(),
+                        post.getImageUrl()
+                )
+                .addOnSuccessListener(unused -> {
+
+                    // reload lại feed
+                    loadNewsFeed(
+                            new ArrayList<>(),
+                            authRepository.getCurrentUserId()
+                    );
+
+                })
+                .addOnFailureListener(e -> {
+
+                    errorMessage.setValue(
+                            "Xóa thất bại: " + e.getMessage()
+                    );
+
+                });
+    }
 }

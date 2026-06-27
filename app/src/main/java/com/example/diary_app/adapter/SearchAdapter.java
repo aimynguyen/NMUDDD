@@ -24,6 +24,14 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
         this.postList = newList;
         notifyDataSetChanged();
     }
+    public interface OnPostInteractionListener {
+        void onPostLongClick(Post post, View anchor);
+    }
+
+    private OnPostInteractionListener listener;
+    public SearchAdapter(OnPostInteractionListener listener) {
+        this.listener = listener;
+    }
 
     @NonNull
     @Override
@@ -81,6 +89,16 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
         } else {
             holder.imgMood.setVisibility(View.GONE);
         }
+
+        // 6. longclick xóa post
+        holder.itemView.setOnLongClickListener(v -> {
+
+            if (listener != null) {
+                listener.onPostLongClick(post, v);
+            }
+
+            return true;
+        });
     }
 
     private String getMoodIcon(String moodName) {
@@ -115,6 +133,20 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
             tvLocation = itemView.findViewById(R.id.tvLocation);
             tvCaption = itemView.findViewById(R.id.tvCaption);
             layoutLocation = itemView.findViewById(R.id.layoutLocation);
+        }
+    }
+
+    // remove post để post không còn hiện trên search sau khi xóa
+    public void removePost(String postId) {
+
+        for (int i = 0; i < postList.size(); i++) {
+
+            if (postList.get(i).getPostId().equals(postId)) {
+
+                postList.remove(i);
+                notifyItemRemoved(i);
+                break;
+            }
         }
     }
 }

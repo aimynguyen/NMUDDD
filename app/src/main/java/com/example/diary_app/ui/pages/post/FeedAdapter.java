@@ -4,7 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -24,6 +26,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
     // 1. TẠO INTERFACE: Bộ đàm liên lạc giữa Adapter và Fragment
     public interface OnPostInteractionListener {
         void onReactionClick(Post post, String reactionType);
+        void onPostLongClick(Post post, View anchor);
+        void onMyPostDoubleTap(Post post);
     }
 
     // 2. CONSTRUCTOR: Ép buộc phải truyền vào bộ đàm (listener)
@@ -139,6 +143,41 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             // Không có địa điểm -> Tắt hẳn cái khung nền đi cho gọn giao diện
             holder.layoutLocation.setVisibility(View.GONE);
         }
+
+        // long click trên post
+        holder.itemView.setOnLongClickListener(v -> {
+
+            if (listener != null) {
+                listener.onPostLongClick(currentPost, holder.itemView.findViewById(R.id.tvUsername));
+            }
+
+            return true;
+        });
+
+        // double tap mở edit
+        GestureDetector gestureDetector =
+                new GestureDetector(
+                        holder.itemView.getContext(),
+                        new GestureDetector.SimpleOnGestureListener() {
+
+                            @Override
+                            public boolean onDoubleTap(MotionEvent e) {
+
+                                if (listener != null) {
+                                    listener.onMyPostDoubleTap(currentPost);
+                                }
+
+                                return true;
+                            }
+                        });
+
+
+        holder.itemView.setOnTouchListener((v, event) -> {
+
+            gestureDetector.onTouchEvent(event);
+
+            return false;
+        });
         // ==========================================
         // 3. XỬ LÝ GỬI BÌNH LUẬN -> CHUYỂN THÀNH TIN NHẮN (DM)
         // ==========================================
@@ -191,6 +230,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                         });
             });
         }
+
     }
     // Hàm hỗ trợ dịch từ chữ (lưu trên Firebase) sang Icon để hiển thị cho User
     private String getMoodIcon(String moodName) {
