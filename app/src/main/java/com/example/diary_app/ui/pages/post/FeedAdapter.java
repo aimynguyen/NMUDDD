@@ -4,7 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -25,6 +27,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
     public interface OnPostInteractionListener {
         void onReactionClick(Post post, String reactionType);
         void onPostLongClick(Post post, View anchor);
+        void onMyPostDoubleTap(Post post);
     }
 
     // 2. CONSTRUCTOR: Ép buộc phải truyền vào bộ đàm (listener)
@@ -135,6 +138,31 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             }
 
             return true;
+        });
+
+        // double tap mở edit
+        GestureDetector gestureDetector =
+                new GestureDetector(
+                        holder.itemView.getContext(),
+                        new GestureDetector.SimpleOnGestureListener() {
+
+                            @Override
+                            public boolean onDoubleTap(MotionEvent e) {
+
+                                if (listener != null) {
+                                    listener.onMyPostDoubleTap(currentPost);
+                                }
+
+                                return true;
+                            }
+                        });
+
+
+        holder.itemView.setOnTouchListener((v, event) -> {
+
+            gestureDetector.onTouchEvent(event);
+
+            return false;
         });
     }
     // Hàm hỗ trợ dịch từ chữ (lưu trên Firebase) sang Icon để hiển thị cho User

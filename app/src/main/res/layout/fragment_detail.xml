@@ -1,14 +1,209 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment_detail">
+    android:layout_gravity="left"
+    android:background="@drawable/bg_gradient_01">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+    <LinearLayout
+        android:id="@+id/fixedPreviewLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="10dp"
+        android:paddingLeft="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-</FrameLayout>
+        <!--back-->
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:padding="4dp"
+            android:background="@drawable/bg_circle_white"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+
+
+
+    </LinearLayout>
+
+
+    <!--scrollable -->
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/fixedPreviewLayout">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
+            android:paddingBottom="120dp">
+
+
+            <!--preview -->
+            <ImageView
+                android:id="@+id/imgPreview"
+                android:layout_width="220dp"
+                android:layout_height="220dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/bg_camera_frame"
+                android:clipToOutline="true"
+                android:scaleType="centerCrop"
+                android:layout_gravity="center"
+                android:src="@android:drawable/ic_menu_gallery"
+                android:elevation="6dp"/>
+
+            <!-- reaction -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_rounded">
+
+                    <!-- Header -->
+                    <LinearLayout
+                        android:id="@+id/layoutReactionHeader"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="14dp">
+
+                        <TextView
+                            android:id="@+id/txtReactionTitle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Reactions (12)"
+                            android:textColor="@color/text_primary"
+                            android:textStyle="bold"
+                            android:textSize="16sp"/>
+
+                        <ImageView
+                            android:id="@+id/imgArrow"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@android:drawable/arrow_down_float"/>
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvReactions"
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        android:nestedScrollingEnabled="false"
+                        android:visibility="gone"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <!-- slider -->
+
+            <FrameLayout
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:background="@drawable/bg_slider_container"
+                android:elevation="6dp">
+
+                <!--slide -->
+
+                <LinearLayout
+                    android:id="@+id/btnPrivate"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="start|center_vertical"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/bg_slider_circle_light"
+                    android:gravity="center"
+                    android:elevation="8dp">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/img_private"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/btnPublic"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/bg_slider_circle_dark"
+                    android:gravity="center"
+                    android:elevation="8dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/img_public"/>
+
+                </LinearLayout>
+
+            </FrameLayout>
+            <!-- caption -->
+
+            <EditText
+                android:id="@+id/edtCaption"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/bg_input_rounded"
+                android:gravity="top"
+                android:hint="Write caption..."
+                android:textColor="@color/text_primary"
+                android:padding="18dp"
+                android:elevation="6dp"/>
+
+
+            <!-- post -->
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"
+                android:layout_margin ="10dp"
+                android:background="@drawable/bg_button_rounded"
+                app:backgroundTint="@color/blue_tertiary"
+                android:text="Save"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:layout_gravity="center"
+                android:elevation="6dp"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,6 +3,7 @@ package com.example.diary_app.ui.pages.homepage;
 import android.app.AlertDialog;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,6 +35,7 @@ import com.example.diary_app.repository.AuthRepository;
 import com.example.diary_app.repository.NotificationRepository;
 import com.example.diary_app.repository.PostRepository;
 import com.example.diary_app.repository.UserRepository;
+import com.example.diary_app.ui.pages.edit.EditPostBottomSheet;
 import com.example.diary_app.ui.pages.post.FeedAdapter;
 import com.example.diary_app.ui.pages.statistics.MapFragment;
 import com.example.diary_app.viewmodel.PetViewModel;
@@ -109,6 +111,22 @@ public class HomeFragment extends Fragment {
         setupDependencies();
         setupListeners();
         setupFeed();
+
+        // edit lại post thì trên feed cũng được đổi luôn
+        getParentFragmentManager()
+                .setFragmentResultListener(
+                        "post_updated",
+                        getViewLifecycleOwner(),
+                        (requestKey, bundle) -> {
+
+
+                            if(bundle.getBoolean("refresh")){
+
+                                fetchFeedData();
+
+                            }
+
+                        });
 
         // Mặc định lúc mới vào là trạng thái Lướt tin & Chụp ảnh
         switchMode(false);
@@ -409,6 +427,18 @@ public class HomeFragment extends Fragment {
             public void onPostLongClick(Post post, View anchor) {
                 showPopup(post, anchor);
             }
+
+            @Override
+            public void onMyPostDoubleTap(Post post) {
+
+                EditPostBottomSheet sheet =
+                        EditPostBottomSheet.newInstance(post.getPostId());
+
+                sheet.show(
+                        getParentFragmentManager(),
+                        "edit_post"
+                );
+            }
         });
         recyclerFeed.setAdapter(feedAdapter);
 
@@ -538,6 +568,10 @@ public class HomeFragment extends Fragment {
 
         popup.show();
     }
+
+    // bottomsheetdialog xuất hiện khi double tap post của bản thân
+
+
     // =======================================================
     // BỘ HÀM XỬ LÝ CAMERA LOCKET-STYLE
     // =======================================================

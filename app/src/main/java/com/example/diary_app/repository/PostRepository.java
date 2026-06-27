@@ -70,7 +70,7 @@ public class PostRepository {
         return db.collection("posts")
                 .whereIn("userId", queryIds)
                 .orderBy("createAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                .get();
+                .get(com.google.firebase.firestore.Source.SERVER);
 
         /* LƯU Ý KHI XỬ LÝ KẾT QUẢ NÀY TRONG VIEWMODEL:
          * Vì Firestore không hỗ trợ lệnh OR phức tạp, query này sẽ lấy CẢ bài private của bạn bè.
@@ -171,6 +171,13 @@ public class PostRepository {
 
                     return batch.commit();
                 });
+    }
+
+    // 13. lấy 1 bài viết
+    public Task<DocumentSnapshot> getPost(String postId){
+        return db.collection("posts")
+                .document(postId)
+                .get();
     }
 
     /**

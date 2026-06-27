@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.diary_app.data.model.Post;
 import com.example.diary_app.R;
+import com.example.diary_app.ui.pages.edit.EditPostBottomSheet;
 import com.example.diary_app.viewmodel.PostViewModel;
 
 import java.util.ArrayList;
@@ -88,6 +89,19 @@ public class FeedFragment extends Fragment {
             @Override
             public void onPostLongClick(Post post, View anchor) {
                 showPopup(post, anchor);
+            }
+
+            // double tap post
+            @Override
+            public void onMyPostDoubleTap(Post post) {
+
+                EditPostBottomSheet sheet =
+                        EditPostBottomSheet.newInstance(post.getPostId());
+
+                sheet.show(
+                        getParentFragmentManager(),
+                        "edit_post"
+                );
             }
         });
 
