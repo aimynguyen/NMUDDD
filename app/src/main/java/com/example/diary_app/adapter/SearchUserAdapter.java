@@ -22,6 +22,7 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
 
     public interface OnAddClickListener {
         void onAddClick(User targetUser, int position);
+        void onRespondClick(User targetUser, int position);
     }
 
     public SearchUserAdapter(List<User> userList, OnAddClickListener onAddClickListener) {
@@ -62,30 +63,44 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
 
             if (targetFriendIds != null && targetFriendIds.contains(currentUserId)) {
                 // 1. Nếu đã là bạn
+                holder.btnAdd.setVisibility(View.VISIBLE);
                 holder.btnAdd.setText("Đã là bạn");
                 holder.btnAdd.setEnabled(false);
                 holder.btnAdd.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.GRAY));
             } else if (sentRequestIds != null && sentRequestIds.contains(user.getUid())) {
                 // 2. Nếu ĐÃ GỬI lời mời và đang chờ chấp nhận
+                holder.btnAdd.setVisibility(View.VISIBLE);
                 holder.btnAdd.setText("Đã gửi");
                 holder.btnAdd.setEnabled(false);
                 holder.btnAdd.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FFA500"))); // Màu cam chờ đợi
+            } else if (receivedRequestIds != null && receivedRequestIds.contains(user.getUid())) {
+                // 3. Nếu người đó ĐÃ GỬI lời mời cho mình
+                holder.btnAdd.setVisibility(View.VISIBLE);
+                holder.btnAdd.setText("Phản hồi");
+                holder.btnAdd.setEnabled(true);
+                holder.btnAdd.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#7ea5dd"))); // Màu xanh dương
             } else {
-                // 3. Nếu chưa có mối quan hệ nào
+                // 4. Nếu chưa có mối quan hệ nào
+                holder.btnAdd.setVisibility(View.VISIBLE);
                 holder.btnAdd.setText("Add");
                 holder.btnAdd.setEnabled(true);
                 holder.btnAdd.setBackgroundTintList(null);
             }
 
-            // 5. Xử lý sự kiện click nút Add
+            // 5. Xử lý sự kiện click nút Add hoặc Phản hồi
             holder.btnAdd.setOnClickListener(v -> {
-                if (onAddClickListener != null) {
-                    onAddClickListener.onAddClick(user, position);
-
-                    // Sau khi bấm, tạm thời đổi giao diện thành "Đã gửi" để tránh bấm liên tục
-                    holder.btnAdd.setText("Đã gửi");
-                    holder.btnAdd.setEnabled(false);
-                    holder.btnAdd.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#888888")));
+                if (holder.btnAdd.getText().toString().equals("Phản hồi")) {
+                    if (onAddClickListener != null) {
+                        onAddClickListener.onRespondClick(user, position);
+                    }
+                } else if (holder.btnAdd.getText().toString().equals("Add")) {
+                    if (onAddClickListener != null) {
+                        onAddClickListener.onAddClick(user, position);
+                        // Sau khi bấm, tạm thời đổi giao diện thành "Đã gửi" để tránh bấm liên tục
+                        holder.btnAdd.setText("Đã gửi");
+                        holder.btnAdd.setEnabled(false);
+                        holder.btnAdd.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#888888")));
+                    }
                 }
             });
 
@@ -98,11 +113,13 @@ public class SearchUserAdapter extends RecyclerView.Adapter<SearchUserAdapter.Vi
     }
 
     private List<String> sentRequestIds = new ArrayList<>();
+    private List<String> receivedRequestIds = new ArrayList<>();
 
     // Sửa lại hàm updateList
-    public void updateList(List<User> newList, List<String> sentIds) {
+    public void updateList(List<User> newList, List<String> sentIds, List<String> receivedIds) {
         this.userList = newList;
         this.sentRequestIds = sentIds;
+        this.receivedRequestIds = receivedIds;
         notifyDataSetChanged();
     }
 
