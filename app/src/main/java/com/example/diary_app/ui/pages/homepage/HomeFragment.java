@@ -183,7 +183,7 @@ public class HomeFragment extends Fragment {
                 //  Tăng EXP cho Pet
                 String myUid = authRepository.getCurrentUserId();
                 if (myUid != null) {
-                    petViewModel.addExp(myUid, PetConstants.EXP_PER_POST);
+                    petViewModel.addExp(getContext(), myUid, PetConstants.EXP_PER_POST);
                 }
 
                 // 3. Dọn dẹp sạch sẽ form đăng bài để lần sau không bị dính chữ cũ
@@ -439,7 +439,7 @@ public class HomeFragment extends Fragment {
                             android.widget.Toast.makeText(getContext(), "Đã thả " + iconToast, android.widget.Toast.LENGTH_SHORT).show();
 
                             // Tăng EXP cho Pet khi thả reaction
-                            petViewModel.addExp(myUid, PetConstants.EXP_PER_REACT);
+                            petViewModel.addExp(getContext(), myUid, PetConstants.EXP_PER_REACT);
 
                             // Gửi thông báo cho chủ bài viết
                             if (!myUid.equals(post.getUserId())) {

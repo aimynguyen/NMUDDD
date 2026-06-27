@@ -13,6 +13,11 @@ import androidx.appcompat.widget.PopupMenu;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import java.util.Calendar;
+
+import com.example.diary_app.core.PetReminderReceiver;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ContextThemeWrapper;
@@ -83,6 +88,8 @@ public class MainActivity extends AppCompatActivity {
             com.example.diary_app.viewmodel.NotificationViewModel notiViewModel = 
                     new ViewModelProvider(this).get(com.example.diary_app.viewmodel.NotificationViewModel.class);
             notiViewModel.syncFcmToken(uid);
+
+            scheduleDailyPetReminder(this);
         }
 
         // 2. Lấy NavController
@@ -167,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void performLogout() {
+        cancelDailyPetReminder(this);
         FirebaseAuth.getInstance().signOut();
         SharedPreferences sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         sharedPref.edit().remove("USER_ID").apply();
@@ -182,6 +190,9 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         sharedPref.edit().putString("USER_ID", userId).apply();
         fetchAndDisplayUserName(userId);
+        
+        // Kích hoạt báo thức ngay sau khi vừa đăng nhập thành công
+        scheduleDailyPetReminder(this);
     }
 
     private void updateHeaderFromStorage() {
@@ -245,5 +256,46 @@ public class MainActivity extends AppCompatActivity {
                         doc.getReference().update("isRead", true);
                     }
                 });
+    }
+
+    public void scheduleDailyPetReminder(Context context) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        
+        Intent intent = new Intent(context, PetReminderReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                context, 102, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        //calendar.add(Calendar.SECOND, 10);
+        calendar.set(Calendar.HOUR_OF_DAY, 20); // 20 giờ
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+
+        if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+
+        if (alarmManager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                try {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                } catch (SecurityException e) {
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                }
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+            }
+        }
+    }
+
+    public void cancelDailyPetReminder(Context context) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(context, PetReminderReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                context, 102, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+        if (alarmManager != null) {
+            alarmManager.cancel(pendingIntent);
+        }
     }
 }
