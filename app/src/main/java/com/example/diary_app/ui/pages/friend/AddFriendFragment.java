@@ -47,6 +47,7 @@ public class AddFriendFragment extends Fragment {
 
     // Thêm biến này ở đầu Fragment cùng các biến khác
     private List<String> sentRequestIds = new ArrayList<>();
+    private List<String> receivedRequestIds = new ArrayList<>();
 
     // Yêu cầu một constructor rỗng theo chuẩn của Fragment
     public AddFriendFragment() {
@@ -104,9 +105,21 @@ public class AddFriendFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerViewSuggestFriend);
 
         searchResults = new ArrayList<>();
-        adapter = new SearchUserAdapter(searchResults, (targetUser, position) -> {
-            if (currentUserId != null) {
-                sendFriendRequest(targetUser);
+        adapter = new SearchUserAdapter(searchResults, new SearchUserAdapter.OnAddClickListener() {
+            @Override
+            public void onAddClick(User targetUser, int position) {
+                if (currentUserId != null) {
+                    sendFriendRequest(targetUser);
+                }
+            }
+
+            @Override
+            public void onRespondClick(User targetUser, int position) {
+                try {
+                    androidx.navigation.Navigation.findNavController(getView()).navigate(R.id.nav_profile);
+                } catch (Exception e) {
+                    requireActivity().getOnBackPressedDispatcher().onBackPressed();
+                }
             }
         });
 
@@ -156,20 +169,32 @@ public class AddFriendFragment extends Fragment {
                         sentRequestIds.add(doc.getString("receiverId"));
                     }
 
-                    // 2. Sau khi có danh sách đã gửi, tiến hành tìm kiếm User
-                    userRepository.searchUserByEmail(queryLowerCase).addOnCompleteListener(task -> {
-                        if (task.isSuccessful() && task.getResult() != null) {
-                            searchResults.clear();
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                User user = document.toObject(User.class);
-                                if (currentUserId != null && !user.getUid().equals(currentUserId)) {
-                                    searchResults.add(user);
+                    //  Lấy danh sách lời mời NGƯỜI KHÁC gửi cho bạn
+                    FirebaseFirestore.getInstance().collection("friend_requests")
+                            .whereEqualTo("receiverId", currentUserId)
+                            .whereEqualTo("status", "pending")
+                            .get()
+                            .addOnSuccessListener(receivedSnapshots -> {
+                                receivedRequestIds.clear();
+                                for (QueryDocumentSnapshot doc : receivedSnapshots) {
+                                    receivedRequestIds.add(doc.getString("senderId"));
                                 }
-                            }
-                            // Gửi danh sách search và danh sách đã gửi lời mời sang Adapter
-                            adapter.updateList(searchResults, sentRequestIds);
-                        }
-                    });
+
+                                // 2. Sau khi có danh sách đã gửi và nhận, tiến hành tìm kiếm User
+                                userRepository.searchUserByEmail(queryLowerCase).addOnCompleteListener(task -> {
+                                    if (task.isSuccessful() && task.getResult() != null) {
+                                        searchResults.clear();
+                                        for (QueryDocumentSnapshot document : task.getResult()) {
+                                            User user = document.toObject(User.class);
+                                            if (currentUserId != null && !user.getUid().equals(currentUserId)) {
+                                                searchResults.add(user);
+                                            }
+                                        }
+                                        // Gửi danh sách search và danh sách đã gửi lời mời sang Adapter
+                                        adapter.updateList(searchResults, sentRequestIds, receivedRequestIds);
+                                    }
+                                });
+                            });
                 });
     }
 

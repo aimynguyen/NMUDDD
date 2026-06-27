@@ -1,6 +1,7 @@
 package com.example.diary_app.viewmodel;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -17,6 +18,7 @@ import com.example.diary_app.repository.PetRepository;
 import com.example.diary_app.repository.PostRepository;
 import com.example.diary_app.data.model.Post;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -143,18 +145,18 @@ public class PetViewModel extends ViewModel {
     }
 
     // tăng EXP (gọi ở viewmodel của Post)
-    public void addExp(String userId, int expAmount){
+    public void addExp(Context context, String userId, int expAmount){
         PetInfo currentPet = petInfoLiveData.getValue();
         if (currentPet != null) {
             // Đã có data sẵn trong bộ nhớ
-            doAddExp(userId, currentPet, expAmount);
+            doAddExp(context, userId, currentPet, expAmount);
         } else {
             // Chưa có data, fetch từ Firebase trước rồi mới cộng EXP
             petRepository.getPetInfo(userId, new PetRepository.OnPetInfoFetchedListener() {
                 @Override
                 public void onSuccess(PetInfo petInfo) {
                     petInfoLiveData.setValue(petInfo);
-                    doAddExp(userId, petInfo, expAmount);
+                    doAddExp(context, userId, petInfo, expAmount);
                 }
 
                 @Override
@@ -167,7 +169,7 @@ public class PetViewModel extends ViewModel {
         }
     }
 
-    private void doAddExp(String userId, PetInfo currentPet, int expAmount) {
+    private void doAddExp(Context context, String userId, PetInfo currentPet, int expAmount) {
         Log.d("PetViewModel", "doAddExp called - dailyExp=" + currentPet.getDailyExp() + ", currentExp=" + currentPet.getCurrentExp() + ", level=" + currentPet.getLevel());
         isLoadingLiveData.setValue(true);
         petRepository.addExpForPet(userId, currentPet, expAmount, new PetRepository.OnExpUpdateListener(){
@@ -183,6 +185,13 @@ public class PetViewModel extends ViewModel {
                     levelUpEvent.setValue(new Event<>(newLevel));
                 } else {
                     toastMessageLiveData.setValue(new Event<>("Đã nhận EXP thành công!"));
+                }
+                
+                // Lưu vào SharedPreferences để không gửi thông báo nếu đã vào app trong ngày
+                if (context != null) {
+                    SharedPreferences sharedPref = context.getSharedPreferences("PetPrefs", Context.MODE_PRIVATE);
+                    String todayStr = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date());
+                    sharedPref.edit().putString("LAST_PET_EXP_DATE", todayStr).apply();
                 }
                 
                 // Gọi lại hàm lấy dữ liệu để UI cập nhật thanh Progress Bar và Level mới nhất

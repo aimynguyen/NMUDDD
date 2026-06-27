@@ -254,7 +254,7 @@ public class CreatePostFragment extends Fragment {
                 // Tăng EXP cho Pet
                 String myUid = authRepository.getCurrentUserId();
                 if (myUid != null) {
-                    petViewModel.addExp(myUid, PetConstants.EXP_PER_POST);
+                    petViewModel.addExp(getContext(), myUid, PetConstants.EXP_PER_POST);
                 }
                 
                 Navigation.findNavController(requireView()).popBackStack();
