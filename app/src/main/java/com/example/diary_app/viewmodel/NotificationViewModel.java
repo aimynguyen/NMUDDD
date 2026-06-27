@@ -111,4 +111,11 @@ public class NotificationViewModel extends ViewModel {
                     Log.d("NotificationViewModel", "Lỗi đánh dấu đã đọc:", e);
                 });
     }
+
+    /**
+     * Đồng bộ FCM Token lên Firestore mỗi khi ứng dụng khởi động
+     */
+    public void syncFcmToken(String uid) {
+        userRepository.updateFcmToken(uid);
+    }
 }

@@ -52,6 +52,20 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
     @Override
     public void onBindViewHolder(@NonNull FeedViewHolder holder, int position) {
         Post currentPost = postList.get(position);
+        // Khởi tạo Repo để lấy ID của người đang lướt App
+        com.example.diary_app.repository.AuthRepository authRepo = new com.example.diary_app.repository.AuthRepository();
+        String myUid = authRepo.getCurrentUserId();
+
+        // Kiểm tra xem bài viết này có phải của chính mình không
+        if (myUid != null && myUid.equals(currentPost.getUserId())) {
+            // LÀ BÀI CỦA MÌNH -> Xóa sổ thanh React và Comment
+            holder.layoutReactionBar.setVisibility(View.GONE);
+            holder.layoutCommentBar.setVisibility(View.GONE);
+        } else {
+            // LÀ BÀI NGƯỜI KHÁC -> Hiện lên bình thường
+            holder.layoutReactionBar.setVisibility(View.VISIBLE);
+            holder.layoutCommentBar.setVisibility(View.VISIBLE);
+        }
 
         // --- A. HIỂN THỊ DỮ LIỆU BÀI VIẾT ---
         holder.tvUsername.setText(currentPost.getUserName());
@@ -164,6 +178,59 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
             return false;
         });
+        // ==========================================
+        // 3. XỬ LÝ GỬI BÌNH LUẬN -> CHUYỂN THÀNH TIN NHẮN (DM)
+        // ==========================================
+        if (holder.btnSendComment != null && holder.edtComment != null) {
+            holder.btnSendComment.setOnClickListener(v -> {
+                String commentText = holder.edtComment.getText().toString().trim();
+
+                if (commentText.isEmpty()) return;
+
+                // Khởi tạo AuthRepository ngay tại đây để lấy ID người đang lướt Feed
+                String postOwnerId = currentPost.getUserId();
+                String postImageUrl = currentPost.getImageUrl();
+
+                // Chặn user tự nhắn tin cho chính mình
+                if (myUid == null || myUid.equals(postOwnerId)) {
+                    holder.edtComment.setText("");
+                    android.widget.Toast.makeText(context, "Đây là bài viết của bạn mà!", android.widget.Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Vô hiệu hóa nút gửi tạm thời để tránh spam click
+                holder.btnSendComment.setEnabled(false);
+
+                // Tạo ID phòng chat chung
+                String chatId = (myUid.compareTo(postOwnerId) < 0) ? myUid + "_" + postOwnerId : postOwnerId + "_" + myUid;
+
+                // Đóng gói tin nhắn (Kèm theo link ảnh của bài viết hiện tại)
+                com.example.diary_app.data.model.ChatMessage newMsg = new com.example.diary_app.data.model.ChatMessage(
+                        "",
+                        myUid,
+                        commentText,
+                        com.google.firebase.Timestamp.now(),
+                        postImageUrl
+                );
+
+                // Gọi Repo để đẩy lên Firebase
+                com.example.diary_app.repository.ChatRepository chatRepo = new com.example.diary_app.repository.ChatRepository();
+                java.util.List<String> participants = java.util.Arrays.asList(myUid, postOwnerId);
+
+                chatRepo.sendMessage(chatId, newMsg, participants)
+                        .addOnSuccessListener(aVoid -> {
+                            // Thành công: Xóa trắng ô nhập liệu và hiện thông báo
+                            holder.edtComment.setText("");
+                            holder.btnSendComment.setEnabled(true); // Mở khóa lại nút gửi
+                            android.widget.Toast.makeText(context, "Đã gửi bình luận qua tin nhắn!", android.widget.Toast.LENGTH_SHORT).show();
+                        })
+                        .addOnFailureListener(e -> {
+                            holder.btnSendComment.setEnabled(true);
+                            android.widget.Toast.makeText(context, "Lỗi: " + e.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                        });
+            });
+        }
+
     }
     // Hàm hỗ trợ dịch từ chữ (lưu trên Firebase) sang Icon để hiển thị cho User
     private String getMoodIcon(String moodName) {
@@ -196,6 +263,10 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         android.widget.TextView imgMood;
         LinearLayout layoutLocation;
         TextView tvLocation;
+        android.widget.EditText edtComment;
+        android.widget.ImageView btnSendComment;
+        android.widget.HorizontalScrollView layoutReactionBar;
+        LinearLayout layoutCommentBar;
         public FeedViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -213,6 +284,10 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
             layoutLocation = itemView.findViewById(R.id.layoutLocation);
             tvLocation = itemView.findViewById(R.id.tvLocation);
+            edtComment = itemView.findViewById(R.id.etMessage);
+            btnSendComment = itemView.findViewById(R.id.btnSend);
+            layoutReactionBar = itemView.findViewById(R.id.layoutReactionBar);
+            layoutCommentBar = itemView.findViewById(R.id.layoutCommentBar);
         }
     }
 }

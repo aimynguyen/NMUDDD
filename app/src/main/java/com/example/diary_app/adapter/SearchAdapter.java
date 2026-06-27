@@ -81,7 +81,16 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
                     .into(holder.imgAvatar);
         }
 
-        // 5, longclick xóa post
+        // 5. Hiển thị Emotion (Mood) của người đăng bài
+        String mood = post.getEmotion();
+        if (mood != null && !mood.trim().isEmpty()) {
+            holder.imgMood.setVisibility(View.VISIBLE);
+            holder.imgMood.setText(getMoodIcon(mood));
+        } else {
+            holder.imgMood.setVisibility(View.GONE);
+        }
+
+        // 6. longclick xóa post
         holder.itemView.setOnLongClickListener(v -> {
 
             if (listener != null) {
@@ -92,13 +101,26 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
         });
     }
 
+    private String getMoodIcon(String moodName) {
+        if (moodName == null) return "😐";
+        switch (moodName.toUpperCase().trim()) {
+            case "HAPPY":   return "😊";
+            case "SAD":     return "😭";
+            case "CALM":    return "😌";
+            case "ANGRY":   return "😡";
+            case "NEUTRAL": return "😳";
+            default:        return "😐";
+        }
+    }
+
     @Override
     public int getItemCount() {
         return postList.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView imgDiary, imgAvatar, imgMood;
+        ImageView imgDiary, imgAvatar;
+        TextView imgMood;
         TextView tvUsername, tvLocation, tvCaption;
         LinearLayout layoutLocation;
 

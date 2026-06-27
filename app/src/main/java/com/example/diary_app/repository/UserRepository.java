@@ -10,7 +10,9 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -204,5 +206,23 @@ public class UserRepository {
         DocumentReference friendRef = db.collection("users").document(friendUid);
         batch.update(friendRef, "friendIds", FieldValue.arrayRemove(myUid));
         return batch.commit();
+    }
+
+    /**
+     * Lấy FCM Token của thiết bị và cập nhật vào bảng "users"
+     */
+    public void updateFcmToken(String uid) {
+        FirebaseMessaging.getInstance().getToken()
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful() && task.getResult() != null) {
+                    String token = task.getResult();
+                    db.collection("users").document(uid).update("fcmToken", token)
+                        .addOnFailureListener(e -> {
+                            Map<String, Object> data = new HashMap<>();
+                            data.put("fcmToken", token);
+                            db.collection("users").document(uid).set(data, SetOptions.merge());
+                        });
+                }
+            });
     }
 }

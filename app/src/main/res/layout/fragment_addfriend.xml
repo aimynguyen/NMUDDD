@@ -22,6 +22,15 @@
             android:background="@drawable/bg_searchbar"
             android:paddingHorizontal="12dp">
 
+            <!-- Back button -->
+            <ImageView
+                android:id="@+id/btnBack"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_back"
+                app:tint="#888"
+                android:layout_marginEnd="8dp"/>
+
             <!--Icon search-->
             <ImageView
                 android:id="@+id/iconSearch"

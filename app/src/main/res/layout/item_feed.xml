@@ -19,9 +19,10 @@
     <!-- REACTION BAR -->
 
     <HorizontalScrollView
+        android:id="@+id/layoutReactionBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
+        android:layout_marginTop="5dp"
         android:scrollbars="none"
         android:fillViewport="true">
 
@@ -97,9 +98,10 @@
     <!-- MESSAGE BAR -->
 
     <LinearLayout
-        android:layout_width="307dp"
+        android:id="@+id/layoutCommentBar"
+        android:layout_width="280dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginBottom="20dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 

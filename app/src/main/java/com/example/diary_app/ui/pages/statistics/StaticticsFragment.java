@@ -1,5 +1,6 @@
 package com.example.diary_app.ui.pages.statistics;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.Gravity;
@@ -9,14 +10,17 @@ import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import com.anychart.AnyChart;
 import com.anychart.AnyChartView;
@@ -42,8 +46,8 @@ public class StaticticsFragment extends Fragment {
 
     //region khai báo biến
     private StaticticsViewModel viewModel;
-    private AnyChartView pieChartView;
-    private AnyChartView barChartView;
+    private android.widget.FrameLayout pieChartContainer;
+    private android.widget.FrameLayout barChartContainer;
 
     private GridLayout gridCalendar;
     private TextView month;
@@ -51,6 +55,7 @@ public class StaticticsFragment extends Fragment {
     private ImageButton btnDropDown;
     private ImageButton btnPre;
     private ImageButton btnNext;
+    private AppCompatButton btnVideo;
     private Calendar calendar;
     private Date startDate;
     private Date endDate;
@@ -75,14 +80,15 @@ public class StaticticsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         //region khởi tạo (Tìm ID qua view)
-        pieChartView = view.findViewById(R.id.pieChart);
-        barChartView = view.findViewById(R.id.barChart);
+        pieChartContainer = view.findViewById(R.id.pieChartContainer);
+        barChartContainer = view.findViewById(R.id.barChartContainer);
         gridCalendar = view.findViewById(R.id.gridCalendar);
         month = view.findViewById(R.id.month);
         year = view.findViewById(R.id.year);
         btnDropDown = view.findViewById(R.id.btnDropDown);
         btnPre = view.findViewById(R.id.btnPre);
         btnNext = view.findViewById(R.id.btnNext);
+        btnVideo = view.findViewById(R.id.btnVideo);
         startDate = new Date();
         endDate = new Date();
 
@@ -130,10 +136,19 @@ public class StaticticsFragment extends Fragment {
                 Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
+        
+        // Lắng nghe cảm xúc theo ngày để cập nhật Lịch
+        viewModel.getDailyEmotions().observe(getViewLifecycleOwner(), (Map<Integer, String> dailyEmotions) -> {
+            if (isAdded() && getContext() != null) {
+                updateCalendarUIWithEmotions(dailyEmotions);
+            }
+        });
 
         calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         updateCalendar();
+
+        btnDropDown.setOnClickListener(v -> showMonthYearPickerDialog());
 
         btnPre.setOnClickListener(v -> {
             calendar.add(Calendar.MONTH, -1);
@@ -144,9 +159,85 @@ public class StaticticsFragment extends Fragment {
             calendar.add(Calendar.MONTH, 1);
             updateCalendar();
         });
+
+        btnVideo.setOnClickListener(v -> {
+            String uid = "";
+            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            }
+
+            Bundle args = new Bundle();
+            args.putLong("startDate", startDate.getTime());
+            args.putLong("endDate", endDate.getTime());
+            args.putString("userId", uid);
+
+            Navigation.findNavController(v)
+                    .navigate(R.id.action_nav_dashboard_to_nav_video, args);
+        });
     }
+    private void showMonthYearPickerDialog() {
+        if (!isAdded() || getContext() == null) return;
+
+        // Tạo container layout chứa 2 NumberPicker
+        LinearLayout container = new LinearLayout(requireContext());
+        container.setOrientation(LinearLayout.HORIZONTAL);
+        container.setGravity(Gravity.CENTER);
+        container.setPadding(48, 32, 48, 16);
+
+        // NumberPicker chọn Tháng (1 - 12)
+        NumberPicker monthPicker = new NumberPicker(requireContext());
+        monthPicker.setMinValue(1);
+        monthPicker.setMaxValue(12);
+        monthPicker.setValue(calendar.get(Calendar.MONTH) + 1);
+        monthPicker.setDisplayedValues(new String[]{
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        });
+
+        // Spacer giữa 2 picker
+        TextView spacer = new TextView(requireContext());
+        spacer.setText("/");
+        spacer.setTextSize(20);
+        LinearLayout.LayoutParams spacerParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        spacerParams.setMargins(16, 0, 16, 0);
+        spacer.setLayoutParams(spacerParams);
+
+        // NumberPicker chọn Năm (5 năm về trước đến 5 năm sau)
+        NumberPicker yearPicker = new NumberPicker(requireContext());
+        int currentYear = calendar.get(Calendar.YEAR);
+        yearPicker.setMinValue(currentYear - 5);
+        yearPicker.setMaxValue(currentYear + 5);
+        yearPicker.setValue(currentYear);
+
+        container.addView(monthPicker);
+        container.addView(spacer);
+        container.addView(yearPicker);
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Chọn tháng / năm")
+                .setView(container)
+                .setPositiveButton("OK", (dialog, which) -> {
+                    calendar.set(Calendar.MONTH, monthPicker.getValue() - 1);
+                    calendar.set(Calendar.YEAR, yearPicker.getValue());
+                    calendar.set(Calendar.DAY_OF_MONTH, 1);
+                    updateCalendar();
+                })
+                .setNegativeButton("Huỷ", null)
+                .show();
+    }
+
     private void showPieChart(Map<String, Integer> emotionDatas) {
-        if (pieChartView == null) return;
+        if (pieChartContainer == null || !isAdded() || getContext() == null) return;
+
+        // Xóa chart cũ và tạo mới AnyChartView để tránh lỗi re-render của WebView
+        pieChartContainer.removeAllViews();
+        AnyChartView pieChartView = new AnyChartView(requireContext());
+        pieChartView.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+        pieChartContainer.addView(pieChartView);
 
         APIlib.getInstance().setActiveAnyChartView(pieChartView);
         Pie pie = AnyChart.pie();
@@ -175,29 +266,40 @@ public class StaticticsFragment extends Fragment {
     }
 
     private void showBarChart(Map<String, Integer> emotionDatas) {
-        if (barChartView == null) return;
+        if (barChartContainer == null || !isAdded() || getContext() == null) return;
+
+        // Xóa chart cũ và tạo mới AnyChartView để tránh lỗi re-render của WebView
+        barChartContainer.removeAllViews();
+        AnyChartView barChartView = new AnyChartView(requireContext());
+        barChartView.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT));
+        barChartContainer.addView(barChartView);
 
         APIlib.getInstance().setActiveAnyChartView(barChartView);
         Cartesian bar = AnyChart.cartesian();
 
+        // Dùng anonymous subclass của ValueDataEntry (kế thừa setValue() từ DataEntry)
+        // để truyền thuộc tính 'fill' và 'stroke' trực tiếp vào từng điểm dữ liệu
         List<DataEntry> datas = new ArrayList<>();
-        List<String> colorPalette = new ArrayList<>();
-
         for (Map.Entry<String, Integer> item : emotionDatas.entrySet()) {
-            datas.add(new ValueDataEntry(item.getKey(), item.getValue()));
-            colorPalette.add(getEmotionHexColor(item.getKey()));
+            final String color = getEmotionHexColor(item.getKey());
+            final String label = item.getKey();
+            final int value = item.getValue();
+            ValueDataEntry entry = new ValueDataEntry(label, value) {{
+                setValue("fill", color);
+                setValue("stroke", color);
+            }};
+            datas.add(entry);
         }
 
-        // Đổi sang cột dọc chuẩn (column) thay vì thanh ngang (bar) để khớp tiêu đề trends
         com.anychart.core.cartesian.series.Column column = bar.column(datas);
+        // Cho phép mỗi điểm trong series tự xác định màu từ trường 'fill'
+        column.fill("function() { return this.getData('fill'); }");
+        column.stroke("function() { return this.getData('stroke'); }");
 
         bar.title("Emotion trends");
         bar.title().fontSize("14");
-
-        // Khóa cứng bảng màu chuẩn cho các cột dữ liệu
-        if (!colorPalette.isEmpty()) {
-            bar.palette(colorPalette.toArray(new String[0]));
-        }
 
         barChartView.setChart(bar);
     }
@@ -299,31 +401,46 @@ public class StaticticsFragment extends Fragment {
 
         gridCalendar.removeAllViews();
 
-        int totalCells = 42;
+        // Tính tổng số ô cần thiết để không bị dư khoảng trắng phía dưới
+        int emptyCells = dayOfWeek - 1; 
+        int requiredCells = emptyCells + daysInMonth;
+        int totalCells = (int) Math.ceil(requiredCells / 7.0) * 7;
+        
         int dayCounter = 1;
 
+        // Kích thước cố định cho mỗi ô ngày (40dp) để hình tròn không bị méo
+        int sizeInPx = (int) (30 * requireContext().getResources().getDisplayMetrics().density + 0.5f);
+
         for (int cell = 1; cell <= totalCells; cell++) {
+            android.widget.FrameLayout cellLayout = new android.widget.FrameLayout(requireContext());
+            GridLayout.LayoutParams cellParams = new GridLayout.LayoutParams();
+            cellParams.width = 0; // Để chia đều 7 cột
+            cellParams.height = GridLayout.LayoutParams.WRAP_CONTENT;
+            cellParams.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
+            cellParams.rowSpec = GridLayout.spec(GridLayout.UNDEFINED);
+            cellLayout.setLayoutParams(cellParams);
+
             TextView dayView = new TextView(requireContext());
             dayView.setGravity(Gravity.CENTER);
             dayView.setTextSize(14);
 
-            GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-            params.width = 0;
-            params.height = GridLayout.LayoutParams.WRAP_CONTENT;
-            params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
-            params.rowSpec = GridLayout.spec(GridLayout.UNDEFINED);
-            params.setMargins(4, 12, 4, 12);
-            dayView.setLayoutParams(params);
+            android.widget.FrameLayout.LayoutParams dayParams = new android.widget.FrameLayout.LayoutParams(sizeInPx, sizeInPx);
+            dayParams.gravity = Gravity.CENTER; // Căn giữa TextView trong ô lưới
+            dayParams.setMargins(0, 8, 0, 8);
+            dayView.setLayoutParams(dayParams);
 
             if (cell >= dayOfWeek && dayCounter <= daysInMonth) {
                 dayView.setText(String.valueOf(dayCounter));
                 dayView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black));
+                dayView.setTag(dayCounter);
                 dayCounter++;
             } else {
                 dayView.setText("");
+                dayView.setTag(null);
             }
 
-            gridCalendar.addView(dayView);
+            cellLayout.addView(dayView);
+            gridCalendar.addView(cellLayout);
         }
 
         Calendar startCal = (Calendar) calendar.clone();
@@ -358,17 +475,40 @@ public class StaticticsFragment extends Fragment {
         }
         return counts;
     }
+    
+    private void updateCalendarUIWithEmotions(Map<Integer, String> dailyEmotions) {
+        if (gridCalendar == null || dailyEmotions == null) return;
+        for (int i = 0; i < gridCalendar.getChildCount(); i++) {
+            View child = gridCalendar.getChildAt(i);
+            if (child instanceof android.widget.FrameLayout) {
+                android.widget.FrameLayout cellLayout = (android.widget.FrameLayout) child;
+                if (cellLayout.getChildCount() > 0 && cellLayout.getChildAt(0) instanceof TextView) {
+                    TextView dayView = (TextView) cellLayout.getChildAt(0);
+                    Object tag = dayView.getTag();
+                    if (tag instanceof Integer) {
+                        int day = (Integer) tag;
+                        if (dailyEmotions.containsKey(day)) {
+                            String emotion = dailyEmotions.get(day);
+                            dayView.setBackgroundResource(getEmotionDrawable(emotion));
+                        } else {
+                            dayView.setBackgroundResource(0);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (pieChartView != null) {
-            pieChartView.removeAllViews();
-            pieChartView = null;
+        if (pieChartContainer != null) {
+            pieChartContainer.removeAllViews();
+            pieChartContainer = null;
         }
-        if (barChartView != null) {
-            barChartView.removeAllViews();
-            barChartView = null;
+        if (barChartContainer != null) {
+            barChartContainer.removeAllViews();
+            barChartContainer = null;
         }
     }
 }

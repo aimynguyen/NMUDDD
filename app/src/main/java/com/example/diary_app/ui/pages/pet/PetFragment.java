@@ -21,6 +21,9 @@ import com.example.diary_app.core.PetConstants;
 import com.example.diary_app.repository.AuthRepository;
 import com.example.diary_app.viewmodel.PetViewModel;
 
+import java.util.Date;
+import java.util.Locale;
+
 public class PetFragment extends Fragment {
 
     private ImageView imgBackground, btnSetting, imgPet, btnInventory;
@@ -69,7 +72,13 @@ public class PetFragment extends Fragment {
                 }
                 txtStreak.setText("🔥" + petInfo.getStreakDays());
                 
-                int energyPercent = (int) ((petInfo.getDailyExp() / (float) PetConstants.MAX_DAILY_EXP) * 100);
+                int displayDailyExp = petInfo.getDailyExp();
+                String todayStr = new java.text.SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date());
+                if (!todayStr.equals(petInfo.getLastExpDate())) {
+                    displayDailyExp = 0;
+                }
+                
+                int energyPercent = (int) ((displayDailyExp / (float) PetConstants.MAX_DAILY_EXP) * 100);
                 txtEnergy.setText("⚡" + energyPercent + "%");
 
                 // Cập nhật background

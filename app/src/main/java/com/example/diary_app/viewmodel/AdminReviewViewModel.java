@@ -4,7 +4,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.diary_app.core.NotiType;
 import com.example.diary_app.data.model.Post;
+import com.example.diary_app.repository.NotificationRepository;
 import com.example.diary_app.repository.PostRepository;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -69,11 +71,23 @@ public class AdminReviewViewModel extends ViewModel {
                 List<Post> currentList = postsLiveData.getValue();
                 if (currentList != null && position < currentList.size()) {
                     currentList.remove(position);
-                    // Cập nhật lại LiveData để RecyclerView tự động mất đi item đó mà không cần load lại cả trang
-                    postsLiveData.setValue(currentList);
-                }
+                // Cập nhật lại LiveData để RecyclerView tự động mất đi item đó mà không cần load lại cả trang
+                postsLiveData.setValue(currentList);
+            }
 
-                // Bước 2: Báo cho Fragment biết là "Xóa thành công rồi, hiện Toast đi!"
+            // gửi thông báo
+            if (post.getUserId() != null && !post.getUserId().isEmpty()) {
+                NotificationRepository notiRepo = new NotificationRepository();
+                notiRepo.sendNotification(
+                        post.getUserId(),
+                        "admin",
+                        NotiType.DELETE_POST,
+                        post.getPostId(),
+                        "Bài viết của bạn đã bị quản trị viên xóa do vi phạm tiêu chuẩn cộng đồng."
+                );
+            }
+
+            // Bước 2: Báo cho Fragment biết là "Xóa thành công rồi, hiện Toast đi!"
                 deleteStatusLiveData.setValue("SUCCESS");
             } else {
                 // Báo xóa thất bại
