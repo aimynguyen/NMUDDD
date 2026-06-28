@@ -109,14 +109,6 @@
                             android:layout_height="80dp"
                             android:src="@null"/>
 
-                        <TextView
-                            android:id="@+id/txtReward1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="name"
-                            android:textSize="14sp"
-                            android:textColor="@color/text_primary"/>
                     </LinearLayout>
 
                 </androidx.cardview.widget.CardView>
