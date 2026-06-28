@@ -153,12 +153,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         result.putDouble("latitude", latLng.latitude);
                         result.putDouble("longitude", latLng.longitude);
 
-                        // 2. Bắn dữ liệu về HomeFragment (Dùng chung kênh requireActivity như đã sửa)
+                        // 2. Bắn dữ liệu về HomeFragment
                         requireActivity().getSupportFragmentManager().setFragmentResult("location_request", result);
 
-                        // 3. Đóng màn hình Map, quay về Preview
-                        requireActivity().getSupportFragmentManager().popBackStack();
+                        // 3. ÉP BUỘC TẮT DIALOG TRƯỚC (Giải phóng luồng giao diện)
+                        dialog.dismiss();
 
+                        // 4. Lùi trang và dọn dẹp sạch sẽ MapFragment khỏi bộ nhớ
+                        requireActivity().getSupportFragmentManager().popBackStack();
                     })
                     .setNegativeButton("Hủy", (dialog, which) -> {
                         // Nếu bấm Hủy: Đóng hộp thoại và xóa cái cờ vừa cắm đi cho sạch
