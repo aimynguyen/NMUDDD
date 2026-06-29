@@ -131,16 +131,9 @@ public class PostRepository {
 
     // 10. Xóa bài viết
     public Task<Void> deletePost(String postId, String imageUrl){
-        if(imageUrl != null && !imageUrl.isEmpty()){
-            StorageReference imageRef = storage.getReferenceFromUrl(imageUrl);
-
-            return imageRef.delete().continueWithTask(task -> {
-                return db.collection("posts").document(postId).delete();
-            });
-        }
-        else {
-            return db.collection("posts").document(postId).delete();
-        }
+        // Việc xóa ảnh (imageUrl) trên Storage đã được đưa xuống xử lý dưới background
+        // thông qua Cloud Functions (onDocumentDeleted). Client không cần tự xóa ảnh nữa.
+        return db.collection("posts").document(postId).delete();
     }
 
     // 11. Cập nhật nội dung bài viết (Sửa Caption, đổi Privacy, thêm Tag...)
