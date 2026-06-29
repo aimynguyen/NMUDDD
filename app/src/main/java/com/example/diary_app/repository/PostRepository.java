@@ -190,4 +190,25 @@ public class PostRepository {
                 .get();
     }
 
+    // Cập nhật username mới cho các post
+    public Task<Void> updateUserNameInPosts(
+            String userId,
+            String newUserName
+    ) {
+        return db.collection("posts")
+                .whereEqualTo("userId", userId)
+                .get()
+                .continueWithTask(task -> {
+                    WriteBatch batch = db.batch();
+                    for (DocumentSnapshot doc : task.getResult().getDocuments()) {
+                        batch.update(
+                                doc.getReference(),
+                                "userName",
+                                newUserName
+                        );
+                    }
+                    return batch.commit();
+                });
+    }
+
 }

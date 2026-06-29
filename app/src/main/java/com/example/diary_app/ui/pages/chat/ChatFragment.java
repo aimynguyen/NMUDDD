@@ -40,11 +40,25 @@ public class ChatFragment extends Fragment {
     private ChatViewModel chatViewModel;
     private ChatAdapter chatAdapter;
 
+    public static String currentChatId = null;
+
     private String chatId;   
     private String userId;   
     private String friendId; 
 
     public ChatFragment() {
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        currentChatId = chatId;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        currentChatId = null;
     }
 
     @Nullable

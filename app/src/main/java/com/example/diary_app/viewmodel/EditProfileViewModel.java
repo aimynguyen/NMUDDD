@@ -136,6 +136,10 @@ public class EditProfileViewModel extends ViewModel {
         isLoading.setValue(true);
         userRepository.updateUserProfile(uid, updates)
                 .addOnSuccessListener(unused -> {
+                    // Cập nhật tên trong các bài viết nếu có đổi tên
+                    if (updates.containsKey("userName")) {
+                        postRepository.updateUserNameInPosts(uid, newName);
+                    }
                     isLoading.setValue(false);
                     message.setValue("Cập nhật thành công!");
                 })

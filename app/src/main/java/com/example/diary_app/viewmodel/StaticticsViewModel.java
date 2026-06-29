@@ -54,6 +54,12 @@ public class StaticticsViewModel extends AndroidViewModel {
         return _postImageUrls;
     }
 
+    // LiveData lưu danh sách các bài viết có vị trí và hình ảnh (Dùng cho PhotoMapFragment)
+    private MutableLiveData<List<Post>> _postsWithLocation = new MutableLiveData<>();
+    public LiveData<List<Post>> getPostsWithLocation() {
+        return _postsWithLocation;
+    }
+
     public StaticticsViewModel(@NonNull Application application) {
         super(application);
         this.repo = new PostRepository();
@@ -78,6 +84,7 @@ public class StaticticsViewModel extends AndroidViewModel {
 
                     List<String> allMoods = new ArrayList<>();
                     List<String> imageUrls = new ArrayList<>();
+                    List<Post> postsWithLoc = new ArrayList<>();
                     Map<String, Integer> emotionCountMap = new HashMap<>();
                     Map<Integer, List<String>> dailyEmotionsRaw = new HashMap<>();
 
@@ -91,6 +98,10 @@ public class StaticticsViewModel extends AndroidViewModel {
                             String imgUrl = post.getImageUrl();
                             if (imgUrl != null && !imgUrl.isEmpty()) {
                                 imageUrls.add(imgUrl);
+                            }
+
+                            if (post.getLocation() != null && post.getLocation().getCoordinates() != null && imgUrl != null && !imgUrl.isEmpty()) {
+                                postsWithLoc.add(post);
                             }
 
                             if (emotion != null && !emotion.isEmpty()) {
@@ -119,6 +130,8 @@ public class StaticticsViewModel extends AndroidViewModel {
 
                     // 1b. Cập nhật danh sách URL ảnh cho VideoFragment
                     _postImageUrls.setValue(imageUrls);
+
+                    _postsWithLocation.setValue(postsWithLoc);
 
                     // Tính cảm xúc chủ đạo mỗi ngày
                     Map<Integer, String> dailyEmotions = new HashMap<>();
