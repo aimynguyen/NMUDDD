@@ -69,6 +69,21 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
         // --- A. HIỂN THỊ DỮ LIỆU BÀI VIẾT ---
         holder.tvUsername.setText(currentPost.getUserName());
+        // ==========================================
+        // HIỂN THỊ NGÀY THÁNG ĐĂNG BÀI
+        // ==========================================
+        // Lấy thời gian từ Model Post (đảm bảo hàm Getter trong Post.java của bạn tên là getCreateAt hoặc getCreatedAt)
+        com.google.firebase.Timestamp timestamp = currentPost.getCreateAt();
+
+        if (timestamp != null) {
+            java.util.Date date = timestamp.toDate();
+            // Định dạng ngày giờ: Ngày/Tháng/Năm Giờ:Phút
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
+            holder.tvDate.setText(sdf.format(date));
+            holder.tvDate.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvDate.setVisibility(View.GONE);
+        }
            //caption rỗng thì ẩn ô caption
         String caption = currentPost.getCaption();
 
@@ -257,7 +272,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
         TextView reactAngry, reactHappy, reactNeutral, reactSad, reactCalm;
 
-        TextView tvUsername, tvCaption;
+        TextView tvUsername, tvCaption, tvDate;
         android.widget.ImageView imgPostContent;
         android.widget.ImageView imgAvatar;
         android.widget.TextView imgMood;
@@ -288,6 +303,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             btnSendComment = itemView.findViewById(R.id.btnSend);
             layoutReactionBar = itemView.findViewById(R.id.layoutReactionBar);
             layoutCommentBar = itemView.findViewById(R.id.layoutCommentBar);
+            tvDate = itemView.findViewById(R.id.tvDate);
         }
     }
 }
