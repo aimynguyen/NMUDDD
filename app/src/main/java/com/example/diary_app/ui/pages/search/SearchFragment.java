@@ -104,7 +104,8 @@ public class SearchFragment extends Fragment {
 
         // Theo dõi LiveData danh sách bài viết từ Firebase đổ về
         viewModel.getSearchResults().observe(getViewLifecycleOwner(), posts -> {
-            currentPosts = posts;
+            currentPosts = posts != null ? new ArrayList<>(posts) : new ArrayList<>();
+            sortPostsByDate(currentPosts);
             filterPosts();
         });
 
@@ -239,7 +240,9 @@ public class SearchFragment extends Fragment {
                             if (post != null) {
                                 post.setPostId(doc.getId());
                                 if (post.getUserId() != null && friendIds.contains(post.getUserId())) {
-                                    list.add(post);
+                                    if ("public".equalsIgnoreCase(post.getPrivacy())) {
+                                        list.add(post);
+                                    }
                                 }
                             }
                         } catch (Exception e) {
@@ -247,6 +250,7 @@ public class SearchFragment extends Fragment {
                         }
                     }
                     currentPosts = list;
+                    sortPostsByDate(currentPosts);
                     adapter.setData(currentPosts);
                 })
                 .addOnFailureListener(e -> {
@@ -267,13 +271,21 @@ public class SearchFragment extends Fragment {
                             Post post = doc.toObject(Post.class);
                             if (post != null) {
                                 post.setPostId(doc.getId());
-                                list.add(post);
+                                String myUid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null ? com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
+                                if (userId.equals(myUid)) {
+                                    list.add(post);
+                                } else {
+                                    if ("public".equalsIgnoreCase(post.getPrivacy())) {
+                                        list.add(post);
+                                    }
+                                }
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
                     currentPosts = list;
+                    sortPostsByDate(currentPosts);
                     adapter.setData(currentPosts);
                 })
                 .addOnFailureListener(e -> {
@@ -289,7 +301,9 @@ public class SearchFragment extends Fragment {
             List<Post> filtered = new ArrayList<>();
             for (Post p : currentPosts) {
                 if (p.getUserId() != null && friendIds.contains(p.getUserId())) {
-                    filtered.add(p);
+                    if ("public".equalsIgnoreCase(p.getPrivacy())) {
+                        filtered.add(p);
+                    }
                 }
             }
             adapter.setData(filtered);
@@ -297,12 +311,29 @@ public class SearchFragment extends Fragment {
         }
 
         List<Post> filtered = new ArrayList<>();
+        String myUid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null ? com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
         for (Post p : currentPosts) {
             if (p.getUserId() != null && p.getUserId().equals(selectedUserId)) {
-                filtered.add(p);
+                if (selectedUserId.equals(myUid)) {
+                    filtered.add(p);
+                } else {
+                    if ("public".equalsIgnoreCase(p.getPrivacy())) {
+                        filtered.add(p);
+                    }
+                }
             }
         }
         adapter.setData(filtered);
 
+    }
+
+    private void sortPostsByDate(List<Post> posts) {
+        if (posts == null) return;
+        java.util.Collections.sort(posts, (p1, p2) -> {
+            if (p1.getCreateAt() == null && p2.getCreateAt() == null) return 0;
+            if (p1.getCreateAt() == null) return 1;
+            if (p2.getCreateAt() == null) return -1;
+            return p2.getCreateAt().compareTo(p1.getCreateAt());
+        });
     }
 }
