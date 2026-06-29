@@ -161,18 +161,70 @@ public class StaticticsFragment extends Fragment {
         });
 
         btnVideo.setOnClickListener(v -> {
-            String uid = "";
-            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-                uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            }
+            final String uid = FirebaseAuth.getInstance().getCurrentUser() != null 
+                    ? FirebaseAuth.getInstance().getCurrentUser().getUid() 
+                    : "";
 
-            Bundle args = new Bundle();
-            args.putLong("startDate", startDate.getTime());
-            args.putLong("endDate", endDate.getTime());
-            args.putString("userId", uid);
+            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(requireContext());
+            View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_video_config, null);
+            builder.setView(dialogView);
+            android.app.AlertDialog dialog = builder.create();
 
-            Navigation.findNavController(v)
-                    .navigate(R.id.action_nav_dashboard_to_nav_video, args);
+            android.widget.Spinner spinnerMusic = dialogView.findViewById(R.id.spinnerMusic);
+            android.widget.SeekBar seekBarDuration = dialogView.findViewById(R.id.seekBarDuration);
+            android.widget.TextView tvDurationValue = dialogView.findViewById(R.id.tvDurationValue);
+            android.widget.Button btnCancel = dialogView.findViewById(R.id.btnCancel);
+            android.widget.Button btnStartExport = dialogView.findViewById(R.id.btnStartExport);
+            btnStartExport.setText("Tiếp tục");
+
+            String[] musicNames = {
+                    "Bật nhạc lên", "Đi giữa trời rực rỡ", "Lớn rồi còn khóc nhè",
+                    "Matchanah", "Mới hôm qua", "Nơi pháo hoa rực rỡ",
+                    "Thức giấc", "Vạn sự như ý", "Về đi thôi", "Xin đừng nhấc máy"
+            };
+            int[] musicResIds = {
+                    R.raw.bat_nhac_len, R.raw.di_giua_troi_ruc_ro, R.raw.lon_roi_con_khoc_nhe,
+                    R.raw.matchanah, R.raw.moi_hom_qua, R.raw.noi_phao_hoa_ruc_ro,
+                    R.raw.thuc_giac, R.raw.van_su_nhu_y, R.raw.ve_di_thoi, R.raw.xin_dung_nhac_may
+            };
+
+            android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, musicNames);
+            spinnerMusic.setAdapter(adapter);
+
+            seekBarDuration.setMax(9);
+            seekBarDuration.setProgress(2);
+            tvDurationValue.setText("3 giây");
+
+            seekBarDuration.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser) {
+                    tvDurationValue.setText((progress + 1) + " giây");
+                }
+                @Override
+                public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+                @Override
+                public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
+            });
+
+            btnCancel.setOnClickListener(v2 -> dialog.dismiss());
+
+            btnStartExport.setOnClickListener(v2 -> {
+                int selectedMusicResId = musicResIds[spinnerMusic.getSelectedItemPosition()];
+                int selectedDuration = seekBarDuration.getProgress() + 1;
+                dialog.dismiss();
+
+                Bundle args = new Bundle();
+                args.putLong("startDate", startDate.getTime());
+                args.putLong("endDate", endDate.getTime());
+                args.putString("userId", uid);
+                args.putInt("musicResId", selectedMusicResId);
+                args.putInt("duration", selectedDuration);
+
+                Navigation.findNavController(v)
+                        .navigate(R.id.action_nav_dashboard_to_nav_video, args);
+            });
+
+            dialog.show();
         });
     }
     private void showMonthYearPickerDialog() {

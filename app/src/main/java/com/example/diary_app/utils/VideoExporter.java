@@ -28,7 +28,6 @@ public class VideoExporter {
     public static final int WIDTH             = 720;
     public static final int HEIGHT            = 1280;
     public static final int FPS               = 15;
-    public static final int SECONDS_PER_IMAGE = 1;
     private static final int BIT_RATE         = 2_000_000;
 
     public interface ExportListener {
@@ -39,9 +38,9 @@ public class VideoExporter {
 
     // ── Entry point ───────────────────────────────────────────────────────────
     public static void export(Context ctx, List<Bitmap> bitmaps, int audioRawResId,
-                              ExportListener cb) {
+                              int secondsPerImage, ExportListener cb) {
         new Thread(() -> {
-            try { run(ctx, bitmaps, audioRawResId, cb); }
+            try { run(ctx, bitmaps, audioRawResId, secondsPerImage, cb); }
             catch (Exception e) {
                 // In log để debug
                 android.util.Log.e("VideoExporter", "Export failed", e);
@@ -53,7 +52,7 @@ public class VideoExporter {
 
     // ── Core ──────────────────────────────────────────────────────────────────
     private static void run(Context ctx, List<Bitmap> bitmaps, int audioRawResId,
-                            ExportListener cb) throws Exception {
+                            int secondsPerImage, ExportListener cb) throws Exception {
 
         // ── 1. Encode video frames ────────────────────────────────────────────
         progress(cb, "Đang mã hóa ảnh...");
@@ -77,7 +76,7 @@ public class VideoExporter {
 
         long ptsUs = 0;
         long frameDur = 1_000_000L / FPS;
-        int  framesPerImg = FPS * SECONDS_PER_IMAGE;
+        int  framesPerImg = FPS * secondsPerImage;
         MediaCodec.BufferInfo bi = new MediaCodec.BufferInfo();
 
         for (int idx = 0; idx < bitmaps.size(); idx++) {

@@ -47,10 +47,13 @@ public class VideoFragment extends Fragment {
     private StaticticsViewModel viewModel;
     private ImageButton btnSave;
 
+    private int musicResId = R.raw.bat_nhac_len;
+    private int duration = 3;
+
     // Xin quyền WRITE_EXTERNAL_STORAGE (chỉ cần Android ≤ 9)
     private final ActivityResultLauncher<String> permLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-                if (granted) startExportVideo();
+                if (granted) startExportVideo(musicResId, duration);
                 else Toast.makeText(getContext(), "Cần cấp quyền để lưu video", Toast.LENGTH_SHORT).show();
             });
 
@@ -62,6 +65,12 @@ public class VideoFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_videoslideshow, container, false);
 
+        Bundle args = getArguments();
+        if (args != null) {
+            musicResId = args.getInt("musicResId", R.raw.bat_nhac_len);
+            duration = args.getInt("duration", 3);
+        }
+
         viewPager2 = view.findViewById(R.id.viewPagerVideo);
         btnSave    = view.findViewById(R.id.btnSave);
 
@@ -69,15 +78,15 @@ public class VideoFragment extends Fragment {
         viewPager2.setAdapter(adapter);
 
         // Nhạc nền
-        mediaPlayer = MediaPlayer.create(getContext(), R.raw.bat_nhac_len);
+        mediaPlayer = MediaPlayer.create(getContext(), musicResId);
         mediaPlayer.setLooping(true);
 
-        // Auto-scroll 3 giây / ảnh
+        // Auto-scroll
         viewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
                 sliderHandler.removeCallbacks(sliderRunnable);
-                sliderHandler.postDelayed(sliderRunnable, 3000);
+                sliderHandler.postDelayed(sliderRunnable, duration * 1000L);
             }
         });
 
@@ -87,14 +96,7 @@ public class VideoFragment extends Fragment {
                 Toast.makeText(getContext(), "Không có ảnh nào để xuất video", Toast.LENGTH_SHORT).show();
                 return;
             }
-            // Android ≤ 9 cần xin quyền ghi storage
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P &&
-                    ContextCompat.checkSelfPermission(requireContext(),
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                permLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            } else {
-                startExportVideo();
-            }
+            checkPermissionAndExport(musicResId, duration);
         });
 
         return view;
@@ -125,14 +127,24 @@ public class VideoFragment extends Fragment {
             imageUrls.clear();
             imageUrls.addAll(urls);
             adapter.notifyDataSetChanged();
-            sliderHandler.postDelayed(sliderRunnable, 3000);
+            sliderHandler.postDelayed(sliderRunnable, duration * 1000L);
         });
+    }
+
+    private void checkPermissionAndExport(int musicResId, int duration) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P &&
+                ContextCompat.checkSelfPermission(requireContext(),
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            permLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        } else {
+            startExportVideo(musicResId, duration);
+        }
     }
 
     // ── Xuất Video ────────────────────────────────────────────────────────────
 
     @SuppressWarnings("deprecation")
-    private void startExportVideo() {
+    private void startExportVideo(int audioResId, int secondsPerImage) {
         ProgressDialog progress = new ProgressDialog(requireContext());
         progress.setTitle("Đang tạo video...");
         progress.setMessage("Chuẩn bị...");
@@ -163,7 +175,7 @@ public class VideoFragment extends Fragment {
             }
 
             // Bắt đầu xuất video
-            VideoExporter.export(requireContext(), bitmaps, R.raw.bat_nhac_len,
+            VideoExporter.export(requireContext(), bitmaps, audioResId, secondsPerImage,
                     new VideoExporter.ExportListener() {
 
                         @Override
@@ -204,7 +216,7 @@ public class VideoFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (!imageUrls.isEmpty()) sliderHandler.postDelayed(sliderRunnable, 3000);
+        if (!imageUrls.isEmpty()) sliderHandler.postDelayed(sliderRunnable, duration * 1000L);
         if (mediaPlayer != null && !mediaPlayer.isPlaying()) mediaPlayer.start();
     }
 
