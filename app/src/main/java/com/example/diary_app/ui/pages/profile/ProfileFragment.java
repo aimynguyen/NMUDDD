@@ -53,7 +53,6 @@ public class ProfileFragment extends Fragment {
         txtName = view.findViewById(R.id.txtName);
         txtEditProfile = view.findViewById(R.id.txtEditProfile);
         imgAvatar = view.findViewById(R.id.imgAvatar);
-        btnSetting = view.findViewById(R.id.btnSetting);
         rvRequests = view.findViewById(R.id.rvRequests);
         rvFriends = view.findViewById(R.id.rvFriends);
         emptyRequest = view.findViewById(R.id.txtEmptyRequest);
