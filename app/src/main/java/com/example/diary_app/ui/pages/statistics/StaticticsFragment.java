@@ -226,6 +226,20 @@ public class StaticticsFragment extends Fragment {
 
             dialog.show();
         });
+
+        com.google.android.material.button.MaterialButton btnSeeMore = view.findViewById(R.id.btnSeeMore);
+        if (btnSeeMore != null) {
+            btnSeeMore.setOnClickListener(v -> {
+                final String uid = FirebaseAuth.getInstance().getCurrentUser() != null 
+                        ? FirebaseAuth.getInstance().getCurrentUser().getUid() 
+                        : "";
+                Bundle args = new Bundle();
+                args.putLong("startDate", startDate.getTime());
+                args.putLong("endDate", endDate.getTime());
+                args.putString("userId", uid);
+                Navigation.findNavController(v).navigate(R.id.action_nav_dashboard_to_nav_photo_map, args);
+            });
+        }
     }
     private void showMonthYearPickerDialog() {
         if (!isAdded() || getContext() == null) return;
