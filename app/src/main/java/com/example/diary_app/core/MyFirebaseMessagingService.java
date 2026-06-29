@@ -20,6 +20,14 @@ import com.google.firebase.messaging.RemoteMessage;
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
+        // Kiểm tra xem tin nhắn gửi tới thuộc phòng chat nào
+        String incomingChatId = remoteMessage.getData().get("chatId");
+        
+        // Nếu người dùng đang mở đúng phòng chat này -> BỎ QUA KHÔNG REO CHUÔNG
+        if (incomingChatId != null && incomingChatId.equals(com.example.diary_app.ui.pages.chat.ChatFragment.currentChatId)) {
+            return; 
+        }
+
         // Hàm này tự động chạy khi có thông báo bắn về lúc app ĐANG MỞ
         if (remoteMessage.getNotification() != null) {
             String title = remoteMessage.getNotification().getTitle();
