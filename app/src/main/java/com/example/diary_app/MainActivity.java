@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView ivAvatar;
     private NavController navController;
     private BottomNavigationView bottomNavigationView;
+    private String currentRole = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,7 +121,13 @@ public class MainActivity extends AppCompatActivity {
                     || id == R.id.nav_chatroom || id == R.id.nav_search || id == R.id.nav_pet
                     || id == R.id.nav_addfriend || id == R.id.nav_admin) {
                     if (headerView != null) headerView.setVisibility(View.VISIBLE);
-                    if (bottomNavigationView != null) bottomNavigationView.setVisibility(View.VISIBLE);
+                    if (bottomNavigationView != null) {
+                        if ("admin".equals(currentRole)) {
+                            bottomNavigationView.setVisibility(View.GONE);
+                        } else {
+                            bottomNavigationView.setVisibility(View.VISIBLE);
+                        }
+                    }
 
                     updateHeaderFromStorage();
                 }
@@ -142,6 +149,13 @@ public class MainActivity extends AppCompatActivity {
         ContextThemeWrapper wrapper = new ContextThemeWrapper(this, R.style.CustomPopupMenu);
         PopupMenu popupMenu = new PopupMenu(wrapper, v);
         popupMenu.getMenuInflater().inflate(R.menu.header_avatar_menu, popupMenu.getMenu());
+        
+        if ("admin".equals(currentRole)) {
+            MenuItem profileItem = popupMenu.getMenu().findItem(R.id.menu_profile);
+            if (profileItem != null) {
+                profileItem.setVisible(false);
+            }
+        }
 
         try {
             java.lang.reflect.Field[] fields = popupMenu.getClass().getDeclaredFields();
@@ -217,6 +231,7 @@ public class MainActivity extends AppCompatActivity {
                             String fullName = doc.getString("userName");
                             String avatarUrl = doc.getString("avatarUrl");
                             String role = doc.getString("role");
+                            currentRole = role;
                             
                             if (tvName != null) tvName.setText(fullName);
                             if (ivAvatar != null) {
@@ -235,10 +250,21 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateBottomMenu(String role) {
         if (bottomNavigationView == null) return;
-        Menu menu = bottomNavigationView.getMenu();
-        MenuItem adminItem = menu.findItem(R.id.nav_admin);
-        if (adminItem != null) {
-            adminItem.setVisible("admin".equals(role));
+        
+        if ("admin".equals(role)) {
+            bottomNavigationView.setVisibility(View.GONE);
+            if (navController != null && navController.getCurrentDestination() != null) {
+                if (navController.getCurrentDestination().getId() != R.id.nav_admin) {
+                    navController.navigate(R.id.nav_admin);
+                }
+            }
+        } else {
+            bottomNavigationView.setVisibility(View.VISIBLE);
+            Menu menu = bottomNavigationView.getMenu();
+            MenuItem adminItem = menu.findItem(R.id.nav_admin);
+            if (adminItem != null) {
+                adminItem.setVisible(false);
+            }
         }
     }
 

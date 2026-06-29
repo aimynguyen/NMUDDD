@@ -57,7 +57,7 @@
                 android:layout_height="wrap_content"
                 android:layout_toEndOf="@id/imgAiIcon"
                 android:layout_marginStart="15dp"
-                android:text="Auau Assistant"
+                android:text="Mochi Assistant"
                 android:textColor="#0D47A1"
                 android:textSize="18sp"
                 android:textStyle="bold" />
