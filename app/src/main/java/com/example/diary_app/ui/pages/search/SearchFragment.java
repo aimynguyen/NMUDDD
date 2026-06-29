@@ -63,6 +63,7 @@ public class SearchFragment extends Fragment {
     private static final String FILTER_ALL = "__ALL__";
     private String selectedUserId = "";
     private List<Post> currentPosts = new ArrayList<>();
+    private List<String> friendIds = new ArrayList<>();
 
     @Nullable
     @Override
@@ -182,8 +183,9 @@ public class SearchFragment extends Fragment {
         friendViewModel.getFriendList().observe(getViewLifecycleOwner(), friends -> {
             spinnerNames.clear();
             spinnerIds.clear();
+            friendIds.clear();
 
-            spinnerNames.add("Tất cả"); // Show posts from everyone
+            spinnerNames.add("Tất cả"); // Show posts from friends
             spinnerIds.add(FILTER_ALL);
 
             spinnerNames.add("Bài viết của tôi"); // My posts only
@@ -192,6 +194,9 @@ public class SearchFragment extends Fragment {
             for (UserModel friend : friends) {
                 spinnerNames.add(friend.getUserName() != null ? friend.getUserName() : "Unknown");
                 spinnerIds.add(friend.getUid());
+                if (friend.getUid() != null) {
+                    friendIds.add(friend.getUid());
+                }
             }
 
             ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, spinnerNames);
@@ -223,7 +228,7 @@ public class SearchFragment extends Fragment {
         com.google.firebase.firestore.FirebaseFirestore db = com.google.firebase.firestore.FirebaseFirestore.getInstance();
 
         if (FILTER_ALL.equals(userId)) {
-            // Load tất cả bài viết (không lọc theo userId)
+            // Load tất cả bài viết của bạn bè
             db.collection("posts")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -233,7 +238,9 @@ public class SearchFragment extends Fragment {
                             Post post = doc.toObject(Post.class);
                             if (post != null) {
                                 post.setPostId(doc.getId());
-                                list.add(post);
+                                if (post.getUserId() != null && friendIds.contains(post.getUserId())) {
+                                    list.add(post);
+                                }
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -277,9 +284,15 @@ public class SearchFragment extends Fragment {
     }
 
     private void filterPosts() {
-        // Nếu chọn "Tất cả" hoặc không có filter, hiển thị tất cả
+        // Nếu chọn "Tất cả" hoặc không có filter, hiển thị tất cả bài viết của bạn bè
         if (FILTER_ALL.equals(selectedUserId) || selectedUserId == null || selectedUserId.isEmpty()) {
-            adapter.setData(currentPosts);
+            List<Post> filtered = new ArrayList<>();
+            for (Post p : currentPosts) {
+                if (p.getUserId() != null && friendIds.contains(p.getUserId())) {
+                    filtered.add(p);
+                }
+            }
+            adapter.setData(filtered);
             return;
         }
 

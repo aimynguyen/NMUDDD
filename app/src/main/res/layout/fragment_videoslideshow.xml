@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:background="@drawable/bg_lineargradient"
     android:layout_height="match_parent">
 
     <FrameLayout
@@ -20,7 +21,7 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:src="@drawable/ic_send"
-        android:background="@drawable/bg_circle_angry"
+        android:background="@drawable/bg_circle_dark"
         android:scaleType="centerInside"
         android:padding="16dp"
         android:layout_below="@id/videoContainer"
