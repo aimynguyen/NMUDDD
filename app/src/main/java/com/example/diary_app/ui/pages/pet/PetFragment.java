@@ -147,6 +147,20 @@ public class PetFragment extends Fragment {
 
         final long[] lastClickTime = {0};
         imgPet.setOnClickListener(v -> {
+            // Hiệu ứng khi tap vào Pet
+            v.animate()
+                .scaleX(1.05f)
+                .scaleY(1.05f)
+                .setDuration(100)
+                .withEndAction(() -> {
+                    v.animate()
+                        .scaleX(1.0f)
+                        .scaleY(1.0f)
+                        .setDuration(100)
+                        .start();
+                })
+                .start();
+
             long clickTime = System.currentTimeMillis();
             if (clickTime - lastClickTime[0] < 300) {
                 petViewModel.changeQuote();
