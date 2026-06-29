@@ -45,3 +45,57 @@ exports.sendPushNotification = onDocumentCreated("notifications/{notificationId}
         console.log("Lỗi gửi thông báo:", error);
     }
 });
+
+// Bắt sự kiện tạo tin nhắn mới để bắn Push Notification
+exports.sendChatNotification = onDocumentCreated("chats/{chatId}/messages/{messageId}", async (event) => {
+    const newMessage = event.data.data();
+    if (!newMessage) return console.log("Không có dữ liệu tin nhắn");
+
+    const senderId = newMessage.senderId;
+    const content = newMessage.content;
+
+    // 1. Lấy thông tin phòng chat để tìm người nhận
+    const chatId = event.params.chatId;
+    const chatDoc = await admin.firestore().collection("chats").doc(chatId).get();
+    if (!chatDoc.exists) return console.log("Không tìm thấy phòng chat");
+
+    const participants = chatDoc.data().participants;
+    if (!participants || participants.length !== 2) return;
+
+    // 2. Lọc ra người nhận (người có uid khác với senderId)
+    const receiverId = participants.find(id => id !== senderId);
+    if (!receiverId) return;
+
+    // 3. Lấy thông tin người nhận (để lấy fcmToken) và người gửi (để lấy tên)
+    const [receiverDoc, senderDoc] = await Promise.all([
+        admin.firestore().collection("users").doc(receiverId).get(),
+        admin.firestore().collection("users").doc(senderId).get()
+    ]);
+
+    if (!receiverDoc.exists) return console.log("Không tìm thấy người nhận");
+    
+    const fcmToken = receiverDoc.data().fcmToken;
+    if (!fcmToken) return console.log("Người nhận chưa có fcmToken");
+
+    const senderName = senderDoc.exists ? senderDoc.data().userName : "Ai đó";
+
+    // 4. Đóng gói payload bắn Push Notification
+    const payload = {
+        notification: {
+            title: `Tin nhắn mới từ ${senderName}`,
+            body: content
+        },
+        data: {
+            chatId: chatId
+        },
+        token: fcmToken
+    };
+
+    // 5. Gửi thông báo
+    try {
+        const response = await admin.messaging().send(payload);
+        console.log("Đã gửi Push Notification tin nhắn thành công:", response);
+    } catch (error) {
+        console.log("Lỗi gửi Push Notification tin nhắn:", error);
+    }
+});
