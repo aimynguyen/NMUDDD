@@ -1,4 +1,4 @@
-const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentDeleted } = require("firebase-functions/v2/firestore");
 const admin = require("firebase-admin");
 
 admin.initializeApp();
@@ -97,5 +97,40 @@ exports.sendChatNotification = onDocumentCreated("chats/{chatId}/messages/{messa
         console.log("Đã gửi Push Notification tin nhắn thành công:", response);
     } catch (error) {
         console.log("Lỗi gửi Push Notification tin nhắn:", error);
+    }
+});
+
+// Bắt sự kiện khi một bài viết (Post) bị xóa khỏi Firestore
+exports.deletePostImageOnPostDelete = onDocumentDeleted("posts/{postId}", async (event) => {
+    // Lưu ý: Đối với onDocumentDeleted, event.data.data() có thể null nếu trigger mới.
+    // Dùng event.data.before.data() trong v1, nhưng ở v2 onDocumentDeleted thì data() là dữ liệu cũ.
+    const deletedPost = event.data.data();
+    
+    // Nếu bài viết không có ảnh thì bỏ qua
+    if (!deletedPost || !deletedPost.imageUrl) {
+        return console.log("Bài viết không có ảnh, không cần xóa Storage.");
+    }
+
+    const imageUrl = deletedPost.imageUrl;
+
+    try {
+        // Lấy tham chiếu đến Storage Bucket mặc định của dự án
+        const bucket = admin.storage().bucket(); 
+        
+        // Link ảnh Firebase thường có dạng: https://.../b/.../o/post_images%2F<uid>%2F<ten_file>?alt=media...
+        // Ta cần decode URL để lấy ra đường dẫn file gốc (vd: post_images/uid/ten_file.jpg)
+        const decodedUrl = decodeURIComponent(imageUrl);
+        const match = decodedUrl.match(/\/o\/(.+?)\?/);
+        
+        if (match && match[1]) {
+            const filePath = match[1];
+            // Lệnh thực thi xóa ảnh
+            await bucket.file(filePath).delete();
+            console.log(`Đã tự động xóa ảnh rác thành công: ${filePath}`);
+        } else {
+             console.log("Không thể trích xuất đường dẫn ảnh từ URL này.");
+        }
+    } catch (error) {
+        console.log("Lỗi khi xóa ảnh trên Storage:", error);
     }
 });
