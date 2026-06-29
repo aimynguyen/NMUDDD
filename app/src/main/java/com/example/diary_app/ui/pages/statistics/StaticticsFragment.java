@@ -31,12 +31,14 @@ import com.anychart.charts.Pie;
 import com.anychart.APIlib;
 
 import com.example.diary_app.R;
+import com.example.diary_app.data.model.Post;
 import com.example.diary_app.viewmodel.StaticticsViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +66,9 @@ public class StaticticsFragment extends Fragment {
     private LinearLayout layoutTop1, layoutTop2, layoutTop3;
     private View imgTop1, imgTop2, imgTop3;
     private TextView txtTop1, txtTop2, txtTop3;
+
+    private TextView tvTopLocation1;
+    private TextView tvTopLocation2;
     //endregion
 
     public StaticticsFragment() {
@@ -105,6 +110,9 @@ public class StaticticsFragment extends Fragment {
         txtTop2 = view.findViewById(R.id.txt_top2);
         txtTop3 = view.findViewById(R.id.txt_top3);
 
+        tvTopLocation1 = view.findViewById(R.id.tv_top_location_1);
+        tvTopLocation2 = view.findViewById(R.id.tv_top_location_2);
+
         // Gắn ViewModel với vòng đời của Fragment hiện tại
         viewModel = new ViewModelProvider(this).get(StaticticsViewModel.class);
         //endregion
@@ -141,6 +149,12 @@ public class StaticticsFragment extends Fragment {
         viewModel.getDailyEmotions().observe(getViewLifecycleOwner(), (Map<Integer, String> dailyEmotions) -> {
             if (isAdded() && getContext() != null) {
                 updateCalendarUIWithEmotions(dailyEmotions);
+            }
+        });
+
+        viewModel.getPostsWithLocation().observe(getViewLifecycleOwner(), (List<Post> posts) -> {
+            if (isAdded() && getContext() != null) {
+                updateTopLocationsUI(posts);
             }
         });
 
@@ -561,6 +575,72 @@ public class StaticticsFragment extends Fragment {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private void updateTopLocationsUI(List<Post> posts) {
+        if (posts == null || posts.isEmpty()) {
+            if (tvTopLocation1 != null) tvTopLocation1.setText("1. No location data");
+            if (tvTopLocation2 != null) tvTopLocation2.setText("");
+            return;
+        }
+
+        class LocationGroup {
+            com.google.firebase.firestore.GeoPoint center;
+            String address;
+            int photoCount;
+
+            LocationGroup(com.google.firebase.firestore.GeoPoint center, String address) {
+                this.center = center;
+                this.address = address;
+                this.photoCount = 1;
+            }
+        }
+
+        List<LocationGroup> groups = new ArrayList<>();
+
+        for (Post post : posts) {
+            if (post.getLocation() == null || post.getLocation().getCoordinates() == null) continue;
+            com.google.firebase.firestore.GeoPoint pt = post.getLocation().getCoordinates();
+            
+            boolean addedToGroup = false;
+            for (LocationGroup group : groups) {
+                float[] results = new float[1];
+                android.location.Location.distanceBetween(
+                        pt.getLatitude(), pt.getLongitude(),
+                        group.center.getLatitude(), group.center.getLongitude(),
+                        results
+                );
+                if (results[0] <= 100.0f) {
+                    group.photoCount++;
+                    addedToGroup = true;
+                    break;
+                }
+            }
+
+            if (!addedToGroup) {
+                String addr = post.getLocation().getAddress() != null && !post.getLocation().getAddress().isEmpty() 
+                                ? post.getLocation().getAddress() : "Unknown location";
+                groups.add(new LocationGroup(pt, addr));
+            }
+        }
+
+        Collections.sort(groups, (g1, g2) -> Integer.compare(g2.photoCount, g1.photoCount));
+
+        if (tvTopLocation1 != null) {
+            if (groups.size() > 0) {
+                tvTopLocation1.setText("1. " + groups.get(0).address + " (" + groups.get(0).photoCount + " ảnh)");
+            } else {
+                tvTopLocation1.setText("1. No location data");
+            }
+        }
+
+        if (tvTopLocation2 != null) {
+            if (groups.size() > 1) {
+                tvTopLocation2.setText("2. " + groups.get(1).address + " (" + groups.get(1).photoCount + " ảnh)");
+            } else {
+                tvTopLocation2.setText("");
             }
         }
     }

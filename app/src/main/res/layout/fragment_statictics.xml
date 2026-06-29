@@ -502,6 +502,7 @@
                         android:layout_marginStart="12dp">
 
                         <TextView
+                            android:id="@+id/tv_top_location_1"
                             android:text="1. University of Information Technology"
                             android:textSize="14sp"
                             android:textColor="@android:color/black"
@@ -511,6 +512,7 @@
                             android:singleLine="true"/>
 
                         <TextView
+                            android:id="@+id/tv_top_location_2"
                             android:text="2. Thao Cam Vien"
                             android:textSize="14sp"
                             android:layout_marginTop="8dp"
