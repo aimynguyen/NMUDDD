@@ -12,8 +12,12 @@ import com.bumptech.glide.Glide;
 import com.example.diary_app.R;
 import com.example.diary_app.data.model.ChatRoom;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-import java.util.Collections; // Nhớ kiểm tra xem đã có import này chưa nhé bạn
+import java.util.Locale;
+import java.text.SimpleDateFormat;
 
 
 public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ChatRoomViewHolder> {
@@ -88,6 +92,32 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ChatRo
 
         holder.tvFriendName.setText(room.getRoomName());
         holder.tvLastMessage.setText(room.getLastMessage());
+
+        // Hiển thị thời gian tin nhắn cuối thực tế
+        if (room.getLastUpdated() != null) {
+            holder.tvTime.setVisibility(View.VISIBLE);
+            Date msgDate = room.getLastUpdated().toDate();
+            Calendar msgCal = Calendar.getInstance();
+            msgCal.setTime(msgDate);
+            Calendar now = Calendar.getInstance();
+
+            String timeText;
+            if (msgCal.get(Calendar.YEAR) == now.get(Calendar.YEAR)
+                    && msgCal.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)) {
+                // Cùng ngày hôm nay -> hiện giờ:phút
+                timeText = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(msgDate);
+            } else if (msgCal.get(Calendar.YEAR) == now.get(Calendar.YEAR)) {
+                // Cùng năm nhưng khác ngày -> hiện ngày/tháng
+                timeText = new SimpleDateFormat("dd/MM", Locale.getDefault()).format(msgDate);
+            } else {
+                // Khác năm -> hiện ngày/tháng/năm rút gọn
+                timeText = new SimpleDateFormat("dd/MM/yy", Locale.getDefault()).format(msgDate);
+            }
+            holder.tvTime.setText(timeText);
+        } else {
+            // Chưa có tin nhắn nào -> ẩn ô thời gian
+            holder.tvTime.setVisibility(View.INVISIBLE);
+        }
 
         // Load avatar
         if (!TextUtils.isEmpty(room.getAvatarUrl())) {
