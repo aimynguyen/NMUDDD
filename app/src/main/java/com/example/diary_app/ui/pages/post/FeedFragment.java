@@ -127,7 +127,26 @@ public class FeedFragment extends Fragment {
 
         postViewModel.getNewsFeedList().observe(getViewLifecycleOwner(), posts -> {
             if (posts != null && !posts.isEmpty()) {
-                feedAdapter.setPosts(posts);
+
+                // 1. Lấy ID của chính mình hiện tại
+                String myUid = authRepository.getCurrentUserId();
+
+                // 2. Tạo một danh sách mới để chứa các bài viết hợp lệ sau khi lọc
+                List<Post> filteredPosts = new ArrayList<>();
+
+                for (Post post : posts) {
+                    // ĐIỀU KIỆN 1: Nếu là bài của chính mình -> Cho phép hiển thị hết (Public & Private)
+                    if (myUid != null && myUid.equals(post.getUserId())) {
+                        filteredPosts.add(post);
+                    }
+                    // ĐIỀU KIỆN 2: Nếu là bài của người khác -> Bắt buộc privacy phải là "public" mới cho hiển thị
+                    else if ("public".equalsIgnoreCase(post.getPrivacy())) {
+                        filteredPosts.add(post);
+                    }
+                }
+
+                // 3. Nạp danh sách đã được lọc sạch sẽ vào Adapter để vẽ lên màn hình
+                feedAdapter.setPosts(filteredPosts);
             }
         });
 
