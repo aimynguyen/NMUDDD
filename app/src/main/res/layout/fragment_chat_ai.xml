@@ -6,10 +6,39 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_lineargradient">
 
+    <RelativeLayout
+        android:id="@+id/layout_topbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:layout_alignParentTop="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mochi"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/blue_secondary"
+            android:layout_centerInParent="true" />
+
+        <ImageButton
+            android:id="@+id/btnClose"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            app:tint="#333333"
+            android:contentDescription="Close" />
+    </RelativeLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/layout_topbar"
         android:layout_above="@+id/layout_input"
         android:padding="8dp"
         android:clipToPadding="false"

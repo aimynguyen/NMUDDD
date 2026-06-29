@@ -52,6 +52,13 @@ public class ChatAIFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         editText = view.findViewById(R.id.edtMessage);
         sendButton = view.findViewById(R.id.btnSend);
+        ImageButton btnClose = view.findViewById(R.id.btnClose);
+
+        btnClose.setOnClickListener(v -> {
+            if (getActivity() != null) {
+                getActivity().onBackPressed();
+            }
+        });
 
         String currentUserId = FirebaseAuth.getInstance().getUid();
         if (currentUserId == null) currentUserId = "user_123";
