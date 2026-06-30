@@ -61,6 +61,8 @@ public class SignupViewModel extends ViewModel {
 
                             userRepository.createUserProfile(newUser)
                                     .addOnSuccessListener(aVoid -> {
+                                        // Đăng xuất ngay để xóa session, user phải đăng nhập lại sau khi xác nhận email
+                                        authRepository.logout();
                                         isLoading.setValue(false);
                                         signupSuccess.setValue(true);
                                     })

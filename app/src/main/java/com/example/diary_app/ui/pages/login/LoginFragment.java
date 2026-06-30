@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.example.diary_app.MainActivity;
@@ -94,6 +95,16 @@ public class LoginFragment extends Fragment {
 
     private void observeViewModel() {
         loginViewModel.getLoginSuccess().observe(getViewLifecycleOwner(), role -> {
+            if (getView() == null) return;
+
+            // Kiểm tra xem fragment hiện tại có phải nav_login không trước khi navigate
+            // Tránh crash "action cannot be found from current destination"
+            NavController navController = Navigation.findNavController(getView());
+            if (navController.getCurrentDestination() == null ||
+                navController.getCurrentDestination().getId() != R.id.nav_login) {
+                return;
+            }
+
             String uid = FirebaseAuth.getInstance().getUid();
             if (uid != null && getActivity() instanceof MainActivity) {
                 ((MainActivity) getActivity()).saveUserIdAndFetchName(uid);
@@ -101,18 +112,13 @@ public class LoginFragment extends Fragment {
 
             if (role.equals("admin")) {
                 Toast.makeText(requireContext(), "Xin chào Quản trị viên!", Toast.LENGTH_SHORT).show();
-                if (getView() != null) {
-                    Navigation.findNavController(getView())
-                            .navigate(R.id.action_nav_login_to_nav_admin);
-                }
+                navController.navigate(R.id.action_nav_login_to_nav_admin);
             } else {
                 Toast.makeText(requireContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                if (getView() != null) {
-                    Navigation.findNavController(getView())
-                            .navigate(R.id.action_nav_login_to_nav_home);
-                }
+                navController.navigate(R.id.action_nav_login_to_nav_home);
             }
         });
+
 
         loginViewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {

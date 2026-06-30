@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import com.example.diary_app.R;
 import com.example.diary_app.viewmodel.SignupViewModel;
@@ -74,16 +75,19 @@ public class SignupFragment extends Fragment {
         // Sử dụng getViewLifecycleOwner() thay vì 'this' để lắng nghe LiveData an toàn hơn trong Fragment
         signupViewModel.getSignupSuccess().observe(getViewLifecycleOwner(), success -> {
             if (success) {
-                Toast.makeText(requireContext(), "Đăng ký thành công! Vui lòng kiểm tra Email để xác nhận tài khoản.", Toast.LENGTH_SHORT).show();
-
-                // TODO: Chuyển sang màn hình chính (bằng NavController hoặc FragmentTransaction)
-
-                // Đóng Fragment hiện tại để quay lại màn hình trước đó (tương đương finish() của Activity)
-                if (getParentFragmentManager().getBackStackEntryCount() > 0) {
-                    getParentFragmentManager().popBackStack();
-                } else if (getActivity() != null) {
-                    getActivity().finish(); // Nếu Fragment này là màn hình duy nhất của Activity thì đóng luôn Activity
-                }
+                // Hiển thị dialog thông báo xác nhận email
+                new android.app.AlertDialog.Builder(requireContext())
+                        .setTitle("Đăng ký thành công!")
+                        .setMessage("📧 Chúng tôi đã gửi email xác nhận đến hộp thư của bạn.\n\nVui lòng kiểm tra email và nhấn vào liên kết xác nhận, sau đó quay lại đăng nhập.")
+                        .setCancelable(false)
+                        .setPositiveButton("Đẹn, tôi hiểu!", (dialog, which) -> {
+                            // Điều hướng về màn hình Login
+                            if (getView() != null) {
+                                Navigation.findNavController(getView())
+                                        .navigate(R.id.action_nav_signin_to_nav_login);
+                            }
+                        })
+                        .show();
             }
         });
 
