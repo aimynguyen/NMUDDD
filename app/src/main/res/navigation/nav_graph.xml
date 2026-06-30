@@ -100,7 +100,15 @@
     <fragment
         android:id="@+id/nav_signin"
         android:name="com.example.diary_app.ui.pages.signup.SignupFragment"
-        android:label="Signup"/>
+        android:label="Signup">
+
+        <action
+            android:id="@+id/action_nav_signin_to_nav_login"
+            app:destination="@id/nav_login"
+            app:popUpTo="@id/nav_login"
+            app:popUpToInclusive="false" />
+
+    </fragment>
 
     <fragment
         android:id="@+id/nav_profile"

@@ -48,6 +48,12 @@ public class LoginViewModel extends ViewModel {
     public void checkExistingSession() {
         String uid = authRepository.getCurrentUserId();
         if (uid != null) {
+            // Kiểm tra email đã xác nhận chưa trước khi cho vào app
+            if (!authRepository.isEmailVerified()) {
+                authRepository.logout();
+                return; // Dừng lại, không cho đăng nhập tự động
+            }
+
             isLoading.setValue(true);
             userRepository.getUserProfile(uid)
                     .addOnSuccessListener(documentSnapshot -> {
